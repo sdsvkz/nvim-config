@@ -4,7 +4,8 @@ return {
     version = "*",
     config = true,
     opts = {
-      open_mapping = '<F3>'
+      open_mapping = '<F3>',
+      direction = 'float'
     }
   }
 }
