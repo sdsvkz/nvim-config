@@ -1,4 +1,4 @@
-Utils = require("config.utils")
+Vkzlib = require("config.vkzlib")
 require("config.vim")
 
 local options = require("config.options")
