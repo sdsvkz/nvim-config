@@ -13,11 +13,11 @@ return {
   end,
   keys = {
     {
-      '<C-O>t', mode = 'n',
+      '<leader>e', mode = 'n',
       '<CMD>NvimTreeToggle<CR>'
     },
     {
-      '<C-F>t', mode = 'n',
+      '<leader>E', mode = 'n',
       '<CMD>NvimTreeFindFile<CR>'
     }
   }

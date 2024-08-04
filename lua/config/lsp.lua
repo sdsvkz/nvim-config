@@ -50,6 +50,9 @@ if options.USE_MASON then
 else
 
   -- LSP server begin
+
+
+  -- Setup
   for server_name, config in pairs(options.LSP_SERVER_CONFIG_TABLE) do
     if (type(config) == "boolean") then
       if (config) then

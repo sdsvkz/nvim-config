@@ -1,5 +1,5 @@
 return {
-  ---comment
+  -- Get keys of table
   ---@param t table
   ---@return table
   keys = function (t)
@@ -10,6 +10,9 @@ return {
     return res
   end,
 
+  -- Get values of table
+  ---@param t table
+  ---@return table
   values = function (t)
     local res = {}
     for _, v in pairs(t) do
@@ -18,7 +21,7 @@ return {
     return res
   end,
 
-  ---comment
+  ---Merge multiple tables
   ---@vararg table
   ---@return table
   concat = function (...)
@@ -29,5 +32,14 @@ return {
       end
     end
     return res
+  end,
+
+  ---Append element of list to table
+  ---@param t table
+  ---@param list table
+  append = function (t, list)
+    for _, v in ipairs(list) do
+      table.insert(t, v)
+    end
   end
 }
