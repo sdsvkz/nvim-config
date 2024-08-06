@@ -26,6 +26,7 @@ local LSP_SERVER_CONFIG_TABLE = {
 
       on_init = function(client)
         local path = client.workspace_folders[1].name
+        ---@diagnostic disable-next-line: undefined-field
         if vim.loop.fs_stat(path..'/.luarc.json') or vim.loop.fs_stat(path..'/.luarc.jsonc') then
           return
         end

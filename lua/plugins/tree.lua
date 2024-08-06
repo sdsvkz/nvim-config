@@ -14,11 +14,13 @@ return {
   keys = {
     {
       '<leader>e', mode = 'n',
-      '<CMD>NvimTreeToggle<CR>'
+      '<CMD>NvimTreeToggle<CR>',
+      desc = "Toggle file explorer"
     },
     {
       '<leader>E', mode = 'n',
-      '<CMD>NvimTreeFindFile<CR>'
+      '<CMD>NvimTreeFindFile<CR>',
+      desc = "Show current file in file explorer"
     }
   }
 }
