@@ -1,13 +1,8 @@
----@type "OFF" | "ON" | "VERBOSE"
-_DEBUG = "ON"
+---@type "OFF" | "ON"
+_DEBUG = "OFF"
 
-function Log(...)
-  if _DEBUG == "ON" then vim.print(...) end
-end
-
-function VLog(...)
-  if _DEBUG == "VERBOSE" then vim.print(...) end
-end
+---@type vkzlib.logging.Logger.Level
+LOG_LEVEL = "debug"
 
 Vkzlib = require("config.vkzlib")
 require("config.vim")
@@ -22,3 +17,4 @@ require("config.lazy")
 require("config.lsp")
 require("config.theme")
 require('config.keymap')
+require("config.autocmds")

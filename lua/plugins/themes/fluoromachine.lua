@@ -5,6 +5,6 @@ return {
   opts = {
     glow = true,
     theme = 'fluoromachine',
-    transparent = false
-  }
+    transparent = false,
+  },
 }

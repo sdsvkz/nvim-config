@@ -43,6 +43,11 @@ return {
       "<CMD>Lspsaga peek_type_definition<CR>",
       desc = "Peek type definition"
     },
+    {
+      "<S-R>", mode = "n",
+      "<CMD>Lspsaga rename<CR>",
+      desc = "Rename"
+    },
   },
   dependencies = {
     'nvim-treesitter/nvim-treesitter', -- optional

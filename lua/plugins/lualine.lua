@@ -2,6 +2,9 @@ return {
   'nvim-lualine/lualine.nvim',
   dependencies = { 'nvim-tree/nvim-web-devicons' },
   opts = {
+    options = {
+      theme = "auto",
+    },
     sections = {
       lualine_a = {'mode'},
       lualine_b = {'diagnostics'},
@@ -15,6 +18,7 @@ return {
       'lazy',
       'nvim-tree',
       'toggleterm'
-    }
+    },
+    lsp_saga = true,
   }
 }

@@ -2,12 +2,19 @@ if _DEBUG == "OFF" then
   return {}
 end
 
+local _mod_name = "test"
+
+local internal = require "vkzlib.internal"
 local functional = require("vkzlib.functional")
-local list = require("vkzlib.list")
-local str = require("vkzlib.str")
-local vkz_table = require("vkzlib.table")
+
+local log = {
+  d = internal.logger(_mod_name, "debug")
+}
+
+local Function = functional.Function
 
 local id = functional.id
+local to_const = functional.to_const
 local curry = functional.curry
 local memorize = functional.memorize
 local apply = functional.apply
@@ -27,28 +34,69 @@ local utils = {
 }
 
 -- functional
-local fail = utils.fail("functional")
+
+-- functional.Function
+local fail = utils.fail("functional.Function")
+
+-- functional.Function.new
+local func_new_test = {
+  test = function ()
+    local f = Function.new(utils.calc)
+    local info = debug.getinfo(utils.calc, "u")
+    assert(
+      f(2, 3, 1) == utils.calc(2, 3, 1) and
+      Function.get_argc(f) == info.nparams and
+      Function.is_vararg(f) == info.isvararg,
+
+      fail("new", "basic") ()
+    )
+  end
+}
+
+fail = utils.fail("functional")
 
 -- functional.id
 local id_test = {
   test = function ()
-    assert(id(false) == false, utils.fail("functional", "id", "basic"))
+    assert(id(false) == false, fail("id", "basic") ())
+  end
+}
+
+-- functional.to_const
+local to_const_test = {
+  test = function ()
+    assert(to_const(function (a, b)
+      return a + b
+    end) (1, 2, 3) == 2 + 3, fail("to_const", "basic") ())
   end
 }
 
 -- functional.curry
 local curry_test = {
   expect = utils.calc(2, 3, 1),
-  one_by_one = function () return curry(utils.calc) (2) (3) (1) () end,
+  one_by_one = function ()
+    local _log = function (desc, ...)
+      log.d("curry_test.one_by_one", desc, ...)
+    end
+    local _f = curry(utils.calc)
+    _log("f = curry(function (a,b,c) return a + b * c end)", _f)
+    local _f_2 = _f(2)
+    _log("f(2)", _f_2)
+    local _f_2_3 = _f_2(3)
+    _log("f(2) (3)", _f_2_3)
+    local _f_2_3_1 = _f_2_3(1)
+    _log("f(2) (3) (1)", _f_2_3_1)
+    return _f_2_3_1()
+  end,
   pass_by_pack = function () return curry(utils.calc) (2, 3) (1) () end,
   with_argc_1 = function () return curry(utils.calc, 3) (2, 3, 1) () end,
   with_argc_2 = function () return curry(utils.calc, 3) (2) (3) (1) () end,
 }
 
 curry_test.test = function ()
-  assert(curry_test.one_by_one() == curry_test.expect, utils.fail("functional", "curry", "one_by_one"))
-  assert(curry_test.one_by_one() == curry_test.pass_by_pack(), utils.fail("functional", "curry", "pass_by_pack"))
-  assert(curry_test.with_argc_1() == curry_test.with_argc_2(), utils.fail("functional", "curry", "with_argc"))
+  assert(curry_test.one_by_one() == curry_test.expect, fail("curry", "one_by_one") ())
+  assert(curry_test.one_by_one() == curry_test.pass_by_pack(), fail("curry", "pass_by_pack") ())
+  assert(curry_test.with_argc_1() == curry_test.with_argc_2(), fail("curry", "with_argc") ())
 end
 
 -- functional.memorize
@@ -119,7 +167,10 @@ end
 local M = {
   utils = utils,
   functional = {
+    func_new_test = func_new_test,
+
     id_test = id_test,
+    to_const_test = to_const_test,
     curry_test = curry_test,
     memorize_test = memorize_test,
     apply_test = apply_test,
