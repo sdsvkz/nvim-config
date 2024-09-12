@@ -22,7 +22,7 @@ if options.USE_MASON then
   local i = 1
   for server_name, opts in pairs(options.LSP_SERVER_CONFIG_TABLE) do
     if type(opts) == "table" and opts.manual_setup == true then
-      manual_setup[server_name] = (opts.opts == nil) and true or opts.opts
+      manual_setup[server_name] = (opts.config == nil) and true or opts.config
       goto continue
     else
       ensure_installed[i] = { server_name }
@@ -81,7 +81,7 @@ else
 
   for k, v in pairs(options.LSP_SERVER_CONFIG_TABLE) do
     if type(v) == "table" then
-      options.LSP_SERVER_CONFIG_TABLE[k] = (v.opts == nil) and true or v.opts
+      options.LSP_SERVER_CONFIG_TABLE[k] = (v.config == nil) and true or v.config
     end
   end
 

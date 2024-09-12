@@ -56,6 +56,6 @@ return {
   -- Haskell
   ["hls"] = {
     manual_setup = true,
-    -- opts = true
+    -- config = true
   }
 }
