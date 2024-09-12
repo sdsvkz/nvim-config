@@ -54,5 +54,8 @@ return {
   -- Python
   ["pyright"] = true,
   -- Haskell
-  ["hls"] = true
+  ["hls"] = {
+    manual_setup = true,
+    -- opts = true
+  }
 }
