@@ -4,7 +4,7 @@ return {
   ["powershell_es"] = function (t)
     t.lspconfig.powershell_es.setup {
       capabilities = t.capabilities,
-      bundle_path = "D:/PowerShellEditorServices",
+      bundle_path = "~/AppData/Local/nvim-data/mason/packages/powershell-editor-services",
       init_options = {
         enableProfileLoading = false
       }
