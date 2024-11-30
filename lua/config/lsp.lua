@@ -1,5 +1,6 @@
 local lspconfig = require('lspconfig')
 local options = require("config.options")
+local server_config_table = require("config.lspservers")
 
 lspconfig.util.default_config = vim.tbl_extend(
   'force',
@@ -20,7 +21,7 @@ if options.USE_MASON then
   local ensure_installed = {}
   local manual_setup = {}
   local i = 1
-  for server_name, opts in pairs(options.LSP_SERVER_CONFIG_TABLE) do
+  for server_name, opts in pairs(server_config_table) do
     if type(opts) == "table" and opts.manual_setup == true then
       manual_setup[server_name] = (opts.config == nil) and true or opts.config
       goto continue
@@ -46,7 +47,7 @@ if options.USE_MASON then
     end,
   }
 
-  for server_name, config in pairs(options.LSP_SERVER_CONFIG_TABLE) do
+  for server_name, config in pairs(server_config_table) do
     if (type(config) == "function") then
       -- Next, provide dedicated handler for specific servers.
       handler[server_name] = function ()
@@ -79,16 +80,16 @@ if options.USE_MASON then
 
 else
 
-  for k, v in pairs(options.LSP_SERVER_CONFIG_TABLE) do
+  for k, v in pairs(server_config_table) do
     if type(v) == "table" then
-      options.LSP_SERVER_CONFIG_TABLE[k] = (v.config == nil) and true or v.config
+      server_config_table[k] = (v.config == nil) and true or v.config
     end
   end
 
   -- LSP server begin
 
   -- Setup
-  for server_name, config in pairs(options.LSP_SERVER_CONFIG_TABLE) do
+  for server_name, config in pairs(server_config_table) do
     if (config == "boolean") then
       if (config) then
         lspconfig[server_name].setup {
@@ -96,7 +97,7 @@ else
         }
       end
     elseif (type(config) == "function") then
-      options.LSP_SERVER_CONFIG_TABLE[server_name] {
+      server_config_table[server_name] {
         lspconfig = lspconfig
       }
     else

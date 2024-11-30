@@ -1,6 +1,8 @@
-return {
-  -- Bash
-  ["bashls"] = true,
+local table = require('vkzlib.table')
+local options = require('config.options')
+
+local windows_only = {
+  -- Powershell Script
   ["powershell_es"] = function (t)
     t.lspconfig.powershell_es.setup {
       capabilities = t.capabilities,
@@ -9,7 +11,15 @@ return {
         enableProfileLoading = false
       }
     }
-  end,
+  end
+}
+
+local linux_only = {
+  -- Bash Script
+  ["bashls"] = true
+}
+
+local general = {
   -- C/C++
   ["clangd"] = true,
   ["cmake"] = true,
@@ -59,3 +69,13 @@ return {
     -- config = true
   }
 }
+
+local additional = {}
+
+if options.CURRENT_SYSTEM == options.SYSTEM_LIST.WINDOWS then
+  additional = windows_only
+elseif options.CURRENT_SYSTEM == options.SYSTEM_LIST.LINUX then
+  additional = linux_only
+end
+
+return table.merge('force', general, additional)
