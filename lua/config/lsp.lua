@@ -2,11 +2,11 @@ local lspconfig = require('lspconfig')
 local options = require("config.options")
 local server_config_table = require("config.lspservers")
 
-lspconfig.util.default_config = vim.tbl_extend(
+lspconfig.util.default_config = Vkzlib.table.merge(
   'force',
   lspconfig.util.default_config,
   {
-    capabilities = vim.tbl_deep_extend(
+    capabilities = Vkzlib.table.deep_merge(
       "force",
       vim.lsp.protocol.make_client_capabilities(),
       require('lsp-file-operations').default_capabilities(),

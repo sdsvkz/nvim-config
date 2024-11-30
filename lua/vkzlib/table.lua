@@ -1,10 +1,10 @@
-local _mod_name = "table"
+local MODULE = "table"
 
 local internal = require("vkzlib.internal")
 local vkz_table = internal.table
 local list = internal.list
 
-local errmsg = internal.errmsg(_mod_name)
+local errmsg = internal.errmsg(MODULE)
 
 local map = vkz_table.map
 
@@ -30,10 +30,13 @@ local function values(t)
   return res
 end
 
--- Merge multiple tables
----@param behavior 'error'|'keep'|'force'
----@vararg table
----@return table
+-- Merge two or more tables
+---@param behavior 'error'|'keep'|'force' Decides what to do if a key is found in more than one map:
+---      - "error": raise an error
+---      - "keep":  use value from the leftmost map
+---      - "force": use value from the rightmost map
+---@param ... table Two or more tables
+---@return table -- Merged table
 local function merge(behavior, ...)
   local args = list.pack(...)
   local res = {}
@@ -53,9 +56,25 @@ end
 
 merge = vim.tbl_extend or merge
 
+-- Merge two or more tables recursively
+---@param behavior 'error'|'keep'|'force' Decides what to do if a key is found in more than one map:
+---      - "error": raise an error
+---      - "keep":  use value from the leftmost map
+---      - "force": use value from the rightmost map
+---@param ... table Two or more tables
+---@return table -- Merged table
+local function deep_merge(behavior, ...)
+  -- TODO
+  assert(false, errmsg("deep_merge", 'Not implemented yet'))
+  return {}
+end
+
+deep_merge = vim.tbl_deep_extend or deep_merge
+
 return {
   keys = keys,
   values = values,
   merge = merge,
+  deep_merge = deep_merge,
   map = map,
 }

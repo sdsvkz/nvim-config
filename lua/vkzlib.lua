@@ -1,5 +1,5 @@
-local M = {
-  core = require("vkzlib.internal").core,
+local vkzlib = {
+  core = require("vkzlib.core"),
   functional = require("vkzlib.functional"),
   list = require("vkzlib.list"),
   str = require("vkzlib.str"),
@@ -10,7 +10,7 @@ local M = {
 }
 
 if _DEBUG then
-  M.test = require("vkzlib.test")
+  vkzlib.test = require("vkzlib.test")
 end
 
-return M
+return vkzlib

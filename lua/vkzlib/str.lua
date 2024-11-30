@@ -1,4 +1,4 @@
-local _mod_name = "str"
+local MODULE = "str"
 
 local internal = require("vkzlib.internal")
 local str = internal.str

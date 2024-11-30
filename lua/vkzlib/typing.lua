@@ -1,4 +1,4 @@
-local _mod_name = "typing"
+local MODULE = "typing"
 
 local internal = require("vkzlib.internal")
 

@@ -2,13 +2,13 @@ if _DEBUG == "OFF" then
   return {}
 end
 
-local _mod_name = "test"
+local MODULE = "test"
 
 local internal = require "vkzlib.internal"
 local functional = require("vkzlib.functional")
 
 local log = {
-  d = internal.logger(_mod_name, "debug")
+  d = internal.logger(MODULE, "debug")
 }
 
 local Function = functional.Function

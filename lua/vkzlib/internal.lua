@@ -1,12 +1,12 @@
-local _lib_name = "vkzlib"
-local _version = "0.0.1"
+local LIB = "vkzlib"
+local VERSION = "0.0.1"
 
-local _mod_name = "core"
+local MODULE = "core"
 
 ---@param module string
 ---@return fun(comp: string): string
 local function _get_qualified_name(module)
-  local prefix = _lib_name .. "." .. module .. "."
+  local prefix = LIB .. "." .. module .. "."
   return function (comp)
     return prefix .. comp
   end
@@ -21,8 +21,8 @@ local function _errmsg(module)
   end
 end
 
-local get_qualified_name = _get_qualified_name(_mod_name)
-local errmsg = _errmsg(_mod_name)
+local get_qualified_name = _get_qualified_name(MODULE)
+local errmsg = _errmsg(MODULE)
 
 local core = {}
 
@@ -370,8 +370,8 @@ end
 local table_map = vim.tbl_map
 
 return {
-  _lib_name = _lib_name,
-  _version = _version,
+  _lib_name = LIB,
+  _version = VERSION,
 
   logger = logger,
   get_qualified_name = _get_qualified_name,

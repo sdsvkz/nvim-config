@@ -1,3 +1,5 @@
+local MODULE = "vim"
+
 -- Wrapper for vim.api.nvim_create_augroup
 -- By default, sep is underscore and opts is { clear = true }
 ---@param prefix string

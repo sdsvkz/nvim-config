@@ -1,4 +1,4 @@
-local _mod_name = "logging"
+local MODULE = "logging"
 
 local internal = require("vkzlib.internal")
 

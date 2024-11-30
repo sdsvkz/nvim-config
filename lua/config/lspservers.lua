@@ -1,4 +1,3 @@
-local table = require('vkzlib.table')
 local options = require('config.options')
 
 local windows_only = {
@@ -78,4 +77,4 @@ elseif options.CURRENT_SYSTEM == options.SYSTEM_LIST.LINUX then
   additional = linux_only
 end
 
-return table.merge('force', general, additional)
+return Vkzlib.table.merge('force', general, additional)

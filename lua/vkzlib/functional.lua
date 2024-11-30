@@ -1,16 +1,16 @@
-local _mod_name = "functional"
+local MODULE = "functional"
 
 local internal = require("vkzlib.internal")
 local core = internal.core
 local list = internal.list
 local typing = internal.typing
 
-local get_qualified_name = internal.get_qualified_name(_mod_name)
-local errmsg = internal.errmsg(_mod_name)
+local get_qualified_name = internal.get_qualified_name(MODULE)
+local errmsg = internal.errmsg(MODULE)
 
 local log = {
-  d = internal.logger(_mod_name, "debug"),
-  t = internal.logger(_mod_name, "trace"),
+  d = internal.logger(MODULE, "debug"),
+  t = internal.logger(MODULE, "trace"),
 }
 
 ---@class Function
@@ -259,7 +259,7 @@ end
 -- TODO `Function` compatibility
 -- Apply arguments to function `f`
 ---@param f function
----@vararg any
+---@param ... any
 ---@return any
 local function apply(f, ...)
   assert(type(f) == "function", errmsg("apply", "not a function"))

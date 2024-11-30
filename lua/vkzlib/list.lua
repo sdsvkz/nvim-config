@@ -1,4 +1,4 @@
-local _mod_name = "list"
+local MODULE = "list"
 
 ---@class Array<T>: { [integer]: T }
 ---@field n integer?
