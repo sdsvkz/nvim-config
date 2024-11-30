@@ -1,5 +1,21 @@
 local options = require('config.options')
 
+-- Map of language server name to configuration
+
+--[
+-- `true` means default setup
+--
+-- Function is the setup handler with parameter `info` of type `table`, which holds `lspconfig`. Set it up yourself.
+-- This is for custom setup
+--
+-- `table` is for setup manually, This one is only useful when using mason
+-- It setup language server without install using mason
+-- Literally the "lspconfig way"
+-- The key `config` is yet another configuration, that is, one of those value
+--
+-- `false` means ignore, this should same as nil_wrap
+--]
+
 local windows_only = {
   -- Powershell Script
   ["powershell_es"] = function (t)
@@ -23,10 +39,8 @@ local general = {
   ["clangd"] = true,
   ["cmake"] = true,
   -- Lua
-  ["lua_ls"] = function (t)
-    t.lspconfig.lua_ls.setup {
-      capabilities = t.capabilities or nil,
-
+  ["lua_ls"] = function (info)
+    info.lspconfig.lua_ls.setup {
       on_init = function(client)
         local path = client.workspace_folders[1].name
         ---@diagnostic disable-next-line: undefined-field
@@ -66,7 +80,9 @@ local general = {
   ["hls"] = {
     manual_setup = true,
     -- config = true
-  }
+  },
+  -- Json
+  ["jsonls"] = true
 }
 
 local additional = {}

@@ -15,27 +15,53 @@ lspconfig.util.default_config = Vkzlib.table.merge(
   }
 )
 
-if options.USE_MASON then
+local function lspconfig_setup(SERVER_CONFIG_TABLE)
+  for server_name, config in pairs(SERVER_CONFIG_TABLE) do
+    if (type(config) == "boolean") then
+      if (config) then
+        -- Default setup
+        lspconfig[server_name].setup {
 
-  -- Ensure installed begin
-  local ensure_installed = {}
-  local manual_setup = {}
-  local i = 1
-  for server_name, opts in pairs(server_config_table) do
-    if type(opts) == "table" and opts.manual_setup == true then
-      manual_setup[server_name] = (opts.config == nil) and true or opts.config
-      goto continue
+        }
+      end
+      -- Do nothing if ignored
+    elseif (type(config) == "function") then
+      -- Invoke custom setup
+      config {
+        lspconfig = lspconfig
+      }
     else
-      ensure_installed[i] = { server_name }
+      error("config type mismatched")
     end
-    i = i + 1
+  end
+end
+
+local function use_mason()
+  -- Preparing begin
+  local handle_by_mason = {}
+  local manual_setup = {}
+  for server_name, opts in pairs(server_config_table) do
+    if opts == false then
+      -- Discard ignored
+      goto continue
+    elseif type(opts) == "table" then
+      if opts.manual_setup == true then
+        -- Put manual ones into manual_setup instead of ensure_installed
+        manual_setup[server_name] = (opts.config == nil) and true or opts.config
+        goto continue
+      end
+      -- If opts.manual_setup is false, then do nothing with it
+    else
+      -- Put those into ensure_installed
+      handle_by_mason[server_name] = opts
+    end
     ::continue::
   end
 
   require("mason-tool-installer").setup {
-    ensure_installed = ensure_installed
+    ensure_installed = Vkzlib.table.keys(handle_by_mason)
   }
-  -- Ensure installed end
+  -- Preparing end
 
   -- LSP server begin
   local handler = {
@@ -47,7 +73,7 @@ if options.USE_MASON then
     end,
   }
 
-  for server_name, config in pairs(server_config_table) do
+  for server_name, config in pairs(handle_by_mason) do
     if (type(config) == "function") then
       -- Next, provide dedicated handler for specific servers.
       handler[server_name] = function ()
@@ -60,50 +86,35 @@ if options.USE_MASON then
 
   require('mason-lspconfig').setup_handlers(handler)
 
-  -- Manually setup
-  for server_name, config in pairs(manual_setup) do
-    if (type(config) == "boolean") then
-      if (config) then
-        lspconfig[server_name].setup {
+  -- Setup manually
+  lspconfig_setup(manual_setup)
 
-        }
-      end
-    elseif (type(config) == "function") then
-      config {
-        lspconfig = lspconfig
-      }
-    else
-      error("config type mismatched")
-    end
-  end
   -- LSP server end
+end
 
-else
-
+local function no_mason()
+  -- Preparing begin
   for k, v in pairs(server_config_table) do
     if type(v) == "table" then
       server_config_table[k] = (v.config == nil) and true or v.config
     end
   end
+  -- Preparing end
 
   -- LSP server begin
 
-  -- Setup
-  for server_name, config in pairs(server_config_table) do
-    if (config == "boolean") then
-      if (config) then
-        lspconfig[server_name].setup {
+  lspconfig_setup(server_config_table)
 
-        }
-      end
-    elseif (type(config) == "function") then
-      server_config_table[server_name] {
-        lspconfig = lspconfig
-      }
-    else
-      error("config type mismatched")
-    end
-  end
   -- LSP server end
+
+end
+
+if options.USE_MASON then
+
+  use_mason()
+
+else
+
+  no_mason()
 
 end
