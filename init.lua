@@ -7,6 +7,7 @@ _DEBUG = "OFF"
 LOG_LEVEL = "debug"
 
 Vkzlib = require('vkzlib')
+Plenary = require('plenary')
 
 require("config.vim")
 

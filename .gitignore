@@ -1,1 +1,6 @@
 lazy-lock.json
+/luarocks.bat
+/lua.bat
+/lua_modules
+/.luarocks
+nvim-dev-1.rockspec
