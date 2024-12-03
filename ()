@@ -85,12 +85,10 @@ function Function:new(params)
     _argc = argc or info.nparams,
     _isvararg = isvararg,
   }
-  -- This method should easily implement inheritance
-  -- Literally use self (class object) as meta table
-  -- But seems complicated to implement operator overload
+  -- Those part literally use self (class object) as meta table
 
   -- Make callable
-  -- !!! This fucked up because this will override call operator for all objects every time you instantiate an object
+  -- BUG This fucked up because every time instantiate an object will override call operator of all objects
   -- self.__call = function (_, ...)
   --   return f(...)
   -- end
@@ -98,15 +96,10 @@ function Function:new(params)
   -- Make colon call search method in class object
   -- self.__index = self
 
-  -- setmetatable(res, self)
-
-
   setmetatable(res, {
-    -- Overload call operator for instance
     __call = function (_, ...)
       return f(...)
     end,
-    -- Make colon call search method in class object
     __index = self
   })
 

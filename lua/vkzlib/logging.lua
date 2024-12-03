@@ -44,6 +44,7 @@ return {
   get_logger = get_logger,
   log = {
     std = get_logger( format ),
+    -- TODO This should optionally loaded depends on whether using Neovim
     vim = get_logger( format, {
       print = vim.print,
     } ),

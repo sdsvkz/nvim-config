@@ -95,7 +95,8 @@ end
 local function no_mason()
   -- Preparing begin
   for k, v in pairs(server_config_table) do
-    if type(v) == "table" then
+    if type(v) == "table" and v.manual_setup == true then
+      -- manual_setup make no difference if not using mason
       server_config_table[k] = (v.config == nil) and true or v.config
     end
   end

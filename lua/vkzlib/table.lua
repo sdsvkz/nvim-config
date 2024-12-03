@@ -1,12 +1,12 @@
 local MODULE = "table"
 
 local internal = require("vkzlib.internal")
-local vkz_table = internal.table
+local tbl = internal.table
 local list = internal.list
 
 local errmsg = internal.errmsg(MODULE)
 
-local map = vkz_table.map
+local map = tbl.map
 
 -- Get keys of table
 ---@param t table

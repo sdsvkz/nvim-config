@@ -4,7 +4,7 @@ local VERSION = "0.0.1"
 local MODULE = "core"
 
 ---@param module string
----@return fun(comp: string): string
+---@return fun(component: string): string
 local function _get_qualified_name(module)
   local prefix = LIB .. "." .. module .. "."
   return function (comp)
@@ -13,7 +13,7 @@ local function _get_qualified_name(module)
 end
 
 ---@param module string
----@return fun(comp: string, msg:string): string
+---@return fun(component: string, msg:string): string
 local function _errmsg(module)
   local _f = _get_qualified_name(module)
   return function (comp, msg)
@@ -21,16 +21,40 @@ local function _errmsg(module)
   end
 end
 
+---Assert with lazy message evaluation
+---
+---Raises an error if the value of its argument v is false (i.e., `nil` or `false`)
+---otherwise, returns all its arguments. In case of error, `message` is the error object; when absent, it defaults to `"assertion failed!"`
+---
+---[View documents](http://www.lua.org/manual/5.1/manual.html#pdf-assert)
+---
+---It's so fucking annoying to write lambda every time I call this
+---But I think it is the only way to evaluate argument lazily
+---
+---@generic T
+---@param v? T
+---@param get_msg? fun(): any
+---@param ... any
+---@return T
+---@return any ...
+local function _assert(v, get_msg, ...)
+  if v == false or v == nil then
+    error(get_msg and get_msg() or "assertion failed!")
+  end
+  return v, get_msg, ...
+end
+
 local get_qualified_name = _get_qualified_name(MODULE)
 local errmsg = _errmsg(MODULE)
+local assert = _assert
 
 local core = {}
 
 -- vkzlib.core
 
-core.to_string = vim.inspect
-core.equals = vim.deep_equal
-core.copy = vim.deepcopy
+core.to_string = vim.inspect -- FIX Implement this
+core.equals = vim.deep_equal -- FIX Implement this
+core.copy = vim.deepcopy -- FIX Implement this
 
 -- Return `t` if `b` is true. Otherwise, return nothing
 ---@param b boolean
@@ -102,7 +126,9 @@ end
 ---@return boolean
 core.all = function (bs)
   for _, b in ipairs(bs) do
-    assert(type(b) == "boolean", errmsg("all", "contains non-boolean argument"))
+    assert(type(b) == "boolean", function()
+      return errmsg("all", "contains non-boolean argument")
+    end)
     if not b then
       return false
     end
@@ -115,7 +141,9 @@ end
 ---@return boolean
 core.any = function (bs)
   for _, b in ipairs(bs) do
-    assert(type(b) == "boolean", errmsg("any", "contains non-boolean argument"))
+    assert(type(b) == "boolean", function()
+      return errmsg("any", "contains non-boolean argument")
+    end)
     if b then
       return true
     end
@@ -183,10 +211,9 @@ local function get_logger(format, opts)
     end
   end
 
-  assert(
-    level_num ~= nil and color ~= nil,
-    errmsg("get_logger", "failed to get level and color")
-  )
+  assert(level_num ~= nil and color ~= nil, function()
+    return errmsg("get_logger", "failed to get level and color")
+  end)
 
   return function(...)
 
@@ -209,7 +236,9 @@ local function get_logger(format, opts)
     -- Log to file
     if type(outfile) == "string" then
       local fp = io.open(outfile, "a")
-      assert(fp ~= nil, errmsg("get_logger.return", "failed to open file: " .. outfile))
+      assert(fp ~= nil, function()
+        return errmsg("get_logger.return", "failed to open file: " .. outfile)
+      end)
       fp:write(
         format({
           color = "",
@@ -250,12 +279,12 @@ local function logger(module_name, level)
 
   local function _logger()
     local log = get_logger(format, {
-      print = vim.print,
+      print = vim.print, -- FIX Use others
       level = level,
       usecolor = false,
     })
     return function (comp, desc, ...)
-      log(prefix .. comp, desc, ...)
+      log(prefix .. comp, desc, ...) -- BUG Log show this position every time
     end
   end
 
@@ -319,7 +348,7 @@ core.join = join
 
 -- vkzlib.typing
 
--- If type of `x` is any of vararg
+-- Whether type of `x` is any of vararg
 ---@param x any
 ---@vararg type
 ---@return boolean
@@ -334,9 +363,15 @@ end
 ---@param x any
 ---@vararg type
 core.ensure_type = function (x, ...)
-  assert(core.is_type(x, ...), errmsg(
-    "ensure_type", "type " .. type(x) .. " but requires any of " .. core.to_string({...}))
-  )
+  -- Shitty lua can't naming `...` so it is not inherited into inner function
+  -- I have to store those things
+  local args = core.pack(...)
+  assert(core.is_type(x, ...), function()
+    return errmsg("ensure_type",
+      "type " .. type(x) ..
+      " but requires any of " .. core.to_string(args)
+    )
+  end)
 end
 
 -- If `x` is an object and is callable
@@ -367,7 +402,7 @@ end
 
 -- vkzlib.table
 
-local table_map = vim.tbl_map
+local tbl_map = vim.tbl_map
 
 return {
   _lib_name = LIB,
@@ -376,6 +411,7 @@ return {
   logger = logger,
   get_qualified_name = _get_qualified_name,
   errmsg = _errmsg,
+  assert = assert,
 
   core = core,
 
@@ -390,7 +426,7 @@ return {
   },
 
   table = {
-    map = table_map,
+    map = tbl_map,
   },
 
   typing = {

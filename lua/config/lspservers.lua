@@ -1,6 +1,7 @@
 local options = require('config.options')
 
 -- Map of language server name to configuration
+-- Use names from lspconfig, not mason
 
 --[
 -- `true` means default setup
@@ -11,11 +12,13 @@ local options = require('config.options')
 -- `table` is for setup manually, This one is only useful when using mason
 -- It setup language server without install using mason
 -- Literally the "lspconfig way"
+-- The key `manual_setup` should be true. Otherwise, ignore it
 -- The key `config` is yet another configuration, that is, one of those value
 --
 -- `false` means ignore, this should same as nil_wrap
 --]
 
+---@type { [string]: boolean | function | {  } }
 local windows_only = {
   -- Powershell Script
   ["powershell_es"] = function (t)
@@ -82,7 +85,9 @@ local general = {
     -- config = true
   },
   -- Json
-  ["jsonls"] = true
+  ["jsonls"] = true,
+  -- Markdown
+  ["marksman"] = true,
 }
 
 local additional = {}

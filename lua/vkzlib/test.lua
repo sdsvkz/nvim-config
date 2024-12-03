@@ -11,6 +11,9 @@ local log = {
   d = internal.logger(MODULE, "debug")
 }
 
+-- Evaluate message doesn't matter until now
+-- local assert = internal.assert
+
 local Function = functional.Function
 
 local id = functional.id
@@ -25,9 +28,15 @@ local utils = {
   throw_test = function ()
     assert(false, "Test passed")
   end,
-  fail = curry(function (module, group, name)
-    return "Test failed: " .. module .. "." .. group .. "." .. name
-  end),
+  fail = function (module)
+    return function (group)
+      return function (name)
+        return function ()
+          return "Test failed: " .. module .. "." .. group .. "." .. name
+        end
+      end
+    end
+  end,
   calc = function (a, b, c)
     return a + b * c
   end
@@ -35,41 +44,46 @@ local utils = {
 
 -- functional
 
--- functional.Function
+-- functional.Function begin
 local fail = utils.fail("functional.Function")
 
 -- functional.Function.new
 local func_new_test = {
   test = function ()
-    local f = Function.new(utils.calc)
+    local f = Function:new { utils.calc }
     local info = debug.getinfo(utils.calc, "u")
     assert(
       f(2, 3, 1) == utils.calc(2, 3, 1) and
-      Function.get_argc(f) == info.nparams and
-      Function.is_vararg(f) == info.isvararg,
+      f:get_argc() == info.nparams and
+      f:is_vararg() == info.isvararg,
 
-      fail("new", "basic") ()
+      fail("new")("basic") ()
     )
   end
 }
+-- functional.Function end
 
 fail = utils.fail("functional")
 
 -- functional.id
 local id_test = {
   test = function ()
-    assert(id(false) == false, fail("id", "basic") ())
+    assert(id(false) == false, fail("id")("basic") ())
   end
 }
 
 -- functional.to_const
 local to_const_test = {
-  test = function ()
-    assert(to_const(function (a, b)
-      return a + b
-    end) (1, 2, 3) == 2 + 3, fail("to_const", "basic") ())
+  f = function (a, b)
+    return a + b
   end
 }
+
+to_const_test.test = function ()
+  local f = to_const_test.f
+  assert(to_const(f) (1, 2, 3) == 2 + 3, fail("to_const")("basic") ())
+  assert((to_const(Function { f }) (1, 2, 3)) == 2 + 3, fail("to_const")("basic (Function)") ())
+end
 
 -- functional.curry
 local curry_test = {
@@ -94,9 +108,9 @@ local curry_test = {
 }
 
 curry_test.test = function ()
-  assert(curry_test.one_by_one() == curry_test.expect, fail("curry", "one_by_one") ())
-  assert(curry_test.one_by_one() == curry_test.pass_by_pack(), fail("curry", "pass_by_pack") ())
-  assert(curry_test.with_argc_1() == curry_test.with_argc_2(), fail("curry", "with_argc") ())
+  assert(curry_test.one_by_one() == curry_test.expect, fail("curry")("one_by_one") ())
+  assert(curry_test.one_by_one() == curry_test.pass_by_pack(), fail("curry")("pass_by_pack") ())
+  assert(curry_test.with_argc_1() == curry_test.with_argc_2(), fail("curry")("with_argc") ())
 end
 
 -- functional.memorize
@@ -161,7 +175,7 @@ local flip_test = {
 }
 
 flip_test.test = function ()
-  assert(flip_test.basic() == flip_test.expect, flip_test.fail ("basic") ())
+  assert(flip_test.basic() == flip_test.expect, flip_test.fail("basic") ())
 end
 
 local M = {
@@ -188,4 +202,3 @@ for _, m in ipairs({ M.functional }) do
 end
 
 return M
-

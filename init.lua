@@ -1,13 +1,19 @@
-local options = require("config.options")
-
 ---@type "OFF" | "ON"
-_DEBUG = "OFF"
+_DEBUG = "ON"
 
 ---@type vkzlib.logging.Logger.Level
-LOG_LEVEL = "debug"
+LOG_LEVEL = "trace"
 
-Vkzlib = require('vkzlib')
-Plenary = require('plenary')
+local options = require("config.options")
+
+Vkzlib = require("vkzlib")
+Plenary = require("plenary")
+Luassert = require("luassert")
+
+Function = Vkzlib.functional.Function
+F = function(x, y, z)
+  print(vim.inspect({ x = x, y = y, z = z }))
+end
 
 require("config.vim")
 
