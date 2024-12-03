@@ -42,6 +42,8 @@ local utils = {
   end
 }
 
+local assert = internal.assert
+
 -- functional
 
 -- functional.Function begin
@@ -57,7 +59,7 @@ local func_new_test = {
       f:get_argc() == info.nparams and
       f:is_vararg() == info.isvararg,
 
-      fail("new")("basic") ()
+      fail("new")("basic")
     )
   end
 }
@@ -68,7 +70,7 @@ fail = utils.fail("functional")
 -- functional.id
 local id_test = {
   test = function ()
-    assert(id(false) == false, fail("id")("basic") ())
+    assert(id(false) == false, fail("id")("basic"))
   end
 }
 
@@ -81,8 +83,8 @@ local to_const_test = {
 
 to_const_test.test = function ()
   local f = to_const_test.f
-  assert(to_const(f) (1, 2, 3) == 2 + 3, fail("to_const")("basic") ())
-  assert((to_const(Function { f }) (1, 2, 3)) == 2 + 3, fail("to_const")("basic (Function)") ())
+  assert(to_const(f) (1, 2, 3) == 2 + 3, fail("to_const")("basic"))
+  assert((to_const(Function { f }) (1, 2, 3)) == 2 + 3, fail("to_const")("basic (Function)"))
 end
 
 -- functional.curry
@@ -108,9 +110,9 @@ local curry_test = {
 }
 
 curry_test.test = function ()
-  assert(curry_test.one_by_one() == curry_test.expect, fail("curry")("one_by_one") ())
-  assert(curry_test.one_by_one() == curry_test.pass_by_pack(), fail("curry")("pass_by_pack") ())
-  assert(curry_test.with_argc_1() == curry_test.with_argc_2(), fail("curry")("with_argc") ())
+  assert(curry_test.one_by_one() == curry_test.expect, fail("curry")("one_by_one"))
+  assert(curry_test.one_by_one() == curry_test.pass_by_pack(), fail("curry")("pass_by_pack"))
+  assert(curry_test.with_argc_1() == curry_test.with_argc_2(), fail("curry")("with_argc"))
 end
 
 -- functional.memorize
@@ -128,12 +130,12 @@ memorize_test.test = function ()
   local res, memorized = f()
   assert(
     (res == memorize_test.expect) and (memorized == false),
-    memorize_test.fail("basic") ()
+    memorize_test.fail("basic")
   )
   res, memorized = f()
   assert(
     (res == memorize_test.expect) and (memorized == true),
-    memorize_test.fail("basic") ()
+    memorize_test.fail("basic")
   )
 end
 
@@ -144,7 +146,7 @@ local apply_test = {
 }
 
 apply_test.test = function ()
-  assert(apply(utils.calc, 2, 3, 1) == apply_test.expect, apply_test.fail("basic") ())
+  assert(apply(utils.calc, 2, 3, 1) == apply_test.expect, apply_test.fail("basic"))
 end
 
 -- functional.compose
@@ -163,7 +165,7 @@ compose_test.expect = compose_test.add1(compose_test.times3(2))
 compose_test.test = function ()
   assert(
     compose(compose_test.add1, compose_test.times3) (2) == compose_test.expect,
-    compose_test.fail("basic") ()
+    compose_test.fail("basic")
   )
 end
 
@@ -175,7 +177,7 @@ local flip_test = {
 }
 
 flip_test.test = function ()
-  assert(flip_test.basic() == flip_test.expect, flip_test.fail("basic") ())
+  assert(flip_test.basic() == flip_test.expect, flip_test.fail("basic"))
 end
 
 local M = {

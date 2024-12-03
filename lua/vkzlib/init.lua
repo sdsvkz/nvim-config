@@ -9,7 +9,6 @@ local vkzlib = setmetatable({}, {
       -- Loaded and not ignored
       rawset(t, k, val)
     elseif _DEBUG ~= "OFF" and not ok then
-      assert(false)
       -- Failed to load
       local log = {
         d = require("vkzlib.internal").logger(MODULE, "debug")

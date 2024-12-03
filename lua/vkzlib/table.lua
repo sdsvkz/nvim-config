@@ -38,6 +38,7 @@ end
 ---@param ... table Two or more tables
 ---@return table -- Merged table
 local function merge(behavior, ...)
+  local deferred_errmsg = errmsg("merge")
   local args = list.pack(...)
   local res = {}
   for i = 1, args.n do
@@ -45,9 +46,9 @@ local function merge(behavior, ...)
       if behavior == 'force' or res[k] == nil then
         res[k] = v
       elseif behavior == 'error' then
-        error(errmsg("merge", "key duplicated"))
+        error(deferred_errmsg("key duplicated") ())
       else
-        assert(behavior == 'keep', errmsg("merge", "invalid argument: behavior"))
+        assert(behavior == 'keep', deferred_errmsg("invalid argument: behavior"))
       end
     end
   end
@@ -64,8 +65,9 @@ merge = vim.tbl_extend or merge
 ---@param ... table Two or more tables
 ---@return table -- Merged table
 local function deep_merge(behavior, ...)
+  local deferred_errmsg = errmsg("deep_merge")
   -- TODO
-  assert(false, errmsg("deep_merge", 'Not implemented yet'))
+  assert(false, deferred_errmsg('Not implemented yet'))
   return {}
 end
 

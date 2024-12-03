@@ -43,36 +43,37 @@ end
 ---@see Function.new.Params
 ---@see Function
 function Function:new(params)
-  assert(params ~= nil and type(params) == "table", function()
-    return errmsg("Function:new", "This function receive table as argument")
-  end)
+  local deferred_errmsg = errmsg("Function:new")
+  assert(params ~= nil and type(params) == "table",
+    deferred_errmsg("This function receive table as argument")
+  )
   ---@type function
   local f = params[1]
-  assert(f ~= nil and type(f) == "function", function()
-    return errmsg("Function:new", "1st argument not a function")
-  end)
+  assert(f ~= nil and type(f) == "function",
+    deferred_errmsg("1st argument not a function")
+  )
   ---@type integer?
   local argc = params.argc
-  assert(argc == nil or type(argc) == "number", function()
-    return errmsg("Function:new", "Invalid opts.argc")
-  end)
+  assert(argc == nil or type(argc) == "number",
+    deferred_errmsg("Invalid opts.argc")
+  )
   ---@type boolean?
   local isvararg = params.isvararg
-  assert(isvararg == nil or type(isvararg) == "boolean", function()
-    return errmsg("Function:new", "Invalid opts.isvararg")
-  end)
+  assert(isvararg == nil or type(isvararg) == "boolean",
+    deferred_errmsg("Invalid opts.isvararg")
+  )
   ---@type function?
   local raw = params.raw
-  assert(raw == nil or type(raw) == "function", function()
-    return errmsg("Function:new", "Invalid opts.raw")
-  end)
+  assert(raw == nil or type(raw) == "function",
+    deferred_errmsg("Invalid opts.raw")
+  )
   local info = debug.getinfo(f, "u")
   assert(argc == nil or argc >= info.nparams, function ()
-    return errmsg("Function:new", string.format(
+    return deferred_errmsg(string.format(
       "`opts.argc` bigger then parameter count of wrapped `function` (%i : %i)",
       argc,
       info.nparams
-    ))
+    )) ()
   end)
 
   if isvararg == nil then
@@ -117,9 +118,10 @@ end
 ---Copy function object
 ---@param noref boolean
 function Function:copy(noref)
-  assert(Function.is_function_object(self), function() return
-    errmsg("Function:copy", "not a `Function`")
-  end)
+  local deferred_errmsg = errmsg("Function:copy")
+  assert(Function.is_function_object(self),
+    deferred_errmsg("not a `Function`")
+  )
   return core.copy(self, noref)
 end
 
@@ -139,9 +141,10 @@ setmetatable(Function, {
   ---
   ---@see Function.constructor.Params
   __call = function (_, opts)
-    assert(type(opts) == "table", function()
-      return errmsg("Function.constructor", "This function receive `table` as argument")
-    end)
+    local deferred_errmsg = errmsg("Function.constructor")
+    assert(type(opts) == "table",
+      deferred_errmsg("This function receive `table` as argument")
+    )
     local f = opts[1]
     if typing.is_type(f, "function") then
       ---@cast f function
@@ -154,7 +157,7 @@ setmetatable(Function, {
       ---@cast f Function
       return f:copy(opts.noref)
     else
-      error(errmsg("Function.constructor", "1st argument not a `function` or `Function`"))
+      error(deferred_errmsg("1st argument not a `function` or `Function`") ())
     end
   end
 })
@@ -180,9 +183,10 @@ function Function:is_vararg()
 end
 
 function Function:apply(...)
-  assert(select("#", ...) >= self._argc, function()
-    return errmsg("Function:apply", "require more arguments")
-  end)
+  local deferred_errmsg = errmsg("Function:apply")
+  assert(select("#", ...) >= self._argc,
+    deferred_errmsg("require more arguments")
+  )
   return self(...)
 end
 
@@ -197,6 +201,7 @@ end
 ---@param f function | Function
 ---@return Function
 local function to_const(f)
+  local deferred_errmsg = errmsg("to_const")
   local function _to_const(_f)
     return function (_, ...)
       return _f(...)
@@ -208,9 +213,9 @@ local function to_const(f)
       argc = info.nparams + 1,
     }
   end
-  assert(Function.is_function_object(f), function()
-    return errmsg("to_const", "not a valid function object")
-  end)
+  assert(Function.is_function_object(f),
+    deferred_errmsg("not a valid function object")
+  )
   return Function { _to_const(f:get()),
     argc = Function.get_argc(f) + 1,
     isvararg = Function.is_vararg(f),
@@ -222,7 +227,8 @@ end
 ---@param f Function
 ---@return Function
 local function _curry(f)
-  assert(Function.is_function_object(f))
+  local deferred_errmsg = errmsg("_curry")
+  assert(Function.is_function_object(f), deferred_errmsg("1st argument is not a function object"))
 
   local function curried(...)
     local argv = list.pack(...)
@@ -240,7 +246,7 @@ local function _curry(f)
       function (...)
         local storedArgs = { list.unpack(argv) }
         local newArgs = list.pack(...)
-        log.t("_curry.curried.return", "New args", newArgs)
+        log.t("_curry.curried@return", "New args", newArgs)
         for i = 1, newArgs.n do
           table.insert(storedArgs, newArgs[i])
         end
@@ -260,6 +266,7 @@ end
 ---@param argc integer?
 ---@return Function
 local function curry(f, argc)
+  local deferred_errmsg = errmsg("curry")
   -- TODO Refactor
   local nparams = nil
   local opts = {}
@@ -269,38 +276,38 @@ local function curry(f, argc)
     if not opts.isvararg then
       -- Not vararg, retrieve anything
       argc = core.from_maybe(info.nparams, argc)
-      assert(argc >= 0 and argc <= info.nparams, function()
-        return errmsg("curry", "argc out of range")
-      end)
+      assert(argc >= 0 and argc <= info.nparams,
+        deferred_errmsg("argc out of range")
+      )
     else
       -- If isvararg, leave argc untouched
       -- Let caller decide how many arguments it takes
       -- But argc must greater or equal than minimal requirement
-      assert(type(argc) == "number", function()
-        return errmsg("curry", "argc is required for vararg function")
-      end)
-      assert(argc >= info.nparams, function()
-        return errmsg("curry", "argc less than minimal requirement")
-      end)
+      assert(type(argc) == "number",
+        deferred_errmsg("argc is required for vararg function")
+      )
+      assert(argc >= info.nparams,
+        deferred_errmsg("argc less than minimal requirement")
+      )
     end
   elseif Function.is_function_object(f) then
     -- Almost the same
     opts.isvararg = Function.is_vararg(f)
     if not opts.isvararg then
       argc = core.from_maybe(Function.get_argc(f), argc)
-      assert(argc >= 0 and argc <= Function.get_argc(f), function()
-        return errmsg("curry", "argc out of range")
-      end)
+      assert(argc >= 0 and argc <= Function.get_argc(f),
+        deferred_errmsg("argc out of range")
+      )
     else
-      assert(type(argc) == "number", function()
-        return errmsg("curry", "argc is required for vararg function")
-      end)
-      assert(argc >= Function.get_argc(f), function()
-        return errmsg("curry", "argc less than minimal requirement")
-      end)
+      assert(type(argc) == "number",
+        deferred_errmsg("argc is required for vararg function")
+      )
+      assert(argc >= Function.get_argc(f),
+        deferred_errmsg("argc less than minimal requirement")
+      )
     end
   else
-    error(errmsg("curry", "Not a callable"))
+    error(deferred_errmsg("Not a callable") ())
   end
 
   -- TODO Use argc
@@ -319,9 +326,10 @@ end
 ---@param f function
 ---@return function
 local function memorize(f)
-  assert(type(f) == "function" and debug.getinfo(f, "u").nparams == 0, function()
-    return errmsg("memorize", "only function with no argument can be memorized")
-  end)
+  local deferred_errmsg = errmsg("memorize")
+  assert(type(f) == "function" and debug.getinfo(f, "u").nparams == 0,
+    deferred_errmsg("only function with no argument can be memorized")
+  )
   local function closure()
     local mem = nil
     return function ()
@@ -350,9 +358,10 @@ end
 ---@param ... any
 ---@return any
 local function apply(f, ...)
-  assert(type(f) == "function", function()
-    return errmsg("apply", "not a function")
-  end)
+  local deferred_errmsg = errmsg("apply")
+  assert(type(f) == "function",
+    deferred_errmsg("not a function")
+  )
   return f(...)
 end
 

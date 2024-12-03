@@ -5,19 +5,25 @@ local MODULE = "core"
 
 ---@param module string
 ---@return fun(component: string): string
-local function _get_qualified_name(module)
+local function get_qualified_name_(module)
   local prefix = LIB .. "." .. module .. "."
-  return function (comp)
-    return prefix .. comp
+  return function (component)
+    return prefix .. component
   end
 end
 
 ---@param module string
----@return fun(component: string, msg:string): string
-local function _errmsg(module)
-  local _f = _get_qualified_name(module)
-  return function (comp, msg)
-    return _f(comp) .. ": " .. msg
+---@return fun(component: string): fun(msg: string): fun(): string
+local function errmsg_(module)
+  local get_prefix = get_qualified_name_(module)
+  return function (component)
+    local prefix = get_prefix(component)
+    return function (msg)
+      local res = prefix .. ": " .. msg
+      return function ()
+        return res
+      end
+    end
   end
 end
 
@@ -28,7 +34,7 @@ end
 ---
 ---[View documents](http://www.lua.org/manual/5.1/manual.html#pdf-assert)
 ---
----It's so fucking annoying to write lambda every time I call this
+---Pain as fuck to write lambda every time I call this
 ---But I think it is the only way to evaluate argument lazily
 ---
 ---@generic T
@@ -37,16 +43,16 @@ end
 ---@param ... any
 ---@return T
 ---@return any ...
-local function _assert(v, get_msg, ...)
+local function assert_(v, get_msg, ...)
   if v == false or v == nil then
     error(get_msg and get_msg() or "assertion failed!")
   end
   return v, get_msg, ...
 end
 
-local get_qualified_name = _get_qualified_name(MODULE)
-local errmsg = _errmsg(MODULE)
-local assert = _assert
+local get_qualified_name = get_qualified_name_(MODULE)
+local errmsg = errmsg_(MODULE)
+local assert = assert_
 
 local core = {}
 
@@ -125,10 +131,9 @@ end
 ---@param bs boolean[]
 ---@return boolean
 core.all = function (bs)
+  local deferred_errmsg = errmsg("all")
   for _, b in ipairs(bs) do
-    assert(type(b) == "boolean", function()
-      return errmsg("all", "contains non-boolean argument")
-    end)
+    assert(type(b) == "boolean", deferred_errmsg("contains non-boolean argument"))
     if not b then
       return false
     end
@@ -140,10 +145,9 @@ end
 ---@param bs boolean[]
 ---@return boolean
 core.any = function (bs)
+  local deferred_errmsg = errmsg("any")
   for _, b in ipairs(bs) do
-    assert(type(b) == "boolean", function()
-      return errmsg("any", "contains non-boolean argument")
-    end)
+    assert(type(b) == "boolean",  deferred_errmsg("contains non-boolean argument"))
     if b then
       return true
     end
@@ -185,6 +189,7 @@ end
 ---@param opts vkzlib.logging.get_logger.Opts?
 ---@return fun(...: any)
 local function get_logger(format, opts)
+  local deferred_errmsg = errmsg("get_logger")
   ---@type fun(...: any)
   local print = print
   ---@type boolean
@@ -211,11 +216,10 @@ local function get_logger(format, opts)
     end
   end
 
-  assert(level_num ~= nil and color ~= nil, function()
-    return errmsg("get_logger", "failed to get level and color")
-  end)
+  assert(level_num ~= nil and color ~= nil, deferred_errmsg("failed to get level and color"))
 
   return function(...)
+    local deferred_errmsg_return = errmsg("get_logger.return")
 
     -- Return early if we're below the log level
     if level_num < levels[LOG_LEVEL] then
@@ -236,9 +240,7 @@ local function get_logger(format, opts)
     -- Log to file
     if type(outfile) == "string" then
       local fp = io.open(outfile, "a")
-      assert(fp ~= nil, function()
-        return errmsg("get_logger.return", "failed to open file: " .. outfile)
-      end)
+      assert(fp ~= nil, deferred_errmsg_return("failed to open file: " .. outfile))
       fp:write(
         format({
           color = "",
@@ -363,15 +365,14 @@ end
 ---@param x any
 ---@vararg type
 core.ensure_type = function (x, ...)
+  local deferred_errmsg = errmsg("ensure_type")
   -- Shitty lua can't naming `...` so it is not inherited into inner function
   -- I have to store those things
   local args = core.pack(...)
-  assert(core.is_type(x, ...), function()
-    return errmsg("ensure_type",
-      "type " .. type(x) ..
-      " but requires any of " .. core.to_string(args)
-    )
-  end)
+  assert(core.is_type(x, ...), deferred_errmsg(
+    "type " .. type(x) ..
+    " but requires any of " .. core.to_string(args)
+  ))
 end
 
 -- If `x` is an object and is callable
@@ -409,9 +410,9 @@ return {
   _version = VERSION,
 
   logger = logger,
-  get_qualified_name = _get_qualified_name,
-  errmsg = _errmsg,
-  assert = assert,
+  get_qualified_name = get_qualified_name_,
+  errmsg = errmsg_,
+  assert = assert_,
 
   core = core,
 
