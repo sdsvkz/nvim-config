@@ -15,10 +15,11 @@ local log = {
 }
 
 ---@class Function
----@field private _raw function Original `function`
----@field private _value function Wrapped `function`
----@field private _argc integer Parameter count of wrapped `function`
----@field private _isvararg boolean Whether wrapped `function` has variadic argument
+---@field protected _raw function Original `function`
+---@field protected _value function Wrapped `function`
+---@field protected _argc integer Parameter count of wrapped `function`
+---@field protected _isvararg boolean Whether wrapped `function` has variadic argument
+---
 ---@operator call(...): ...
 Function = {}
 
@@ -217,9 +218,9 @@ local function to_const(f)
     deferred_errmsg("not a valid function object")
   )
   return Function { _to_const(f:get()),
-    argc = Function.get_argc(f) + 1,
-    isvararg = Function.is_vararg(f),
-    raw = Function.get_raw(f)
+    argc = f:get_argc() + 1,
+    isvararg = f:is_vararg(),
+    raw = f:get_raw()
   }
 end
 
@@ -227,32 +228,59 @@ end
 ---@param f Function
 ---@return Function
 local function _curry(f)
+  -- Don't write variables here to avoid side effect
+
   local deferred_errmsg = errmsg("_curry")
   assert(Function.is_function_object(f), deferred_errmsg("1st argument is not a function object"))
 
+  ---A clousure to contained arguments 
+  ---@param ... any All previously passed arguments
+  ---@return Function curried Handler for next call
   local function curried(...)
+    -- Don't write variables here to avoid side effect
+
+    -- Storage of arguments (Cannot upvalue `...`)
     local argv = list.pack(...)
     log.t("_curry.curried", "All args", argv)
     if argv.n >= f:get_argc() then
+      -- This means all parameters have been filled
       log.t("_curry.curried", "Finalized", string.format("%i = argv.n >= f:get_argc() = %i", argv.n, f:get_argc()))
+      -- Apply arguments and return result in next call
       return Function:new {
         function ()
           return f(list.unpack(argv))
-        end
+        end,
+        argc = 0,
+        isvararg = f:is_vararg(),
+        raw = f:get_raw()
       }
     end
 
+    local function res(...)
+      -- New arguments in this call
+      local newArgs = list.pack(...)
+      if newArgs.n == 0 then
+        log.t("_curry.curried@return", "No arg, skipped")
+        return Function:new { res, argc = argv.n, isvararg = f:is_vararg(), raw = f:get_raw() }
+      end
+
+      -- Copy of `argv`, to perform side effect
+      -- This will be the new `argv`
+      local storedArgs = { list.unpack(argv) }
+      log.t("_curry.curried@return", "New args", newArgs)
+      for i = 1, newArgs.n do
+        -- Side effect: Put new arguments into `stonedArgs`
+        table.insert(storedArgs, newArgs[i])
+      end
+      -- Create new closure with previously and newly passed arguments
+      return curried(list.unpack(storedArgs))
+    end
+
     return Function:new {
-      function (...)
-        local storedArgs = { list.unpack(argv) }
-        local newArgs = list.pack(...)
-        log.t("_curry.curried@return", "New args", newArgs)
-        for i = 1, newArgs.n do
-          table.insert(storedArgs, newArgs[i])
-        end
-        return curried(list.unpack(storedArgs))
-      end,
-      argc = Function.get_argc(f) - argv.n
+      res,
+      argc = Function.get_argc(f) - argv.n,
+      isvararg = f:is_vararg(),
+      raw = f:get_raw()
     }
   end
 

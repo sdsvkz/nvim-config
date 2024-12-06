@@ -12,7 +12,7 @@ local pack = list.pack
 local unpack = list.unpack
 
 -- Merge multiple lists
----@vararg List
+---@param ... List
 ---@return List
 local function concat(...)
   local res = {}

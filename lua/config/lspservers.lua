@@ -81,6 +81,8 @@ local general = {
   ["pyright"] = true,
   -- Haskell
   ["hls"] = {
+    -- Use HLS from PATH for better customization
+    -- Since only supported ghc versions can be used
     manual_setup = true,
     -- config = true
   },

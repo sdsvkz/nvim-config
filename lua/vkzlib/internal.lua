@@ -263,7 +263,7 @@ local function logger(module_name, level)
   local prefix = "vkzlib." .. module_name .. "."
 
   ---@param info vkzlib.logging.get_logger.format.Info
-  ---@vararg any
+  ---@param ... any
   local function format(info, ...)
     local lineinfo = info.info.short_src .. ":" .. info.info.currentline
     local str = string.format(
@@ -297,7 +297,7 @@ end
 
 -- Returns a new table with all arguments stored into keys `1`, `2`, etc
 -- and with a field `"n"` with the total number of arguments
----@vararg any
+---@param ... any
 ---@return List
 ---@see table.pack
 local function pack(...)
@@ -352,7 +352,7 @@ core.join = join
 
 -- Whether type of `x` is any of vararg
 ---@param x any
----@vararg type
+---@param ... type
 ---@return boolean
 core.is_type = function (x, ...)
   local type_x = type(x)
@@ -363,7 +363,7 @@ end
 
 -- Throw if type of `x` is not `t`
 ---@param x any
----@vararg type
+---@param ... type
 core.ensure_type = function (x, ...)
   local deferred_errmsg = errmsg("ensure_type")
   -- Shitty lua can't naming `...` so it is not inherited into inner function

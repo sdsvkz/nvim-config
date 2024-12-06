@@ -23,7 +23,7 @@ local function to_string(...)
 end
 
 ---@param info vkzlib.logging.get_logger.format.Info
----@vararg any
+---@param ... any
 ---@return string
 local function format(info, ...)
   local nameupper = info.level:upper()
