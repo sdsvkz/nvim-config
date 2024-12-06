@@ -1,4 +1,4 @@
--- FIX Don't load this module if not using Neovim
+-- FIX Return nothing if not using Neovim
 local MODULE = "vim"
 
 -- Wrapper for vim.api.nvim_create_augroup

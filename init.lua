@@ -1,5 +1,5 @@
 ---@type "OFF" | "ON"
-_DEBUG = "ON"
+_DEBUG = "OFF"
 
 ---@type vkzlib.logging.Logger.Level
 LOG_LEVEL = "debug"
@@ -10,10 +10,10 @@ Vkzlib = require("vkzlib")
 Plenary = require("plenary")
 Luassert = require("luassert")
 
-Function = Vkzlib.functional.Function
-F = function(x, y, z)
-  print(vim.inspect({ x = x, y = y, z = z }))
-end
+-- Function = Vkzlib.functional.Function
+-- F = function(x, y, z)
+--   print(vim.inspect({ x = x, y = y, z = z }))
+-- end
 
 require("config.vim")
 
@@ -26,4 +26,3 @@ require("config.lazy")
 require("config.lsp")
 require("config.theme")
 require('config.keymap')
-require("config.autocmds")

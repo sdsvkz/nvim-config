@@ -1,19 +1,7 @@
 local lspconfig = require('lspconfig')
+local ufo = require("ufo")
 local options = require("config.options")
 local server_config_table = require("config.lspservers")
-
-lspconfig.util.default_config = Vkzlib.table.merge(
-  'force',
-  lspconfig.util.default_config,
-  {
-    capabilities = Vkzlib.table.deep_merge(
-      "force",
-      vim.lsp.protocol.make_client_capabilities(),
-      require('lsp-file-operations').default_capabilities(),
-      require('cmp_nvim_lsp').default_capabilities()
-    )
-  }
-)
 
 local function lspconfig_setup(SERVER_CONFIG_TABLE)
   for server_name, config in pairs(SERVER_CONFIG_TABLE) do
@@ -36,7 +24,7 @@ local function lspconfig_setup(SERVER_CONFIG_TABLE)
   end
 end
 
-local function use_mason()
+local function with_mason()
   -- Preparing begin
   local handle_by_mason = {}
   local manual_setup = {}
@@ -58,6 +46,7 @@ local function use_mason()
     ::continue::
   end
 
+  -- TODO Definitely put this into config.mason or something
   require("mason-tool-installer").setup {
     ensure_installed = Vkzlib.table.keys(handle_by_mason)
   }
@@ -92,7 +81,7 @@ local function use_mason()
   -- LSP server end
 end
 
-local function no_mason()
+local function lspconfig_only()
   -- Preparing begin
   for k, v in pairs(server_config_table) do
     if type(v) == "table" and v.manual_setup == true then
@@ -110,12 +99,31 @@ local function no_mason()
 
 end
 
+-- Append required capabilities
+lspconfig.util.default_config = Vkzlib.table.merge(
+  'force',
+  lspconfig.util.default_config,
+  {
+    capabilities = Vkzlib.table.deep_merge(
+      "force",
+      vim.lsp.protocol.make_client_capabilities(),
+      require('lsp-file-operations').default_capabilities(),
+      require('cmp_nvim_lsp').default_capabilities(),
+      ufo.default_capabilities()
+    )
+  }
+)
+
+-- Setup LSP
 if options.USE_MASON then
 
-  use_mason()
+  with_mason()
 
 else
 
-  no_mason()
+  lspconfig_only()
 
 end
+
+-- Setup ufo for code folding
+ufo.setup()
