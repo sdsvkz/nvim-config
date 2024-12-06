@@ -226,7 +226,7 @@ local function get_logger(format, opts)
       return
     end
 
-    local info = debug.getinfo(2, "Sl")
+    local info = debug.getinfo(3, "Sl")
 
     -- Output to console
     print(
