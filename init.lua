@@ -2,7 +2,7 @@
 _DEBUG = "ON"
 
 ---@type vkzlib.logging.Logger.Level
-LOG_LEVEL = "trace"
+LOG_LEVEL = "debug"
 
 local options = require("config.options")
 

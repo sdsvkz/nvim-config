@@ -181,9 +181,10 @@ end
 
 ---@class vkzlib.logging.get_logger.Opts
 ---@field print fun(...: any)
+---@field with_traceback boolean?
 ---@field usecolor boolean?
 ---@field outfile string?
----@field level nil | vkzlib.logging.Logger.Level
+---@field level vkzlib.logging.Logger.Level?
 
 ---@param format fun(info: vkzlib.logging.get_logger.format.Info, ...: any[])
 ---@param opts vkzlib.logging.get_logger.Opts?
@@ -193,6 +194,8 @@ local function get_logger(format, opts)
   ---@type fun(...: any)
   local print = print
   ---@type boolean
+  local with_traceback = false
+  ---@type boolean
   local usecolor = true
   ---@type string?
   local outfile = nil
@@ -201,6 +204,7 @@ local function get_logger(format, opts)
 
   if type(opts) == "table" then
     print = core.from_type("function", print, opts.print)
+    with_traceback = core.from_type("boolean", with_traceback, opts.with_traceback)
     usecolor = core.from_type("boolean", usecolor, opts.usecolor)
     outfile = core.from_type("string", outfile, opts.outfile)
     level = core.from_type("string", level, opts.level)
@@ -228,14 +232,23 @@ local function get_logger(format, opts)
 
     local info = debug.getinfo(3, "Sl")
 
+    local res = format({
+      color = usecolor and color or "",
+      info = info,
+      level = level,
+    }, ...)
+
     -- Output to console
-    print(
-      format({
-        color = usecolor and color or "",
-        info = info,
-        level = level,
-      }, ...)
-    )
+    if with_traceback == true then
+      print(
+        debug.traceback(res, 3),
+        "",
+        "====================================================================================",
+        ""
+      )
+    else
+      print(res)
+    end
 
     -- Log to file
     if type(outfile) == "string" then
@@ -245,7 +258,7 @@ local function get_logger(format, opts)
         format({
           color = "",
           info = info,
-          level = level,
+          level = level
         }, ...)
       )
       fp:close()
@@ -281,12 +294,13 @@ local function logger(module_name, level)
 
   local function _logger()
     local log = get_logger(format, {
-      print = vim.print, -- FIX Use others
-      level = level,
+      print = vim.print, -- FIX Use others if not using Neovim
+      with_traceback = LOG_LEVEL == "trace",
       usecolor = false,
+      level = level,
     })
     return function (comp, desc, ...)
-      log(prefix .. comp, desc, ...) -- BUG Log show this position every time
+      log(prefix .. comp, desc, ...)
     end
   end
 
