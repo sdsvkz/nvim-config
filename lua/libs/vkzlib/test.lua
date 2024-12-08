@@ -8,7 +8,7 @@ local internal = require "vkzlib.internal"
 local functional = require("vkzlib.functional")
 
 local log = {
-  d = internal.logger(MODULE, "debug")
+  d = internal.logger(MODULE, "debug", 3)
 }
 
 -- Evaluate message doesn't matter until now

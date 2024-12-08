@@ -1,5 +1,7 @@
 local MODULE = "logging"
 
+-- TODO Looks like callback doesn't have funcinfo. Figure it out.
+
 local internal = require("vkzlib.internal")
 
 local get_logger = internal.logging.get_logger
@@ -17,7 +19,7 @@ local function to_string(...)
     if type(x) == "number" then
       x = round(x, .01)
     end
-    t[#t + 1] = tostring(x)
+    table.insert(t, tostring(x))
   end
   return table.concat(t, " ")
 end
@@ -29,13 +31,17 @@ local function format(info, ...)
   local nameupper = info.level:upper()
   local msg = to_string(...)
   local lineinfo = info.info.short_src .. ":" .. info.info.currentline
+  local funcinfo = info.info.name
+    and string.format(" in function `%s`", info.info.name)
+    or ""
   return string.format(
-    "%s[%-6s%s]%s %s: %s",
+    "%s[%-6s%s]%s %s:%s\n%s",
     info.color,
     nameupper,
     os.date("%H:%M:%S"),
     info.color,
     lineinfo,
+    funcinfo,
     msg
   )
 end
@@ -43,10 +49,14 @@ end
 return {
   get_logger = get_logger,
   log = {
-    std = get_logger( format ),
+    std = get_logger( format, {
+      print = print,
+      with_traceback = true,
+    } ),
     -- TODO This should optionally loaded depends on whether using Neovim
     vim = get_logger( format, {
       print = vim.print,
+      with_traceback = true,
     } ),
   }
 }

@@ -180,15 +180,19 @@ end
 ---@field color string
 
 ---@class vkzlib.logging.get_logger.Opts
----@field print fun(...: any)
----@field with_traceback boolean?
----@field usecolor boolean?
----@field outfile string?
----@field level vkzlib.logging.Logger.Level?
+---@field print fun(...: any) Print function used to print message
+---@field with_traceback boolean? Append call stack traceback to message (Default `false`)
+---@field usecolor boolean? Print with color (Default `true`)
+---@field outfile string? Also write logs into `outfile` (Default `nil`, means don't)
+---@field level vkzlib.logging.Logger.Level? Log level of this logger (Default `info`)
+---@field depth integer? Depth of call stack for `debug.getinfo` (Default `2`)
 
----@param format fun(info: vkzlib.logging.get_logger.format.Info, ...: any[])
+---@param format fun(info: vkzlib.logging.get_logger.format.Info, ...: ...)
 ---@param opts vkzlib.logging.get_logger.Opts?
 ---@return fun(...: any)
+---
+---@see vkzlib.logging.get_logger.Opts
+---@see vkzlib.logging.get_logger.format.Info
 local function get_logger(format, opts)
   local deferred_errmsg = errmsg("get_logger")
   ---@type fun(...: any)
@@ -201,6 +205,8 @@ local function get_logger(format, opts)
   local outfile = nil
   ---@type vkzlib.logging.Logger.Level
   local level = "info"
+  ---@type integer
+  local depth = 2
 
   if type(opts) == "table" then
     print = core.from_type("function", print, opts.print)
@@ -208,9 +214,12 @@ local function get_logger(format, opts)
     usecolor = core.from_type("boolean", usecolor, opts.usecolor)
     outfile = core.from_type("string", outfile, opts.outfile)
     level = core.from_type("string", level, opts.level)
+    depth = core.from_type("number", depth, opts.depth)
   end
 
+  ---@type integer
   local level_num = nil
+  ---@type string
   local color = nil
   for i, v in ipairs(color_of_levels) do
     if v.name == level then
@@ -230,7 +239,8 @@ local function get_logger(format, opts)
       return
     end
 
-    local info = debug.getinfo(3, "Sl")
+    local info = debug.getinfo(depth, "Sln")
+    assert(core.is_type(info, "table"))
 
     local res = format({
       color = usecolor and color or "",
@@ -241,10 +251,9 @@ local function get_logger(format, opts)
     -- Output to console
     if with_traceback == true then
       print(
-        debug.traceback(res, 3),
-        "",
-        "====================================================================================",
-        ""
+        debug.traceback(res, depth + 1) .. "\n"
+        .. "\n"
+        .. "====================================================================================" .. "\n"
       )
     else
       print(res)
@@ -279,11 +288,15 @@ local function logger(module_name, level)
   ---@param ... any
   local function format(info, ...)
     local lineinfo = info.info.short_src .. ":" .. info.info.currentline
+    local funcinfo = info.info.name
+      and string.format(" in function `%s`", info.info.name)
+      or ""
     local str = string.format(
-      "[%-6s%s] %s:\n",
+      "[%-6s%s] %s:%s\n",
       info.level:upper(),
       os.date("%H:%M:%S"),
-      lineinfo
+      lineinfo,
+      funcinfo
     )
     local args = { n = select("#", ...), ... }
     for i = 1, args.n do
@@ -298,6 +311,7 @@ local function logger(module_name, level)
       with_traceback = LOG_LEVEL == "trace",
       usecolor = false,
       level = level,
+      depth = 3,
     })
     return function (comp, desc, ...)
       log(prefix .. comp, desc, ...)
@@ -312,7 +326,8 @@ end
 -- Returns a new table with all arguments stored into keys `1`, `2`, etc
 -- and with a field `"n"` with the total number of arguments
 ---@param ... any
----@return List
+---@return { [integer]: any, n: integer }
+---
 ---@see table.pack
 local function pack(...)
   return { n = select("#", ...), ... }
@@ -320,27 +335,42 @@ end
 
 core.pack = table.pack or pack
 
-local _unpack = unpack
+-- Recursive part of `v_unpack`
+local function _v_unpack(t, i, j)
+  if i > j then
+    return
+  else
+    return t[i], _v_unpack(t, i+1, j)
+  end
+end
 
 -- Returns the elements from the given `list`. This function is equivalent to
 -- ```lua
 --     return t[i], t[i+1], ..., t[j]
 -- ```
----@generic T
----@param t List
----@param i integer?
----@param j integer?
----@return T ...
-function unpack(t, i, j)
-  if j or type(t) ~= "table" or t.n == nil or (i and type(i) ~= "number") then
-    -- Let _unpack handle exceptions as well
-    ---@diagnostic disable-next-line: param-type-mismatch
-    return _unpack(t, i, j)
+---@param list any[]
+---@param first integer? Index of first element (Default `1`)
+---@param last integer? Index of last element (Default `#t`)
+---@return any ...
+local function v_unpack(list, first, last)
+  local deferred_errmsg = errmsg("v_unpack")
+  assert(type(list) == "table", deferred_errmsg("bad argument #1 (table expected, got " .. type(list) .. ")"))
+
+  local function get_integer(x, name, default)
+    if x then
+      assert(type(x) == "number",
+        deferred_errmsg("bad argument " .. name .. " (number expected, got " .. type(x) .. ")")
+      )
+      return x < 0 and math.ceil(x) or math.floor(x)
+    else
+      return default
+    end
   end
-  return _unpack(t, core.from_maybe(1, i), t.n)
+
+  return _v_unpack(list, get_integer(first, "#2", 1), get_integer(last, "#3", #list))
 end
 
-core.unpack = table.unpack or unpack
+core.unpack = table.unpack or unpack or v_unpack
 
 -- Apply function to list elements
 ---@generic T

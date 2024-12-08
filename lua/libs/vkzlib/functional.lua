@@ -14,7 +14,7 @@ local log = {
   t = internal.logger(MODULE, "trace"),
 }
 
----@class Function
+---@class vkzlib.data.Function
 ---@field protected _raw function Original `function`
 ---@field protected _value function Wrapped `function`
 ---@field protected _argc integer Parameter count of wrapped `function`
@@ -31,18 +31,18 @@ Function.is_function_object = function (x)
   return getmetatable(x).__index == Function
 end
 
----@class Function.new.Params
+---@class vkzlib.data.Function.new.Params
 ---@field [1] function
 ---@field argc integer?
 ---@field isvararg boolean?
 ---@field raw function?
 
 ---Create `Function` object from `f`
----@param params? Function.new.Params
----@return Function
+---@param params? vkzlib.data.Function.new.Params
+---@return vkzlib.data.Function
 ---
----@see Function.new.Params
----@see Function
+---@see vkzlib.data.Function.new.Params
+---@see vkzlib.data.Function
 function Function:new(params)
   local deferred_errmsg = errmsg("Function:new")
   assert(params ~= nil and type(params) == "table",
@@ -80,7 +80,7 @@ function Function:new(params)
   if isvararg == nil then
     isvararg = info.isvararg
   end
-  ---@type Function
+  ---@type vkzlib.data.Function
   local res = {
     _raw = raw or f,
     _value = f,
@@ -126,21 +126,21 @@ function Function:copy(noref)
   return core.copy(self, noref)
 end
 
----@class Function.constructor.Params
----@field [1] function | Function
+---@class vkzlib.data.Function.constructor.Params
+---@field [1] function | vkzlib.data.Function
 ---@field argc integer?
 ---@field isvararg boolean?
 ---@field raw function?
 ---@field noref boolean?
 ---
----@see Function:new.Params
+---@see vkzlib.data.Function.new.Params
 ---@see Function.copy
 
 setmetatable(Function, {
   ---Constructor overload
-  ---@param opts Function.constructor.Params
+  ---@param opts vkzlib.data.Function.constructor.Params
   ---
-  ---@see Function.constructor.Params
+  ---@see vkzlib.data.Function.constructor.Params
   __call = function (_, opts)
     local deferred_errmsg = errmsg("Function.constructor")
     assert(type(opts) == "table",
@@ -155,7 +155,7 @@ setmetatable(Function, {
         raw = opts.raw
       }
     elseif Function.is_function_object(f) then
-      ---@cast f Function
+      ---@cast f vkzlib.data.Function
       return f:copy(opts.noref)
     else
       error(deferred_errmsg("1st argument not a `function` or `Function`") ())
@@ -199,8 +199,8 @@ local function id(x)
 end
 
 ---Add an argument in front and discard it
----@param f function | Function
----@return Function
+---@param f function | vkzlib.data.Function
+---@return vkzlib.data.Function
 local function to_const(f)
   local deferred_errmsg = errmsg("to_const")
   local function _to_const(_f)
@@ -225,8 +225,8 @@ local function to_const(f)
 end
 
 ---Currying `f` with `argc`
----@param f Function
----@return Function
+---@param f vkzlib.data.Function
+---@return vkzlib.data.Function
 local function _curry(f)
   -- Don't write variables here to avoid side effect
 
@@ -235,7 +235,7 @@ local function _curry(f)
 
   ---A clousure to contained arguments 
   ---@param ... any All previously passed arguments
-  ---@return Function curried Handler for next call
+  ---@return vkzlib.data.Function curried Handler for next call
   local function curried(...)
     -- Don't write variables here to avoid side effect
 
@@ -290,9 +290,9 @@ end
 ---Currying function `f` with optional argument count
 ---By default, `maxArgc` is the number of arguments `f` expect
 ---Variadic function must provide argc
----@param f function | Function
+---@param f function | vkzlib.data.Function
 ---@param argc integer?
----@return Function
+---@return vkzlib.data.Function
 local function curry(f, argc)
   local deferred_errmsg = errmsg("curry")
   -- TODO Refactor

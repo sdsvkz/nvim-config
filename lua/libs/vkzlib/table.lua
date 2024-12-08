@@ -39,10 +39,9 @@ end
 ---@return table -- Merged table
 local function merge(behavior, ...)
   local deferred_errmsg = errmsg("merge")
-  local args = list.pack(...)
   local res = {}
-  for i = 1, args.n do
-    for k, v in pairs(args[i]) do
+  for _, t in ipairs({...}) do
+    for k, v in pairs(t) do
       if behavior == 'force' or res[k] == nil then
         res[k] = v
       elseif behavior == 'error' then
