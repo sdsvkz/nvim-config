@@ -27,7 +27,7 @@ Function = {}
 ---@param x any
 ---@return boolean
 Function.is_function_object = function (x)
-  -- FIX I think this wouldn't be true for subclasses (Inheritance implementation from PiL 16.2)
+  -- FIX: I think this wouldn't be true for subclasses (Inheritance implementation from PiL 16.2)
   return getmetatable(x).__index == Function
 end
 
@@ -295,7 +295,7 @@ end
 ---@return vkzlib.data.Function
 local function curry(f, argc)
   local deferred_errmsg = errmsg("curry")
-  -- TODO Refactor
+  -- TODO: Refactor
   local nparams = nil
   local opts = {}
   if type(f) == "function" then
@@ -338,7 +338,7 @@ local function curry(f, argc)
     error(deferred_errmsg("Not a callable") ())
   end
 
-  -- TODO Use argc
+  -- TODO: Use argc
   -- Actually, figure out what argc does first
   f = Function { f, opts.isvararg }
 
@@ -347,9 +347,11 @@ local function curry(f, argc)
   return _curry(f)
 end
 
--- TODO `Function` compatibility
--- TODO Use weak table for nparams = 1
--- TODO Expand nparams for positive integer by recursively apply nparams = 1 to decrease nparams
+-- TODO:
+--  `Function` compatibility
+--  Use weak table for nparams = 1
+--  Expand nparams for positive integer by recursively apply nparams = 1 to decrease nparams
+
 ---Make function `f` memorize its result
 ---@param f function
 ---@return function
@@ -380,7 +382,8 @@ local function memorize(f)
   return closure()
 end
 
--- TODO `Function` compatibility
+-- TODO: `Function` compatibility
+
 ---Apply arguments to function `f`
 ---@param f function
 ---@param ... any
@@ -393,7 +396,8 @@ local function apply(f, ...)
   return f(...)
 end
 
--- TODO `Function` compatibility
+-- TODO: `Function` compatibility
+
 ---Compose two functions
 ---@param f function
 ---@param g function
@@ -404,7 +408,8 @@ local function compose(f, g)
   end
 end
 
--- TODO `Function` compatibility
+-- TODO: `Function` compatibility
+
 ---Swap position of first and second argument
 ---@param f function
 ---@return function

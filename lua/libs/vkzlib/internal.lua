@@ -58,9 +58,9 @@ local core = {}
 
 -- vkzlib.core
 
-core.to_string = vim.inspect -- FIX Implement this
-core.equals = vim.deep_equal -- FIX Implement this
-core.copy = vim.deepcopy -- FIX Implement this
+core.to_string = vim.inspect -- TODO: Implement this
+core.equals = vim.deep_equal -- TODO: Implement this
+core.copy = vim.deepcopy -- TODO: Implement this
 
 -- Return `t` if `b` is true. Otherwise, return nothing
 ---@param b boolean
@@ -279,9 +279,10 @@ end
 -- Get logger for module
 -- By default, `verbose_only` is `false`
 ---@param module_name string
----@param level? vkzlib.logging.Logger.Level
+---@param level vkzlib.logging.Logger.Level?
+---@param depth integer?
 ---@return fun(comp: string, desc: string, ...)
-local function logger(module_name, level)
+local function logger(module_name, level, depth)
   local prefix = "vkzlib." .. module_name .. "."
 
   ---@param info vkzlib.logging.get_logger.format.Info
@@ -307,11 +308,11 @@ local function logger(module_name, level)
 
   local function _logger()
     local log = get_logger(format, {
-      print = vim.print, -- FIX Use others if not using Neovim
+      print = vim.print, -- TODO: Use others if not using Neovim
       with_traceback = LOG_LEVEL == "trace",
       usecolor = false,
       level = level,
-      depth = 3,
+      depth = depth,
     })
     return function (comp, desc, ...)
       log(prefix .. comp, desc, ...)

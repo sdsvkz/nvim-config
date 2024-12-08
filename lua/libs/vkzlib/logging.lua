@@ -1,6 +1,6 @@
 local MODULE = "logging"
 
--- TODO Looks like callback doesn't have funcinfo. Figure it out.
+-- TODO: Looks like callback doesn't have funcinfo. Figure it out.
 
 local internal = require("vkzlib.internal")
 
@@ -53,7 +53,7 @@ return {
       print = print,
       with_traceback = true,
     } ),
-    -- TODO This should optionally loaded depends on whether using Neovim
+    -- TODO: This should optionally loaded depends on whether using Neovim
     vim = get_logger( format, {
       print = vim.print,
       with_traceback = true,

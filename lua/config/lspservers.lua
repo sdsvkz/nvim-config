@@ -1,6 +1,6 @@
 local options = require('config.options')
 
--- TODO
+-- TODO:
   -- Add luacheck into this
     -- Should I put linters/formatters etc, into `lspservers` and rename it,
     -- or put'em into another table?

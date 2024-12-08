@@ -1,4 +1,4 @@
--- FIX Return nothing if not using Neovim
+-- TODO: Return nothing if not using Neovim
 local MODULE = "vim"
 
 -- Wrapper for vim.api.nvim_create_augroup

@@ -65,7 +65,7 @@ merge = vim.tbl_extend or merge
 ---@return table -- Merged table
 local function deep_merge(behavior, ...)
   local deferred_errmsg = errmsg("deep_merge")
-  -- TODO
+  -- TODO: Implement this
   assert(false, deferred_errmsg('Not implemented yet'))
   return {}
 end

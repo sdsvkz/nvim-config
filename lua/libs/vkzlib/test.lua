@@ -1,5 +1,5 @@
 if _DEBUG == "OFF" then
-  return nil
+  return
 end
 
 local MODULE = "test"

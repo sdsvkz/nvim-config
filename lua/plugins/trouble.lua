@@ -5,32 +5,32 @@ return {
   keys = {
     {
       "<leader>xx",
-      "<cmd>Trouble diagnostics toggle<cr>",
+      "<cmd>Trouble diagnostics toggle focus=true<cr>",
       desc = "Diagnostics (Trouble)",
     },
     {
       "<leader>xX",
-      "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
+      "<cmd>Trouble diagnostics toggle focus=true filter.buf=0<cr>",
       desc = "Buffer Diagnostics (Trouble)",
     },
     {
       "<leader>cs",
-      "<cmd>Trouble symbols toggle focus=false<cr>",
+      "<cmd>Trouble symbols toggle focus=true<cr>",
       desc = "Symbols (Trouble)",
     },
     {
       "<leader>cl",
-      "<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
+      "<cmd>Trouble lsp toggle focus=true win.position=right<cr>",
       desc = "LSP Definitions / references / ... (Trouble)",
     },
     {
       "<leader>xL",
-      "<cmd>Trouble loclist toggle<cr>",
+      "<cmd>Trouble loclist toggle focus=true<cr>",
       desc = "Location List (Trouble)",
     },
     {
       "<leader>xQ",
-      "<cmd>Trouble qflist toggle<cr>",
+      "<cmd>Trouble qflist toggle focus=true<cr>",
       desc = "Quickfix List (Trouble)",
     },
   },
