@@ -14,10 +14,12 @@ return {
       lualine_z = {'location'}
     },
     extensions = {
-      'quickfix',
       'lazy',
+      "mason",
       'nvim-tree',
-      'toggleterm'
+      'toggleterm',
+      "trouble",
+      'quickfix',
     },
     lsp_saga = true,
   }

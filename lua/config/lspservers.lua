@@ -93,8 +93,6 @@ local general = {
   },
   -- Json
   ["jsonls"] = true,
-  -- Markdown
-  ["marksman"] = true,
 }
 
 local additional = {}

@@ -14,6 +14,16 @@ return {
   },
   keys = {
     {
+      "<LEADER>chi", mode = "n",
+      "<CMD>Lspsaga incoming_calls<CR>",
+      desc = "Display incoming call hierarchy"
+    },
+    {
+      "<LEADER>cho", mode = "n",
+      "<CMD>Lspsaga outgoing_calls<CR>",
+      desc = "Display outgoing call hierarchy"
+    },
+    {
       "<A-CR>", mode = "n",
       "<CMD>Lspsaga code_action<CR>",
       desc = "Code action in cursor"
