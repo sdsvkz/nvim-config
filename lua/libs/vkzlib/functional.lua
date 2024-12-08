@@ -81,6 +81,7 @@ function Function:new(params)
     isvararg = info.isvararg
   end
   ---@type vkzlib.data.Function
+  ---@diagnostic disable-next-line: missing-fields
   local res = {
     _raw = raw or f,
     _value = f,
