@@ -6,12 +6,18 @@ return {
     dependencies = {
       "nvim-tree/nvim-web-devicons",
     },
-    config = function()
-      -- disable netrw at the very start of your init.lua
+    init = function ()
+      -- disable netrw
       vim.g.loaded_netrw = 1
       vim.g.loaded_netrwPlugin = 1
-      require("nvim-tree").setup {}
     end,
+    opts = {
+      actions = {
+        open_file = {
+          quit_on_open = true
+        }
+      }
+    },
     keys = {
       {
         '<leader>e', mode = 'n',
