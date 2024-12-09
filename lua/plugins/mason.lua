@@ -1,6 +1,7 @@
-return Vkzlib.core.conditional(
-  require("config.options").USE_MASON,
-  {
+local profile = require("profiles")
+
+if profile.USE_MASON then
+  return {
     {
       "williamboman/mason.nvim",
       opts = {},
@@ -14,6 +15,7 @@ return Vkzlib.core.conditional(
     },
     require("plugins.mason.lspconfig"),
     require("plugins.mason.tool_installer"),
-  },
-  {}
-)
+  }
+else
+  return {}
+end

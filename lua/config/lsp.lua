@@ -1,6 +1,6 @@
 local lspconfig = require('lspconfig')
 local ufo = require("ufo")
-local options = require("config.options")
+local options = require("profiles.options")
 local server_config_table = require("config.lspservers")
 
 local function lspconfig_setup(SERVER_CONFIG_TABLE)
@@ -46,7 +46,8 @@ local function with_mason()
     ::continue::
   end
 
-  -- TODO Definitely put this into config.mason or something
+  -- TODO: Definitely put this into config.mason or something
+  -- TODO: Also, use mason-lspconfig and remove mason-tool-installer
   require("mason-tool-installer").setup {
     ensure_installed = Vkzlib.table.keys(handle_by_mason)
   }

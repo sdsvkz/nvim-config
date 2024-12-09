@@ -1,9 +1,10 @@
-local options = require("config.options")
+local profile = require("profiles")
+local options = require("profiles.options")
 
-return Vkzlib.core.conditional(
-  options.CURRENT_SYSTEM == options.SYSTEM_LIST.WINDOWS,
-  {
+if profile.CURRENT_SYSTEM == options.System.Windows then
+  return {
     require("plugins.windows.im_select")
-  },
-  {}
-)
+  }
+else
+  return {}
+end

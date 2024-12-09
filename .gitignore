@@ -2,4 +2,7 @@ lazy-lock.json
 /lua_modules
 /.luarocks
 nvim-dev-1.rockspec
-settings.lua
+/lua/profiles/*
+
+!/lua/profiles/init.lua
+!/lua/profiles/default.lua

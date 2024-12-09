@@ -72,8 +72,12 @@ core.enable_if = function (b, t)
   end
 end
 
--- b == true ? t : f
--- Return `t` if `b` is `true`. Otherwise return `f`
+-- TODO:
+-- Implement lazy version of those functions
+
+---b == true ? t : f
+---Return `t` if `b` is `true`. Otherwise return `f`
+---!!! This function doesn't lazy evaluate its arguments
 ---@generic T, U
 ---@param b boolean
 ---@param t T

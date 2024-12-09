@@ -1,8 +1,7 @@
-local current_path = debug.getinfo(1, "S").source:sub(2)
-current_path = current_path:sub(1, #current_path - #"init.lua")
+local current_path = vim.fn.stdpath("config")
 package.path =
-  current_path .. "lua/libs/?.lua;" ..
-  current_path .. "lua/libs/?/init.lua;" ..
+  current_path .. "/lua/libs/?.lua;" ..
+  current_path .. "/lua/libs/?/init.lua;" ..
   package.path
 
 ---@type "OFF" | "ON"

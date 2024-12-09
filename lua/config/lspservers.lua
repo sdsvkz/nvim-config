@@ -1,9 +1,5 @@
-local options = require('config.options')
-
--- TODO:
-  -- Add luacheck into this
-    -- Should I put linters/formatters etc, into `lspservers` and rename it,
-    -- or put'em into another table?
+local profile = require('profiles')
+local options = require("profiles.options")
 
 -- TODO:
 -- Let configuration determine what LSP should be installed automatically
@@ -101,9 +97,9 @@ local general = {
 
 local additional = {}
 
-if options.CURRENT_SYSTEM == options.SYSTEM_LIST.WINDOWS then
+if profile.CURRENT_SYSTEM == options.System.Windows then
   additional = windows_only
-elseif options.CURRENT_SYSTEM == options.SYSTEM_LIST.LINUX then
+elseif profile.CURRENT_SYSTEM == options.System.Linux then
   additional = linux_only
 end
 
