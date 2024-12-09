@@ -21,7 +21,7 @@ local log = {
 ---@field protected _isvararg boolean Whether wrapped `function` has variadic argument
 ---
 ---@operator call(...): ...
-Function = {}
+local Function = {}
 
 ---If `x` is an valid `Function` object
 ---@param x any
@@ -204,9 +204,9 @@ end
 ---@return vkzlib.data.Function
 local function to_const(f)
   local deferred_errmsg = errmsg("to_const")
-  local function _to_const(_f)
+  local function _to_const(f_)
     return function (_, ...)
-      return _f(...)
+      return f_(...)
     end
   end
   if type(f) == "function" then
@@ -234,7 +234,7 @@ local function _curry(f)
   local deferred_errmsg = errmsg("_curry")
   assert(Function.is_function_object(f), deferred_errmsg("1st argument is not a function object"))
 
-  ---A clousure to contained arguments 
+  ---A clousure to contained arguments
   ---@param ... any All previously passed arguments
   ---@return vkzlib.data.Function curried Handler for next call
   local function curried(...)

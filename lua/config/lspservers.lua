@@ -5,6 +5,10 @@ local options = require('config.options')
     -- Should I put linters/formatters etc, into `lspservers` and rename it,
     -- or put'em into another table?
 
+-- TODO:
+-- Let configuration determine what LSP should be installed automatically
+-- Otherwise, make it manual setup
+
 -- Map of language server name to configuration
 -- Use names from lspconfig, not mason
 
