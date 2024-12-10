@@ -1,5 +1,7 @@
 -- originally authored by @AdamWhittingham
 
+local profile = require("profiles")
+
 local path_ok, plenary_path = pcall(require, "plenary.path")
 if not path_ok then
   return
@@ -224,7 +226,7 @@ local buttons = {
     dashboard.button("SPC f g", "󰊄  Live grep", "<CMD>Telescope live_grep<CR>"),
     dashboard.button("c", "  Configuration", "<cmd>cd ~/.config/nvim/ <CR>"),
     dashboard.button("l", "  Lazy home", "<cmd>Lazy<CR>"),
-    dashboard.button("m", "  Mason home", "<cmd>Mason<CR>"),
+    profile.USE_MASON == true and dashboard.button("m", "  Mason home", "<cmd>Mason<CR>") or nil,
     dashboard.button("q", "󰅚  Quit", "<cmd>qa<CR>"),
   },
   position = "center",

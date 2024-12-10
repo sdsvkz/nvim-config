@@ -4,6 +4,7 @@ return {
   -- Preferences
 
   ---@type Profiles.Options.System
+  ---@diagnostic disable-next-line: undefined-field
   CURRENT_SYSTEM = vim.uv.os_uname().sysname,
 
   ---@type boolean

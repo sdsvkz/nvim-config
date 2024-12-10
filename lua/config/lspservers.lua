@@ -8,28 +8,35 @@ local options = require("profiles.options")
 -- Map of language server name to configuration
 -- Use names from lspconfig, not mason
 
---[
--- `true` means default setup
---
--- Function is the setup handler with parameter `info` of type `table`, which holds `lspconfig`. Set it up yourself.
--- This is for custom setup
---
--- `table` is for setup manually, This one is only useful when using mason
--- It setup language server without install using mason
--- Literally the "lspconfig way"
--- The key `manual_setup` should be true. Otherwise, ignore it
--- The key `config` is yet another configuration, that is, one of those value
---
--- `false` means ignore, this should same as nil_wrap
---]
+---@class (exact) MasonConfig
+---@field [1] string
+---@field version string?
+---@field auto_update boolean?
 
----@type { [string]: boolean | function | {  } }
+---@alias config.lsp.Server.MasonConfig string | MasonConfig
+
+---@alias config.lsp.Handler.Config boolean | fun(info: { lspconfig: table }): nil
+
+
+---`true` means default setup
+---
+---Function is the setup handler with parameter `info` of type `table`, which holds `lspconfig`. Set it up yourself.
+---This is for custom setup
+---
+---`table` is for setup manually, This one is only useful when using mason
+---It setup language server without install using mason
+---Literally the "lspconfig way"
+---The key `config` is yet another configuration, that is, one of those value
+---
+---`false` means ignore, this should same as nil
+---@alias config.lsp.Handler config.lsp.Handler.Config | { config: config.lsp.Handler.Config? }
+
+---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }
 local windows_only = {
   -- Powershell Script
   ["powershell_es"] = function (t)
     t.lspconfig.powershell_es.setup {
-      capabilities = t.capabilities,
-      bundle_path = "~/AppData/Local/nvim-data/mason/packages/powershell-editor-services",
+      bundle_path = vim.fn.stdpath("data") .. "/mason/packages/powershell-editor-services",
       init_options = {
         enableProfileLoading = false
       }
@@ -37,17 +44,19 @@ local windows_only = {
   end
 }
 
+---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }
 local linux_only = {
   -- Bash Script
   ["bashls"] = true
 }
 
+---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }
 local general = {
   -- C/C++
-  ["clangd"] = true,
-  ["cmake"] = true,
+  [{ "clangd", auto_update = true }] = true,
+  [{ "cmake", auto_update = true }] = true,
   -- Lua
-  ["lua_ls"] = function (info)
+  [{ "lua_ls", auto_update = true }] = function (info)
     info.lspconfig.lua_ls.setup {
       on_init = function(client)
         local path = client.workspace_folders[1].name
@@ -71,7 +80,7 @@ local general = {
               -- "${3rd}/luv/library"
               -- "${3rd}/busted/library",
             }
-            -- or pull in all of 'runtimepath'. NOTE: this is a lot slower
+            -- or pull in all of 'runtimepath'.
             -- library = vim.api.nvim_get_runtime_file("", true)
           }
         })
@@ -83,18 +92,18 @@ local general = {
     }
   end,
   -- Python
-  ["pyright"] = true,
+  [{ "pyright", auto_update = true }] = true,
   -- Haskell
   ["hls"] = {
     -- Use HLS from PATH for better customization
     -- Since only supported ghc versions can be used
-    manual_setup = true,
-    -- config = true
+    config = true
   },
   -- Json
-  ["jsonls"] = true,
+  [{ "jsonls", auto_update = true }] = true,
 }
 
+---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }
 local additional = {}
 
 if profile.CURRENT_SYSTEM == options.System.Windows then
