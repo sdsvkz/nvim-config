@@ -72,8 +72,7 @@ core.enable_if = function (b, t)
   end
 end
 
--- TODO:
--- Implement lazy version of those functions
+-- TODO: Implement lazy version of those functions
 
 ---b == true ? t : f
 ---Return `t` if `b` is `true`. Otherwise return `f`

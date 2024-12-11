@@ -1,3 +1,4 @@
+---@diagnostic disable: unused-local
 -- originally authored by @AdamWhittingham
 
 local profile = require("profiles")
