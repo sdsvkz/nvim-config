@@ -205,7 +205,7 @@ lspconfig.util.default_config = Vkzlib.table.merge(
 )
 
 -- Setup LSP
-if profile.USE_MASON then
+if profile.preference.use_mason then
 
   with_mason()
 

@@ -32,7 +32,8 @@ end
 ---Assert with lazy message evaluation
 ---
 ---Raises an error if the value of its argument v is false (i.e., `nil` or `false`)
----otherwise, returns all its arguments. In case of error, `message` is the error object; when absent, it defaults to `"assertion failed!"`
+---otherwise, returns all its arguments. In case of error, `message` is the error object;
+---when absent, it defaults to `"assertion failed!"`
 ---
 ---[View documents](http://www.lua.org/manual/5.1/manual.html#pdf-assert)
 ---
@@ -240,7 +241,7 @@ local function get_logger(format, opts)
     local deferred_errmsg_return = errmsg("get_logger.return")
 
     -- Return early if we're below the log level
-    if level_num < levels[profile.LOG_LEVEL] then
+    if level_num < levels[profile.debugging.log_level] then
       return
     end
 
@@ -314,7 +315,7 @@ local function logger(module_name, level, depth)
   local function _logger()
     local log = get_logger(format, {
       print = vim.print, -- TODO: Use others if not using Neovim
-      with_traceback = profile.LOG_LEVEL == "trace",
+      with_traceback = profile.debugging.log_level == "trace",
       usecolor = false,
       level = level,
       depth = depth,

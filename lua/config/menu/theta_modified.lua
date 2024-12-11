@@ -1,4 +1,5 @@
 ---@diagnostic disable: unused-local
+-- luacheck: no unused
 -- originally authored by @AdamWhittingham
 
 local profile = require("profiles")
@@ -53,7 +54,11 @@ local function file_button(fn, sc, short_fn,autocd)
     ico_txt = ""
   end
   local cd_cmd = (autocd and " | cd %:p:h" or "")
-  local file_button_el = dashboard.button(sc, ico_txt .. short_fn, "<cmd>e " .. vim.fn.fnameescape(fn) .. cd_cmd .." <CR>")
+  local file_button_el = dashboard.button(
+    sc,
+    ico_txt .. short_fn,
+    "<cmd>e " .. vim.fn.fnameescape(fn) .. cd_cmd .." <CR>"
+  )
   local fn_start = short_fn:match(".*[/\\]")
   if fn_start ~= nil then
     table.insert(fb_hl, { "Comment", #ico_txt - 2, #fn_start + #ico_txt })
@@ -106,6 +111,7 @@ local function mru(start, cwd, items_number, opts)
     end
 
     if #short_fn > target_width then
+      ---@diagnostic disable-next-line: param-type-mismatch
       short_fn = plenary_path.new(short_fn):shorten(1, { -2, -1 })
       if #short_fn > target_width then
         short_fn = plenary_path.new(short_fn):shorten(1, { -1 })
@@ -227,7 +233,7 @@ local buttons = {
     dashboard.button("SPC f g", "󰊄  Live grep", "<CMD>Telescope live_grep<CR>"),
     dashboard.button("c", "  Configuration", "<cmd>cd ~/.config/nvim/ <CR>"),
     dashboard.button("l", "  Lazy home", "<cmd>Lazy<CR>"),
-    profile.USE_MASON == true and dashboard.button("m", "  Mason home", "<cmd>Mason<CR>") or nil,
+    profile.preference.use_mason == true and dashboard.button("m", "  Mason home", "<cmd>Mason<CR>") or nil,
     dashboard.button("q", "󰅚  Quit", "<cmd>qa<CR>"),
   },
   position = "center",

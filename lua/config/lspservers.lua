@@ -106,9 +106,9 @@ local general = {
 ---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }
 local additional = {}
 
-if profile.CURRENT_SYSTEM == options.System.Windows then
+if profile.preference.os == options.System.Windows then
   additional = windows_only
-elseif profile.CURRENT_SYSTEM == options.System.Linux then
+elseif profile.preference.os == options.System.Linux then
   additional = linux_only
 end
 

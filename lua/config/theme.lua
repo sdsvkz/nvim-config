@@ -1,8 +1,8 @@
 local profile = require("profiles")
 
-local colorscheme = profile.THEME
+local colorscheme = profile.appearence.theme
 -- local main_menu = require("config.options").main_menu
-local main_menu = require("config.menu." .. profile.MENU).config
+local main_menu = require("config.menu." .. profile.appearence.menu).config
 
 vim.cmd.colorscheme(colorscheme)
 

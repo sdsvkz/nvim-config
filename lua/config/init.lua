@@ -1,8 +1,9 @@
 local options = require("profiles.options")
+local profile = require("profiles")
 
 require("config.vim")
 
-if options.CURRENT_SYSTEM == options.System.Windows then
+if profile.preference.os == options.System.Windows then
   require("config.powershell")
 end
 

@@ -14,7 +14,7 @@ local vkzlib = setmetatable({}, {
     if ok and type(val) == "table" then
       -- Loaded and not ignored
       rawset(t, k, val)
-    elseif profile.ENABLE_TEST == false and not ok then
+    elseif profile.debugging.enable_test == false and not ok then
       -- Failed to load or tried to load test module when test disabled
       local log = {
         d = require("vkzlib.internal").logger(MODULE, "debug")

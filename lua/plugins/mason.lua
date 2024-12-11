@@ -1,6 +1,6 @@
 local profile = require("profiles")
 
-if profile.USE_MASON then
+if profile.preference.use_mason then
   return {
     {
       "williamboman/mason.nvim",

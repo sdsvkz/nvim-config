@@ -2,11 +2,9 @@ local MODULE = "test"
 
 local profile = require("profiles")
 
-if profile.ENABLE_TEST == false then
+if profile.debugging.enable_test == false then
   return
 end
-
-
 
 local internal = require "vkzlib.internal"
 local functional = require("vkzlib.functional")
