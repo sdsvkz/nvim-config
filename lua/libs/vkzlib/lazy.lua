@@ -1,6 +1,8 @@
 -- Lazy load everything into vkzlib.
 local MODULE = "lazy"
 
+local profile = require("profiles")
+
 local vkzlib = setmetatable({}, {
   __index = function(t, k)
     if k == "init" or k == "lazy" then
@@ -9,11 +11,11 @@ local vkzlib = setmetatable({}, {
 
     local ok, val = pcall(require, string.format("vkzlib.%s", k))
 
-    if ok and val ~= nil then
+    if ok and type(val) == "table" then
       -- Loaded and not ignored
       rawset(t, k, val)
-    elseif _DEBUG ~= "OFF" and not ok then
-      -- Failed to load
+    elseif profile.ENABLE_TEST == false and not ok then
+      -- Failed to load or tried to load test module when test disabled
       local log = {
         d = require("vkzlib.internal").logger(MODULE, "debug")
       }

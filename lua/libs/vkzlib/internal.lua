@@ -3,6 +3,8 @@ local VERSION = "0.0.1"
 
 local MODULE = "core"
 
+local profile = require("profiles")
+
 ---@param module string
 ---@return fun(component: string): string
 local function get_qualified_name_(module)
@@ -238,7 +240,7 @@ local function get_logger(format, opts)
     local deferred_errmsg_return = errmsg("get_logger.return")
 
     -- Return early if we're below the log level
-    if level_num < levels[LOG_LEVEL] then
+    if level_num < levels[profile.LOG_LEVEL] then
       return
     end
 
@@ -312,7 +314,7 @@ local function logger(module_name, level, depth)
   local function _logger()
     local log = get_logger(format, {
       print = vim.print, -- TODO: Use others if not using Neovim
-      with_traceback = LOG_LEVEL == "trace",
+      with_traceback = profile.LOG_LEVEL == "trace",
       usecolor = false,
       level = level,
       depth = depth,

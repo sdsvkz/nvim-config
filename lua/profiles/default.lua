@@ -9,6 +9,8 @@
 -- If you want to disable other profile, you can change extension to others
 -- e.g. sdsvkz.lua.disabled
 --
+-- !!! Don't use Vkzlib, as profile contains debugging flags
+--
 --]]
 
 return {
@@ -36,4 +38,14 @@ return {
   ---Choose here using file name without extension
   ---@type string
   MENU = "theta_modified",
+
+  -- Debugging
+
+  ---Whether enable test module of `vkzlib`
+  ---@type boolean
+  ENABLE_TEST = false,
+
+  ---Log level for `vkzlib.logging`
+  ---@type vkzlib.logging.Logger.Level
+  LOG_LEVEL = "info"
 }

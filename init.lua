@@ -4,17 +4,11 @@ package.path =
   current_path .. "/lua/libs/?/init.lua;" ..
   package.path
 
----@type "OFF" | "ON"
-_DEBUG = "OFF"
-
----@type vkzlib.logging.Logger.Level
-LOG_LEVEL = "debug"
+require("profiles")
 
 Vkzlib = require("vkzlib")
 Plenary = require("plenary")
 Luassert = require("luassert")
-
-require("profiles")
 
 require("config")
 

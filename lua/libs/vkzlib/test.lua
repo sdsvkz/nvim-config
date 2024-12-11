@@ -1,8 +1,12 @@
-if _DEBUG == "OFF" then
+local MODULE = "test"
+
+local profile = require("profiles")
+
+if profile.ENABLE_TEST == false then
   return
 end
 
-local MODULE = "test"
+
 
 local internal = require "vkzlib.internal"
 local functional = require("vkzlib.functional")
@@ -19,7 +23,8 @@ local Function = functional.Function
 local id = functional.id
 local to_const = functional.to_const
 local curry = functional.curry
-local memorize = functional.memorize
+-- TODO: Rewrite test once memorize is reimplemented
+-- local memorize = functional.memorize
 local apply = functional.apply
 local compose = functional.compose
 local flip = functional.flip
@@ -115,29 +120,30 @@ curry_test.test = function ()
   assert(curry_test.with_argc_1() == curry_test.with_argc_2(), fail("curry")("with_argc"))
 end
 
+-- TODO: Rewrite test once memorize is reimplemented
 -- functional.memorize
-local memorize_test = {
-  expect = "memorize",
-  fail = fail("memorize"),
-}
-
-memorize_test.f = function ()
-  return memorize_test.expect
-end
-
-memorize_test.test = function ()
-  local f = memorize(memorize_test.f)
-  local res, memorized = f()
-  assert(
-    (res == memorize_test.expect) and (memorized == false),
-    memorize_test.fail("basic")
-  )
-  res, memorized = f()
-  assert(
-    (res == memorize_test.expect) and (memorized == true),
-    memorize_test.fail("basic")
-  )
-end
+-- local memorize_test = {
+--   expect = "memorize",
+--   fail = fail("memorize"),
+-- }
+--
+-- memorize_test.f = function ()
+--   return memorize_test.expect
+-- end
+--
+-- memorize_test.test = function ()
+--   local f = memorize(memorize_test.f)
+--   local res, memorized = f()
+--   assert(
+--     (res == memorize_test.expect) and (memorized == false),
+--     memorize_test.fail("basic")
+--   )
+--   res, memorized = f()
+--   assert(
+--     (res == memorize_test.expect) and (memorized == true),
+--     memorize_test.fail("basic")
+--   )
+-- end
 
 -- functional.apply
 local apply_test = {
@@ -188,7 +194,8 @@ local M = {
     id_test = id_test,
     to_const_test = to_const_test,
     curry_test = curry_test,
-    memorize_test = memorize_test,
+    -- TODO: Rewrite test once memorize is reimplemented
+    -- memorize_test = memorize_test,
     apply_test = apply_test,
     compose_test = compose_test,
     flip_test = flip_test,

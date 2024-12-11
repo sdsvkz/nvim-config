@@ -366,15 +366,9 @@ local function memorize(f)
     return function ()
       if mem ~= nil then
         log.t("memorize", "skipped")
-        if _DEBUG then
-          return mem, true
-        end
         return mem
       end
       mem = f()
-      if _DEBUG then
-        return mem, false
-      end
       return mem
     end
 
