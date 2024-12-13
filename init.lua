@@ -7,8 +7,6 @@ package.path =
 require("profiles")
 
 Vkzlib = require("vkzlib")
-Plenary = require("plenary")
-Luassert = require("luassert")
 
 require("config")
 
