@@ -1,10 +1,16 @@
+-- Linters for filetypes
+-- See statusline for filetype of current file
+-- TODO: Put into profile
+local linters = {
+  lua = { "luacheck" },
+  python = { "flake8", "bandit" }, -- Mason doesn't include bandit yet
+  haskell = { "hlint" },
+}
+
 -- Use `nvim-lint.nvim`
 local lint = require("lint")
 
--- Linter for languages
-lint.linters_by_ft = {
-  lua = { "luacheck" },
-}
+lint.linters_by_ft = linters
 
 -- Setup autocmd to trigger lint
 vim.api.nvim_create_autocmd({ "BufWritePost" }, {

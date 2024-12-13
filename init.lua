@@ -6,6 +6,7 @@ package.path =
 
 require("profiles")
 
+-- luacheck: ignore
 Vkzlib = require("vkzlib")
 
 require("config")

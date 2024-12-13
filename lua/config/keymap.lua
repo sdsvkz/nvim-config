@@ -5,3 +5,4 @@ wk.add {
 }
 
 vim.keymap.set("n", "<LEADER>,l", "<CMD>Lazy<CR>", { desc = "Lazy home" })
+vim.keymap.set("n", "<LEADER>F", vim.lsp.buf.format, { desc = "LSP: Format buffer" })

@@ -2,11 +2,10 @@
 -- luacheck: ignore
 
 globals = {
-  "vim"
+  "vim",
 }
 
 read_globals = {
-  "Vkzlib",
-  "Plenary",
-  "Luassert",
+  "Vkzlib"
 }
+
