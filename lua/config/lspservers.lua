@@ -54,7 +54,6 @@ local linux_only = {
 local general = {
   -- C/C++
   [{ "clangd", auto_update = true }] = true,
-  [{ "cmake", auto_update = true }] = true,
   -- Lua
   [{ "lua_ls", auto_update = true }] = function (info)
     info.lspconfig.lua_ls.setup {

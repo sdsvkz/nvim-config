@@ -13,6 +13,31 @@
 --
 --]]
 
+---@class profiles.Profile
+---@field preference profiles.Profile.Preference
+---@field editor profiles.Profile.Editor
+---@field appearence profiles.Profile.Appearence
+---@field debugging profiles.Profile.Debugging
+
+---@class profiles.Profile.Preference
+---@field os Profiles.Options.System
+---@field use_mason boolean
+
+---@class profiles.Profile.Editor
+---@field line_numbering boolean
+---@field expand_tab_to_spaces boolean
+---@field tab_size integer
+---@field auto_indent boolean
+
+---@class profiles.Profile.Appearence
+---@field theme string
+---@field menu string
+
+---@class profiles.Profile.Debugging
+---@field enable_test boolean
+---@field log_level vkzlib.logging.Logger.Level
+
+---@type profiles.Profile
 return {
   -- Preference
   preference = {
@@ -26,6 +51,31 @@ return {
     ---Otherwise, configure all language servers with lspconfig
     ---@type boolean
     use_mason = true,
+  },
+
+  editor = {
+    ---@type boolean
+    ---
+    ---@see vim.o.number
+    line_numbering = true,
+
+    ---@type boolean
+    ---
+    ---@see vim.o.expandtab
+    expand_tab_to_spaces = true,
+
+    ---@type integer
+    ---
+    ---@see vim.o.tabstop
+    ---@see vim.o.softtabstop
+    ---@see vim.o.shiftwidth
+    tab_size = 4,
+
+    ---@type boolean
+    ---
+    ---@see vim.o.autoindent
+    ---@see vim.o.smartindent
+    auto_indent = true,
   },
 
   -- Appearence
