@@ -17,6 +17,7 @@
 ---@field preference profiles.Profile.Preference
 ---@field editor profiles.Profile.Editor
 ---@field appearence profiles.Profile.Appearence
+---@field language profiles.Profile.Language
 ---@field debugging profiles.Profile.Debugging
 
 ---@class profiles.Profile.Preference
@@ -32,6 +33,13 @@
 ---@class profiles.Profile.Appearence
 ---@field theme string
 ---@field menu string
+
+-- TODO: Complete language options
+-- This should let user enable what language to use.
+-- Profile should enable some tools for language being chosen
+-- User should be able to exclude or include some optional tools
+
+---@class profiles.Profile.Language
 
 ---@class profiles.Profile.Debugging
 ---@field enable_test boolean
@@ -89,6 +97,11 @@ return {
     ---Choose here using file name without extension
     ---@type string
     menu = "theta_modified",
+  },
+
+  -- Language
+  language = {
+
   },
 
   -- Debugging
