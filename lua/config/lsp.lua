@@ -78,7 +78,7 @@ local function with_mason()
     -- effective if run_on_start is set to true.
     -- e.g.: 5000 = 5 second delay, 10000 = 10 second delay, etc...
     -- Default: 0
-    start_delay = 3000,
+    start_delay = 10000,
 
     -- Only attempt to install if 'debounce_hours' number of hours has
     -- elapsed since the last time Neovim was started. This stores a
@@ -86,7 +86,7 @@ local function with_mason()
     -- This is only relevant when you are using 'run_on_start'. It has no
     -- effect when running manually via ':MasonToolsInstall' etc....
     -- Default: nil
-    debounce_hours = nil, -- at least 5 hours between attempts to install/update
+    debounce_hours = nil,
 
     -- By default all integrations are enabled. If you turn on an integration
     -- and you have the required module(s) installed this means you can use

@@ -5,16 +5,20 @@ return {
     init = function ()
       local modules = {
         -- General
-        ['mini.files'] = true,
+
+        -- ['mini.files'] = true,
+        -- For LSP mesage
         ['mini.notify'] = true,
+
         -- Editing
+
         ['mini.ai'] = true,
         ['mini.bracketed'] = true,
         ['mini.surround'] = true,
-        ['mini.operators'] = true,
+        -- ['mini.operators'] = true,
         ['mini.pairs'] = true,
         ['mini.jump2d'] = true,
-        ['mini.pick'] = true,
+        -- ['mini.pick'] = true,
         -- Visual
         -- ['mini.animate'] = true,
         -- ['mini.hipatterns'] = function(module)

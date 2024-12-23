@@ -17,7 +17,7 @@
 ---@field preference profiles.Profile.Preference
 ---@field editor profiles.Profile.Editor
 ---@field appearence profiles.Profile.Appearence
----@field language profiles.Profile.Language
+---@field language profiles.Profile.Language.Supported
 ---@field debugging profiles.Profile.Debugging
 
 ---@class profiles.Profile.Preference
@@ -40,6 +40,23 @@
 -- User should be able to exclude or include some optional tools
 
 ---@class profiles.Profile.Language
+---@field enable boolean
+---@field tools profiles.Profile.Language.Tools?
+
+---@class profiles.Profile.Language.Supported
+---@field c profiles.Profile.Language
+---@field cpp profiles.Profile.Language
+---@field haskell profiles.Profile.Language
+---@field lua profiles.Profile.Language
+---@field json profiles.Profile.Language
+---@field python profiles.Profile.Language
+
+-- TODO: Add dap config here after nvim-dap is added
+
+---@class profiles.Profile.Language.Tools
+---@field formatter [string]?
+---@field linter [string]?
+---@field ls { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
 
 ---@class profiles.Profile.Debugging
 ---@field enable_test boolean
@@ -101,7 +118,26 @@ return {
 
   -- Language
   language = {
+    -- TODO: Set tools for languages
 
+    c = {
+      enable = false,
+    },
+    cpp = {
+      enable = false,
+    },
+    haskell = {
+      enable = false,
+    },
+    lua = {
+      enable = false,
+    },
+    json = {
+      enable = false,
+    },
+    python = {
+      enable = false,
+    },
   },
 
   -- Debugging
