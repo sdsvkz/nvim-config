@@ -13,58 +13,15 @@
 --
 --]]
 
----@class profiles.Profile
----@field preference profiles.Profile.Preference
----@field editor profiles.Profile.Editor
----@field appearence profiles.Profile.Appearence
----@field language profiles.Profile.Language.Supported
----@field debugging profiles.Profile.Debugging
-
----@class profiles.Profile.Preference
----@field os Profiles.Options.System
----@field use_mason boolean
-
----@class profiles.Profile.Editor
----@field line_numbering boolean
----@field expand_tab_to_spaces boolean
----@field tab_size integer
----@field auto_indent boolean
-
----@class profiles.Profile.Appearence
----@field theme string
----@field menu string
-
 -- TODO: Complete language options
 -- This should let user enable what language to use.
 -- Profile should enable some tools for language being chosen
 -- User should be able to exclude or include some optional tools
 
----@class profiles.Profile.Language
----@field enable boolean
----@field tools profiles.Profile.Language.Tools?
-
----@class profiles.Profile.Language.Supported
----@field c profiles.Profile.Language
----@field cpp profiles.Profile.Language
----@field haskell profiles.Profile.Language
----@field lua profiles.Profile.Language
----@field json profiles.Profile.Language
----@field python profiles.Profile.Language
-
--- TODO: Add dap config here after nvim-dap is added
-
----@class profiles.Profile.Language.Tools
----@field formatter [string]?
----@field linter [string]?
----@field ls { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
-
----@class profiles.Profile.Debugging
----@field enable_test boolean
----@field log_level vkzlib.logging.Logger.Level
-
----@type profiles.Profile
-return {
-  -- Preference
+---@class profiles.Profile
+local profile = {
+  ---Preference
+  ---@class profiles.Profile.Preference
   preference = {
     ---Operating system used
     ---Used for platform-specific features
@@ -78,6 +35,8 @@ return {
     use_mason = true,
   },
 
+  ---Editor
+  ---@class profiles.Profile.Editor
   editor = {
     ---@type boolean
     ---
@@ -103,7 +62,8 @@ return {
     auto_indent = true,
   },
 
-  -- Appearence
+  ---Appearence
+  ---@class profiles.Profile.Appearence
   appearence = {
     ---To get list of available themes
     ---Run `:lua for _, theme in ipairs(vim.fn.getcompletion("", "color")) do print(theme) end`
@@ -116,31 +76,67 @@ return {
     menu = "theta_modified",
   },
 
-  -- Language
-  language = {
-    -- TODO: Set tools for languages
+  ---Languages
+  ---@class profiles.Profile.Languages
+  languages = {
+    -- TODO: I need some utilities to turn this into usable datasets. Probably put them into profiles.utils
 
-    c = {
-      enable = false,
+    ---@class profiles.Profile.Languages.Supported
+    supported = {
+      -- TODO: Set tools for languages
+
+      ---@class profiles.Profile.Languages.Language
+      c = {
+        ---@type boolean
+        enable = false,
+        ---@class profiles.Profile.Languages.Tools
+        tools = {
+          ---@type [string]?
+          formatters = nil,
+          ---@type [string]?
+          linters = nil,
+          ---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
+          ls = nil,
+          -- TODO: Add dap config here after nvim-dap is added
+        },
+      },
+      ---@type profiles.Profile.Languages.Language
+      cpp = {
+        enable = false,
+        tools = {},
+      },
+      ---@type profiles.Profile.Languages.Language
+      haskell = {
+        enable = false,
+        tools = {},
+      },
+      ---@type profiles.Profile.Languages.Language
+      lua = {
+        enable = false,
+        tools = {},
+      },
+      ---@type profiles.Profile.Languages.Language
+      json = {
+        enable = false,
+        tools = {},
+      },
+      ---@type profiles.Profile.Languages.Language
+      python = {
+        enable = false,
+        tools = {},
+      },
     },
-    cpp = {
-      enable = false,
-    },
-    haskell = {
-      enable = false,
-    },
-    lua = {
-      enable = false,
-    },
-    json = {
-      enable = false,
-    },
-    python = {
-      enable = false,
+
+    ---@type profiles.Profile.Languages.Supported | [profiles.Profile.Languages.Language]
+    custom = {
+
     },
   },
 
-  -- Debugging
+  -- TODO: vkzlib: Remove dependency of profile
+
+  ---Debugging
+  ---@class profiles.Profile.Debugging
   debugging = {
     ---Whether enable test module of `vkzlib`
     ---@type boolean
@@ -151,3 +147,5 @@ return {
     log_level = "info"
   },
 }
+
+return profile

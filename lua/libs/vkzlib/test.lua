@@ -1,7 +1,9 @@
 local MODULE = "test"
 
+-- TODO: This should be removed afterwards
 local profile = require("profiles")
 
+-- TODO: Get rid of profile. Use same strategy of log_level
 if profile.debugging.enable_test == false then
   return
 end

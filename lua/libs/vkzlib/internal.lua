@@ -3,6 +3,7 @@ local VERSION = "0.0.1"
 
 local MODULE = "core"
 
+-- TODO: This should be removed afterwards
 local profile = require("profiles")
 
 ---@param module string
@@ -240,6 +241,11 @@ local function get_logger(format, opts)
   return function(...)
     local deferred_errmsg_return = errmsg("get_logger.return")
 
+    -- TODO: Get rid of profile.
+    -- I got a idea
+    -- Make init.lua return a function, once received log_level as argument, return the library
+    -- Do the same to send required setting down the tree.
+
     -- Return early if we're below the log level
     if level_num < levels[profile.debugging.log_level] then
       return
@@ -314,7 +320,7 @@ local function logger(module_name, level, depth)
 
   local function _logger()
     local log = get_logger(format, {
-      print = vim.print, -- TODO: Use others if not using Neovim
+      print = vim and vim.print or print, -- TODO: Use others if not using Neovim
       with_traceback = profile.debugging.log_level == "trace",
       usecolor = false,
       level = level,
