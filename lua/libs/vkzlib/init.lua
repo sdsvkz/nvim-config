@@ -1,7 +1,8 @@
--- Lazy load everything into vkzlib.
-local MODULE = "init"
+-- Eagerly load everything into vkzlib.
+local options = require("vkzlib.options")
 
 local vkzlib = {
+  options = options,
   core = require("vkzlib.core"),
   functional = require("vkzlib.functional"),
   internal = require("vkzlib.internal"),
@@ -9,9 +10,12 @@ local vkzlib = {
   logging = require("vkzlib.logging"),
   str = require("vkzlib.str"),
   table = require("vkzlib.table"),
-  test = require("vkzlib.test"),
   typing = require("vkzlib.typing"),
   vim = require("vkzlib.vim"),
 }
+
+if options.enable_test then
+  vkzlib.test = require("vkzlib.test")
+end
 
 return vkzlib

@@ -133,18 +133,10 @@ local profile = {
     },
   },
 
-  -- TODO: vkzlib: Remove dependency of profile
-
   ---Debugging
   ---@class profiles.Profile.Debugging
   debugging = {
-    ---Whether enable test module of `vkzlib`
-    ---@type boolean
-    enable_test = false,
 
-    ---Log level for `vkzlib.logging`
-    ---@type vkzlib.logging.Logger.Level
-    log_level = "info"
   },
 }
 

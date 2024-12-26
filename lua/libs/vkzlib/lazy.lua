@@ -1,30 +1,23 @@
--- Lazy load everything into vkzlib.
-local MODULE = "lazy"
+-- Lazily loaded vkzlib.
+local options = require("vkzlib.options")
 
-local profile = require("profiles")
-
-local vkzlib = setmetatable({}, {
+local vkzlib = setmetatable({
+  options = options
+}, {
   __index = function(t, k)
-    if k == "init" or k == "lazy" then
+    -- Exclude
+    if k == "init" or k == "lazy" or k == "user" or (k == "test" and options.enable_test == false) then
       return nil
     end
 
     local ok, val = pcall(require, string.format("vkzlib.%s", k))
 
-    if ok and type(val) == "table" then
-      -- Loaded and not ignored
-      rawset(t, k, val)
-    elseif profile.debugging.enable_test == false and not ok then
-      -- Failed to load or tried to load test module when test disabled
-      local log = {
-        d = require("vkzlib.internal").logger(MODULE, "debug")
-      }
-      local core = require("vkzlib.core")
-      assert(type(core) == "table", "vkzlib.init: Unable to load core for printing error object")
-      log.d("vkzlib.<metatable>.__index", core.to_string(val))
+    if not ok or type(val) == "table" then
+      return nil
     end
-    -- ok == true and val == nil ignored
 
+    -- Loaded and not ignored
+    rawset(t, k, val)
     return val
   end
 })
