@@ -4,8 +4,6 @@ package.path =
   current_path .. "/lua/libs/?/init.lua;" ..
   package.path
 
-require("profiles")
-
 -- luacheck: ignore
 Vkzlib = require("vkzlib")
 

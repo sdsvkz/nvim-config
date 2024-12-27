@@ -81,56 +81,140 @@ local profile = {
   languages = {
     -- TODO: I need some utilities to turn this into usable datasets. Probably put them into profiles.utils
 
+    ---Supported language, map filetype into language options
     ---@class profiles.Profile.Languages.Supported
     supported = {
-      -- TODO: Set tools for languages
-
       ---@class profiles.Profile.Languages.Language
       c = {
+        ---Whether to use this language
+        ---e.g. You can use this to implement platform
         ---@type boolean
         enable = false,
         ---@class profiles.Profile.Languages.Tools
         tools = {
+          -- TODO: Add options to `formatters` and `linters`
+
           ---@type [string]?
           formatters = nil,
           ---@type [string]?
           linters = nil,
           ---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
-          ls = nil,
+          ls = {
+            [{ "clangd", auto_update = true }] = true,
+          },
           -- TODO: Add dap config here after nvim-dap is added
         },
       },
       ---@type profiles.Profile.Languages.Language
       cpp = {
         enable = false,
-        tools = {},
+        tools = {
+          ls = {
+            [{ "clangd", auto_update = true }] = true,
+          },
+        },
       },
       ---@type profiles.Profile.Languages.Language
       haskell = {
         enable = false,
-        tools = {},
+        tools = {
+          -- formatters = { "ormolu" }, -- HLS use Ormolu as built-in formatter
+          linters = { "hlint" },
+          ls = {
+            ["hls"] = {
+              -- Use HLS from PATH for better customization
+              -- Since only supported ghc versions can be used
+              config = true
+            },
+          },
+        },
       },
       ---@type profiles.Profile.Languages.Language
       lua = {
         enable = false,
-        tools = {},
+        tools = {
+          formatters = { "stylua" },
+          linters = { "luacheck" },
+          ls = {
+            [{ "lua_ls", auto_update = true }] = function (info)
+              info.lspconfig.lua_ls.setup {
+                on_init = function(client)
+                  local path = client.workspace_folders[1].name
+                  ---@diagnostic disable-next-line: undefined-field
+                  if vim.uv.fs_stat(path..'/.luarc.json') or vim.uv.fs_stat(path..'/.luarc.jsonc') then
+                    return
+                  end
+
+                  client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
+                    runtime = {
+                      -- Tell the language server which version of Lua you're using
+                      -- (most likely LuaJIT in the case of Neovim)
+                      version = 'LuaJIT'
+                    },
+                    -- Make the server aware of Neovim runtime files
+                    workspace = {
+                      checkThirdParty = false,
+                      library = {
+                        vim.env.VIMRUNTIME
+                        -- Depending on the usage, you might want to add additional paths here.
+                        -- "${3rd}/luv/library"
+                        -- "${3rd}/busted/library",
+                      }
+                      -- or pull in all of 'runtimepath'.
+                      -- library = vim.api.nvim_get_runtime_file("", true)
+                    }
+                  })
+                end,
+
+                settings = {
+                  Lua = {}
+                }
+              }
+            end,
+          },
+        },
       },
       ---@type profiles.Profile.Languages.Language
       json = {
         enable = false,
-        tools = {},
+        tools = {
+          ls = {
+            [{ "jsonls", auto_update = true }] = true,
+          },
+        },
       },
       ---@type profiles.Profile.Languages.Language
       python = {
         enable = false,
-        tools = {},
+        tools = {
+          formatters = { "isort", "black" },
+          linters = { "flake8", "bandit" },
+          ls = {
+            [{ "pyright", auto_update = true }] = true,
+          },
+        },
       },
     },
 
+    ---Map filetype into language options
+    ---Override this in your own profile. It will be merged with `supported`
     ---@type profiles.Profile.Languages.Supported | [profiles.Profile.Languages.Language]
-    custom = {
+    custom = {},
 
-    },
+    --- !!! Don't touch those fields
+    --- Those will be extracted automatically from fields above
+
+    ---This should be extracted automatically from fields above
+    ---@type string[]?
+    formatters = nil,
+
+    ---This should be extracted automatically from fields above
+    ---@type string[]?
+    linters = nil,
+
+    ---This should be extracted automatically from fields above
+    ---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
+    ls = nil,
   },
 
   ---Debugging
