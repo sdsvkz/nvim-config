@@ -12,13 +12,19 @@ local function get_language_tools(LANGUAGES)
   ---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }
   local ls = {}
 
-  -- TODO: Implement this
   -- All Languages are disabled by default
   -- So see if any of them in `custom` has been enabled
   for ft, lang in pairs(LANGUAGES.custom) do
     ---@cast ft +string
     ---@cast lang +profiles.Profile.Languages.Language
     if lang.enable then
+      ---@type profiles.Profile.Languages.Language
+      local default = LANGUAGES.supported[ft]
+      if type(default) == "table" then
+        formatters[ft] = vim.deepcopy(default.tools.formatters, true)
+        linters[ft] = vim.deepcopy(default.tools.linters, true)
+        ls = deep_merge("force", ls, default.tools.ls)
+      end
       -- TODO: If it is enabled, do with tools
       -- Remember, use `supported` as backup setting if any, say, not supplied
     end

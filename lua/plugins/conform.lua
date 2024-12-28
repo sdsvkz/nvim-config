@@ -1,4 +1,5 @@
-local formatters = require("config.formatters")
+local formatters = require("profiles").languages.formatters
+assert(formatters ~= nil, "Profile with invalid formatters")
 
 return {
 	"stevearc/conform.nvim",

@@ -1,16 +1,38 @@
 local lspconfig = require('lspconfig')
 local ufo = require("ufo")
 local profile = require("profiles")
-local server_config_table = require("config.lspservers")
+local server_config_table = profile.languages.ls
+assert(server_config_table ~= nil, "Profile with invalid language server config")
+
+---Options of Mason package
+---@class (exact) MasonConfig
+---@field [1] string Package name
+---@field version string? Package version
+---@field auto_update boolean? Automatically update package if update available
+
+---@alias config.lsp.Server.MasonConfig string | MasonConfig
+
+---@alias config.lsp.Handler.Config boolean | fun(info: { lspconfig: table }): nil
+
+---`true` means default setup
+---
+---Function is the setup handler with parameter `info` of type `table`, which holds `lspconfig`. Set it up yourself.
+---This is for custom setup
+---
+---`table` is for setup manually, This one is only useful when using mason
+---It setup language server without install using mason
+---Literally the "lspconfig way"
+---The key `config` is yet another configuration, that is, one of those value
+---
+---`false` means ignore, this should same as nil
+---@alias config.lsp.Handler config.lsp.Handler.Config | { config: config.lsp.Handler.Config? }
 
 local function lspconfig_setup(NAME_CONFIG_TABLE)
   for server_name, config in pairs(NAME_CONFIG_TABLE) do
     if (type(config) == "boolean") then
       if (config) then
         -- Default setup
-        lspconfig[server_name].setup {
-
-        }
+        lspconfig[server_name].setup {}
       end
       -- Do nothing if ignored
     elseif (type(config) == "function") then
@@ -107,6 +129,7 @@ local function with_mason()
   -- LSP server begin
   local handler = {
     -- Set up default handler
+    -- NOTE: This will setup all LSP using default config
     function (server_name)
       lspconfig[server_name].setup {
 

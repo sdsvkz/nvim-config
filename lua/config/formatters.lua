@@ -1,6 +1,5 @@
 -- Formatters of filetypes
 -- See statusline for filetype of current file
--- TODO: Put into profile
 local formatters = {
   lua = { "stylua" },
   -- Conform will run multiple formatters sequentially

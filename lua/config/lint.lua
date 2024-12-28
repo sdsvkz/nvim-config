@@ -1,14 +1,16 @@
 -- Linters for filetypes
 -- See statusline for filetype of current file
--- TODO: Put into profile
-local linters = {
-  lua = { "luacheck" },
-  python = { "flake8", "bandit" }, -- Mason doesn't include bandit yet
-  haskell = { "hlint" },
-}
+
+-- local linters = {
+--   lua = { "luacheck" },
+--   python = { "flake8", "bandit" }, -- Mason doesn't include bandit yet
+--   haskell = { "hlint" },
+-- }
 
 -- Use `nvim-lint.nvim`
 local lint = require("lint")
+local linters = require("profiles").languages.linters
+assert(linters ~= nil, "Profile with invalid linters")
 
 lint.linters_by_ft = linters
 

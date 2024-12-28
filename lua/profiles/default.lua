@@ -82,22 +82,30 @@ local profile = {
     -- TODO: I need some utilities to turn this into usable datasets. Probably put them into profiles.utils
 
     ---Supported language, map filetype into language options
+    ---See statusline for filetype of current file
+    ---e.g. `lua` for "*.lua", ".luacheckrc", etc
+    ---
+    ---@see profiles.Profile.Languages.Language
     ---@class profiles.Profile.Languages.Supported
     supported = {
       ---@class profiles.Profile.Languages.Language
       c = {
         ---Whether to use this language
         ---e.g. You can use this to implement platform
-        ---@type boolean
-        enable = false,
+        ---@type boolean?
+        enable = nil,
         ---@class profiles.Profile.Languages.Tools
         tools = {
           -- TODO: Add options to `formatters` and `linters`
 
+          -- Formatters of this filetype
           ---@type [string]?
           formatters = nil,
+          -- Linters of this filetype
           ---@type [string]?
           linters = nil,
+          ---Map of language server name to configuration
+          ---Use names from lspconfig, not mason
           ---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
           ls = {
             [{ "clangd", auto_update = true }] = true,
@@ -107,7 +115,6 @@ local profile = {
       },
       ---@type profiles.Profile.Languages.Language
       cpp = {
-        enable = false,
         tools = {
           ls = {
             [{ "clangd", auto_update = true }] = true,
@@ -116,7 +123,6 @@ local profile = {
       },
       ---@type profiles.Profile.Languages.Language
       haskell = {
-        enable = false,
         tools = {
           -- formatters = { "ormolu" }, -- HLS use Ormolu as built-in formatter
           linters = { "hlint" },
@@ -131,7 +137,6 @@ local profile = {
       },
       ---@type profiles.Profile.Languages.Language
       lua = {
-        enable = false,
         tools = {
           formatters = { "stylua" },
           linters = { "luacheck" },
@@ -176,7 +181,6 @@ local profile = {
       },
       ---@type profiles.Profile.Languages.Language
       json = {
-        enable = false,
         tools = {
           ls = {
             [{ "jsonls", auto_update = true }] = true,
@@ -184,13 +188,38 @@ local profile = {
         },
       },
       ---@type profiles.Profile.Languages.Language
+      ps1 = {
+        tools = {
+          ls = {
+            ["powershell_es"] = function (t)
+              t.lspconfig.powershell_es.setup {
+                bundle_path = vim.fn.stdpath("data") .. "/mason/packages/powershell-editor-services",
+                init_options = {
+                  enableProfileLoading = false
+                }
+              }
+            end,
+          },
+        },
+      },
+      ---@type profiles.Profile.Languages.Language
       python = {
-        enable = false,
         tools = {
           formatters = { "isort", "black" },
           linters = { "flake8", "bandit" },
           ls = {
             [{ "pyright", auto_update = true }] = true,
+          },
+        },
+      },
+      ---@type profiles.Profile.Languages.Language
+      sh = {
+        tools = {
+          ls = {
+            -- Install `shellcheck` and `shfmt` to enable linting and formatting respectively
+            ["bashls"] = function (info)
+              info.lspconfig.bashls.setup()
+            end,
           },
         },
       },
