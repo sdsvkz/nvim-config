@@ -85,6 +85,8 @@ local profile = {
     ---@see profiles.Profile.Languages.Language
     ---@class profiles.Profile.Languages.Supported
     supported = {
+      -- TODO: Consider use the same language options with multiple filetypes
+
       ---@class profiles.Profile.Languages.Language
       c = {
         ---Whether to use this language
@@ -95,7 +97,10 @@ local profile = {
         tools = {
           -- TODO: Add options to `formatters` and `linters`
 
-          -- Formatters of this filetype
+          -- NOTE: To make formatters and linters work, install required tools (using Mason)
+          -- If Mason enabled, language servers will be automatically installed (by mason-tool-installer)
+
+          ---Formatters of this filetype
           ---@type [string]?
           formatters = nil,
           -- Linters of this filetype
@@ -212,12 +217,23 @@ local profile = {
       ---@type profiles.Profile.Languages.Language
       sh = {
         tools = {
+          formatters = { "shfmt" },
+          linters = { "shellcheck" },
           ls = {
-            -- TODO: Figure out how to lead `bashls` to find `shellcheck` and `shfmt` installed by mason
-            -- Install `shellcheck` and `shfmt` to enable linting and formatting respectively
-            ["bashls"] = function (info)
-              info.lspconfig.bashls.setup()
-            end,
+            -- ["bashls"] = function (info)
+            --   info.lspconfig.bashls.setup {
+            --     settings = {
+            --       bashIde = {
+            --         -- NOTE: I don't know if this will works, you can try
+            --         -- But I think `shellcheck` and `shfmt` integration is broken
+            --         -- Well, actually, never mind. I don't know anything for certain
+            --         -- Because, right now, I am testing with Windows
+            --         explainshellEndpoint = "",
+            --       },
+            --     }
+            --   }
+            -- end,
+            ["bashls"] = true,
           },
         },
       },
