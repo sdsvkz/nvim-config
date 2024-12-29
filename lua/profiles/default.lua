@@ -1,5 +1,9 @@
 --[[
 --
+-- !!! You should only load this in your own profile, and, as READ-ONLY variable
+-- If you want to assign any table in default profile to your own profile, deep copy it
+-- I have not handle any possible change to default profile
+--
 -- !!! Don't modify this
 -- Create you own profile, name don't matter, e.g. sdsvkz.lua
 -- Return table with overrided options
@@ -12,11 +16,6 @@
 -- !!! Don't use Vkzlib, as profile contains debugging flags
 --
 --]]
-
--- TODO: Complete language options
--- This should let user enable what language to use.
--- Profile should enable some tools for language being chosen
--- User should be able to exclude or include some optional tools
 
 ---@class profiles.Profile
 local profile = {
@@ -79,8 +78,6 @@ local profile = {
   ---Languages
   ---@class profiles.Profile.Languages
   languages = {
-    -- TODO: I need some utilities to turn this into usable datasets. Probably put them into profiles.utils
-
     ---Supported language, map filetype into language options
     ---See statusline for filetype of current file
     ---e.g. `lua` for "*.lua", ".luacheckrc", etc
@@ -196,7 +193,7 @@ local profile = {
                 bundle_path = vim.fn.stdpath("data") .. "/mason/packages/powershell-editor-services",
                 init_options = {
                   enableProfileLoading = false
-                }
+                },
               }
             end,
           },
@@ -216,6 +213,7 @@ local profile = {
       sh = {
         tools = {
           ls = {
+            -- TODO: Figure out how to lead `bashls` to find `shellcheck` and `shfmt` installed by mason
             -- Install `shellcheck` and `shfmt` to enable linting and formatting respectively
             ["bashls"] = function (info)
               info.lspconfig.bashls.setup()
@@ -228,7 +226,38 @@ local profile = {
     ---Map filetype into language options
     ---Override this in your own profile. It will be merged with `supported`
     ---@type profiles.Profile.Languages.Supported | [profiles.Profile.Languages.Language]
-    custom = {},
+    custom = {
+      -- Example
+
+      -- cpp = {
+      --   enable = true,
+      -- },
+      -- haskell = {
+      --   enable = true,
+      -- },
+      -- json = {
+      --   enable = true,
+      -- },
+      -- lua = {
+      --   enable = true,
+      -- },
+      -- python = {
+      --   enable = true,
+      --   ---@type profiles.Profile.Languages.Tools
+      --   tools = {
+      --     -- Override `formatters` here
+      --     -- If set, this will be used instead of default `formatters`
+      --     formatters = {},
+      --   },
+      -- },
+      -- Load default using `local default = require("profiles.default")`
+      -- ps1 = {
+      --   enable = default.preference.os == "Windows_NT",
+      -- },
+      -- sh = {
+      --   enable = default.preference.os == "Linux"
+      -- },
+    },
 
     --- !!! Don't touch those fields
     --- Those will be extracted automatically from fields above

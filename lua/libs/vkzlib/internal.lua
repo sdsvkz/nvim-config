@@ -63,7 +63,7 @@ local core = {}
 
 core.to_string = vim.inspect -- TODO: Implement this
 core.equals = vim.deep_equal -- TODO: Implement this
-core.copy = vim.deepcopy -- TODO: Implement this
+core.deep_copy = vim.deepcopy -- TODO: Implement this
 
 -- Return `t` if `b` is true. Otherwise, return nothing
 ---@param b boolean
@@ -454,7 +454,9 @@ end
 
 -- vkzlib.table
 
-local tbl_map = vim.tbl_map
+core.tbl_map = vim.tbl_map -- TODO: Implement this
+
+
 
 return {
   _lib_name = LIB,
@@ -478,7 +480,7 @@ return {
   },
 
   table = {
-    map = tbl_map,
+    map = core.tbl_map,
   },
 
   typing = {

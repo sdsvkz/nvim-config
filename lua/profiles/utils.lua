@@ -21,12 +21,18 @@ local function get_language_tools(LANGUAGES)
       ---@type profiles.Profile.Languages.Language
       local default = LANGUAGES.supported[ft]
       if type(default) == "table" then
-        formatters[ft] = vim.deepcopy(default.tools.formatters, true)
-        linters[ft] = vim.deepcopy(default.tools.linters, true)
-        ls = deep_merge("force", ls, default.tools.ls)
+        local is_tools_exists = type(lang.tools) == "table"
+        formatters[ft] = is_tools_exists and
+          lang.tools.formatters or
+          Vkzlib.core.deep_copy(default.tools.formatters, true)
+        linters[ft] = is_tools_exists and
+          lang.tools.linters or
+          Vkzlib.core.deep_copy(default.tools.linters, true)
+        ls = deep_merge("force", ls, is_tools_exists and
+          lang.tools.ls or
+          default.tools.ls
+        )
       end
-      -- TODO: If it is enabled, do with tools
-      -- Remember, use `supported` as backup setting if any, say, not supplied
     end
   end
 

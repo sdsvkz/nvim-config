@@ -81,6 +81,7 @@ local function with_mason()
     ::continue::
   end
 
+  -- This has better customize options
   mason_tool_installer.setup {
     ensure_installed = ensure_installed,
 
@@ -149,8 +150,6 @@ local function with_mason()
   end
 
   mason_lspconfig.setup {
-    -- NOTE: Use mason-tool-installer for better customization
-    --
     -- A list of servers to automatically install if they're not already installed.
     -- Example: { "rust_analyzer@nightly", "lua_ls" }
     --

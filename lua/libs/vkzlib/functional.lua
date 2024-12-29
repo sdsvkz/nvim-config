@@ -124,7 +124,7 @@ function Function:copy(noref)
   assert(Function.is_function_object(self),
     deferred_errmsg("not a `Function`")
   )
-  return core.copy(self, noref)
+  return core.deep_copy(self, noref)
 end
 
 ---@class vkzlib.data.Function.constructor.Params
@@ -348,10 +348,9 @@ local function curry(f, argc)
   return _curry(f)
 end
 
--- TODO:
---  `Function` compatibility
---  Use weak table for nparams = 1
---  Expand nparams for positive integer by recursively apply nparams = 1 to decrease nparams
+-- TODO: `Function` compatibility
+-- Use weak table for nparams = 1
+-- Expand nparams for positive integer by recursively apply nparams = 1 to decrease nparams
 
 ---Make function `f` memorize its result
 ---@param f function

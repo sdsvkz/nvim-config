@@ -6,7 +6,7 @@ local main_menu = require("config.menu." .. profile.appearence.menu).config
 
 vim.cmd.colorscheme(colorscheme)
 
-require'alpha'.setup(main_menu)
+require("alpha").setup(main_menu)
 
 --[[
 -- For unknown reason, when using some themes,
