@@ -85,10 +85,8 @@ local profile = {
     ---@see profiles.Profile.Languages.Language
     ---@class profiles.Profile.Languages.Supported
     supported = {
-      -- TODO: Consider use the same language options with multiple filetypes
-
       ---@class profiles.Profile.Languages.Language
-      c = {
+      [{ "c", "cpp" }] = {
         ---Whether to use this language
         ---e.g. You can use this to implement platform
         ---@type boolean?
@@ -101,10 +99,10 @@ local profile = {
           -- If Mason enabled, language servers will be automatically installed (by mason-tool-installer)
 
           ---Formatters of this filetype
-          ---@type [string]?
-          formatters = nil,
+          ---@type string[]?
+          formatters = { "clang-format" },
           -- Linters of this filetype
-          ---@type [string]?
+          ---@type string[]?
           linters = nil,
           ---Map of language server name to configuration
           ---Use names from lspconfig, not mason
@@ -115,15 +113,6 @@ local profile = {
           -- TODO: Add dap config here after nvim-dap is added
         },
       },
-      ---@type profiles.Profile.Languages.Language
-      cpp = {
-        tools = {
-          ls = {
-            [{ "clangd", auto_update = true }] = true,
-          },
-        },
-      },
-      ---@type profiles.Profile.Languages.Language
       haskell = {
         tools = {
           -- formatters = { "ormolu" }, -- HLS use Ormolu as built-in formatter
@@ -137,7 +126,6 @@ local profile = {
           },
         },
       },
-      ---@type profiles.Profile.Languages.Language
       lua = {
         tools = {
           formatters = { "stylua" },
@@ -181,7 +169,6 @@ local profile = {
           },
         },
       },
-      ---@type profiles.Profile.Languages.Language
       json = {
         tools = {
           ls = {
@@ -189,7 +176,6 @@ local profile = {
           },
         },
       },
-      ---@type profiles.Profile.Languages.Language
       ps1 = {
         tools = {
           ls = {
@@ -204,7 +190,6 @@ local profile = {
           },
         },
       },
-      ---@type profiles.Profile.Languages.Language
       python = {
         tools = {
           formatters = { "isort", "black" },
@@ -214,8 +199,7 @@ local profile = {
           },
         },
       },
-      ---@type profiles.Profile.Languages.Language
-      sh = {
+      [{ "bash", "sh" }] = {
         tools = {
           formatters = { "shfmt" },
           linters = { "shellcheck" },
@@ -241,7 +225,7 @@ local profile = {
 
     ---Map filetype into language options
     ---Override this in your own profile. It will be merged with `supported`
-    ---@type profiles.Profile.Languages.Supported | [profiles.Profile.Languages.Language]
+    ---@type table<string | string[], profiles.Profile.Languages.Language>
     custom = {
       -- Example
 
@@ -266,7 +250,7 @@ local profile = {
       --     formatters = {},
       --   },
       -- },
-      -- Load default using `local default = require("profiles.default")`
+      -- -- Load default using `local default = require("profiles.default")`
       -- ps1 = {
       --   enable = default.preference.os == "Windows_NT",
       -- },

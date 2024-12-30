@@ -47,6 +47,7 @@ local function format(info, ...)
 end
 
 return {
+  default_format = format,
   get_logger = get_logger,
   log = {
     std = get_logger( format, {
