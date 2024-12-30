@@ -73,7 +73,12 @@ local cmp_main = {
       {
 			  { name = "buffer" },
 			  { name = "path" },
-		  }),
+		  },
+      -- Lazydev completion source for require statements and module annotations
+      {
+        name = "lazydev",
+        group_index = 0, -- set group index to 0 to skip loading LuaLS completions
+      }),
 
       sorting = {
         comparators = {

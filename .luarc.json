@@ -1,0 +1,10 @@
+{
+  "runtime": {
+    "path": [
+      "/lua/?.lua",
+      "/lua/?/init.lua",
+      "/lua/libs/?.lua",
+      "/lua/libs/?/init.lua"
+    ]
+  }
+}
