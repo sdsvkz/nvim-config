@@ -221,7 +221,15 @@ lspconfig.util.default_config = Vkzlib.table.merge(
       vim.lsp.protocol.make_client_capabilities(),
       require('lsp-file-operations').default_capabilities(),
       require('cmp_nvim_lsp').default_capabilities(),
-      ufo.default_capabilities()
+      -- UFO default capabilities
+      {
+        textDocument = {
+          foldingRange = {
+            dynamicRegistration = false,
+            lineFoldingOnly = true,
+          },
+        },
+      }
     )
   }
 )

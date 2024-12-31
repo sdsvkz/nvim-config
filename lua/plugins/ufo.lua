@@ -9,17 +9,6 @@ return {
     vim.o.foldlevel = 99
     vim.o.foldlevelstart = 99
     vim.o.foldenable = true
-
-    require("ufo").default_capabilities = function ()
-      return {
-        textDocument = {
-          foldingRange = {
-            dynamicRegistration = false,
-            lineFoldingOnly = true,
-          },
-        },
-      }
-    end
   end,
   keys = function ()
     local ufo = require("ufo")
