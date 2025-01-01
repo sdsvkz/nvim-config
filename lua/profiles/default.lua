@@ -143,7 +143,7 @@ local profile = {
                   args = {
                     -- Ignore some warnings, see https://luacheck.readthedocs.io/en/stable/warnings.html
                     -- Some of them are duplicated with `luals`, others are annoying
-                    "--ignore", "2.1", "611", "612", "631",
+                    "--ignore", "21*", "611", "612", "631",
                     Vkzlib.list.unpack(linter.args),
                   }
                 }
@@ -317,6 +317,12 @@ local profile = {
   debugging = {
 
   },
+
+  -- This field will be injected in profile.init
+
+  ---Utils for profile
+  ---@module "profiles.utils"
+  utils = {}
 }
 
 return profile

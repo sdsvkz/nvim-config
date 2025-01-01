@@ -19,5 +19,6 @@ local tools = utils.get_language_tools(profile.languages)
 profile.languages.formatters = tools.formatters
 profile.languages.linters = tools.linters
 profile.languages.ls = tools.ls
+profile.utils = utils
 
 return profile

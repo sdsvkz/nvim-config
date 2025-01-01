@@ -2,6 +2,26 @@
 
 local deep_merge = Vkzlib.table.deep_merge
 
+---@param LANGS table<string | string[], profiles.Profile.Languages.Language>
+---@param ft string
+---@return boolean
+local function is_ft_support_enabled(LANGS, ft)
+  for FILETYPES, LANG in pairs(LANGS) do
+    if type(FILETYPES) == "string" then
+      if FILETYPES == ft and LANG.enable == true then
+        return true
+      end
+    else
+      for _, filetype in ipairs(FILETYPES) do
+        if filetype == ft and LANG.enable == true then
+          return true
+        end
+      end
+    end
+  end
+  return false
+end
+
 ---Retrieve required tools from profile
 ---@param LANGUAGES profiles.Profile.Languages
 local function get_language_tools(LANGUAGES)
@@ -49,7 +69,7 @@ local function get_language_tools(LANGUAGES)
             Vkzlib.core.deep_copy(default.tools.linters, true)
           ls = deep_merge("force", ls, is_tools_exists and
             lang.tools.ls or
-            default.tools.ls
+            default.tools.ls or {}
           )
         else
           formatters[filetype] = lang.tools.formatters
@@ -77,5 +97,6 @@ local function get_language_tools(LANGUAGES)
 end
 
 return {
+  is_ft_support_enabled = is_ft_support_enabled,
   get_language_tools = get_language_tools,
 }
