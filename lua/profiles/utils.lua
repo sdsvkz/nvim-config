@@ -1,3 +1,5 @@
+---@module "conform"
+
 local deep_merge = Vkzlib.table.deep_merge
 
 ---Retrieve required tools from profile
@@ -5,14 +7,14 @@ local deep_merge = Vkzlib.table.deep_merge
 local function get_language_tools(LANGUAGES)
   -- TODO: Extract dap as soon as nvim-dap is added
 
-  ---@type { [string]: string[] }
+  ---@type table<string, conform.FiletypeFormatter>
   local formatters = {}
-  ---@type { [string]: string[] }
+  ---@type table<string, (string | config.lint.LinterSpec)[]>
   local linters = {}
   ---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }
   local ls = {}
 
-  ---@type { [string]: profiles.Profile.Languages.Language }
+  ---@type table<string, profiles.Profile.Languages.Language>
   local supported = {}
   for ft, lang in pairs(LANGUAGES.supported) do
     ---@cast ft string | string[]

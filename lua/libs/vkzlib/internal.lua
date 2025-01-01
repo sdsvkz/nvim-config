@@ -63,6 +63,24 @@ local core = {}
 
 core.to_string = vim.inspect -- TODO: Implement this
 core.equals = vim.deep_equal -- TODO: Implement this
+
+--- Returns a deep copy of the given object. Non-table objects are copied as
+--- in a typical Lua assignment, whereas table objects are copied recursively.
+--- Functions are naively copied, so functions in the copied table point to the
+--- same functions as those in the input table. Userdata and threads are not
+--- copied and will throw an error.
+---
+--- Note: `noref=true` is much more performant on tables with unique table
+--- fields, while `noref=false` is more performant on tables that reuse table
+--- fields.
+---
+--- When `noref=false` (default) a contained table is only copied once and all
+--- references point to this single copy. When `true` every occurrence of a
+--- table results in a new copy. This also means that a cyclic reference can
+--- cause `deepcopy()` to fail.
+---
+---@generic T
+---@type fun(orig: T, noref: boolean?): T
 core.deep_copy = vim.deepcopy -- TODO: Implement this
 
 -- Return `t` if `b` is true. Otherwise, return nothing

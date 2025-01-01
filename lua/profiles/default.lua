@@ -17,6 +17,9 @@
 --
 --]]
 
+---@module "lint"
+---@module "conform"
+
 ---@class profiles.Profile
 local profile = {
   ---Preference
@@ -93,16 +96,16 @@ local profile = {
         enable = nil,
         ---@class profiles.Profile.Languages.Tools
         tools = {
-          -- TODO: Add options to `formatters` and `linters`
+          -- TEST: Add `conform` supported options to `formatters`
 
           -- NOTE: To make formatters and linters work, install required tools (using Mason)
           -- If Mason enabled, language servers will be automatically installed (by mason-tool-installer)
 
           ---Formatters of this filetype
-          ---@type string[]?
-          formatters = { "clang-format" },
+          ---@type conform.FiletypeFormatter?
+          formatters = nil,
           -- Linters of this filetype
-          ---@type string[]?
+          ---@type (string | config.lint.LinterSpec)[]?
           linters = nil,
           ---Map of language server name to configuration
           ---Use names from lspconfig, not mason
@@ -129,7 +132,25 @@ local profile = {
       lua = {
         tools = {
           formatters = { "stylua" },
-          linters = { "luacheck" },
+          ---@type (string | config.lint.LinterSpec)[]?
+          linters = {
+            {
+              "luacheck",
+              opts = function (linter)
+                ---@type lint.Linter
+                ---@diagnostic disable-next-line: missing-fields
+                local properties = {
+                  args = {
+                    -- Ignore some warnings, see https://luacheck.readthedocs.io/en/stable/warnings.html
+                    -- Some of them are duplicated with `luals`, others are annoying
+                    "--ignore", "2.1", "611", "612", "631",
+                    Vkzlib.list.unpack(linter.args),
+                  }
+                }
+                return Vkzlib.table.deep_merge('force', linter, properties)
+              end
+            }
+          },
           ls = {
             [{ "lua_ls", auto_update = true }] = function (info)
               info.lspconfig.lua_ls.setup {
@@ -263,11 +284,11 @@ local profile = {
     --- Those will be extracted automatically from fields above
 
     ---This should be extracted automatically from fields above
-    ---@type string[]?
+    ---@type table<string, conform.FiletypeFormatter>?
     formatters = nil,
 
     ---This should be extracted automatically from fields above
-    ---@type string[]?
+    ---@type table<string, (string | config.lint.LinterSpec)[]>?
     linters = nil,
 
     ---This should be extracted automatically from fields above

@@ -13,6 +13,7 @@ if profile.preference.use_mason then
         },
       },
     },
+    require("plugins.mason.dap"),
     require("plugins.mason.lspconfig"),
     require("plugins.mason.tool_installer"),
   }

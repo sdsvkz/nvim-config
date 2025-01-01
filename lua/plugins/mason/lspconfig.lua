@@ -1,4 +1,3 @@
 return {
-  "williamboman/mason-lspconfig.nvim",
-  opts = {}
+  "williamboman/mason-lspconfig.nvim"
 }
