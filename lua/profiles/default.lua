@@ -242,6 +242,13 @@ local profile = {
           },
         },
       },
+      rust = {
+        tools = {
+          ls = {
+            ["rust_analyzer"] = false,
+          }
+        }
+      }
     },
 
     ---Map filetype into language options

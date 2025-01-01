@@ -24,7 +24,8 @@ assert(server_config_table ~= nil, "Profile with invalid language server config"
 ---Literally the "lspconfig way"
 ---The key `config` is yet another configuration, that is, one of those value
 ---
----`false` means ignore, this should same as nil
+---`false` means ignore. When using mason, this will only install package but not setup.
+---Otherwise this should same as nil
 ---@alias config.lsp.Handler config.lsp.Handler.Config | { config: config.lsp.Handler.Config? }
 
 local function lspconfig_setup(NAME_CONFIG_TABLE)
@@ -51,7 +52,7 @@ local function with_mason()
   local mason_tool_installer = require("mason-tool-installer")
   -- Preparing begin
 
-  ---@type { [string]: config.lsp.Handler }
+  ---@type { [string]: config.lsp.Handler.Config }
   local handle_by_mason = {}
   ---@type config.lsp.Server.MasonConfig[]
   local ensure_installed = {}
@@ -62,21 +63,20 @@ local function with_mason()
     if type(server_config) == "table" then
       -- Extract server_name from `config.lsp.Server.MasonConfig`
       server_name = server_config[1]
-    else
-      assert(type(server_config) == "string")
     end
+    assert(type(server_name) == "string")
 
-    if handler == false then
-      -- Discard ignored
-      goto continue
-    elseif type(handler) == "table" then
+    if type(handler) == "table" then
       -- Put manual ones into manual_setup instead of ensure_installed
       manual_setup[server_name] = handler.config
       goto continue
     else
+      -- Put all others into ensure_installed
       table.insert(ensure_installed, server_config)
-      -- Put those into ensure_installed
-      handle_by_mason[server_name] = handler
+      if handler ~= false then
+        -- Skip `false` for installing only
+        handle_by_mason[server_name] = handler
+      end
     end
     ::continue::
   end
@@ -129,17 +129,22 @@ local function with_mason()
 
   -- LSP server begin
   local handler = {
+    -- NOTE: This will setup ALL language servers using default config
+    -- I don't think this is good for many of them
+    -- Especially for those I don't want to setup using lspconfig
+    --
     -- Set up default handler
-    -- NOTE: This will setup all LSP using default config
-    function (server_name)
-      lspconfig[server_name].setup {
-
-      }
-    end,
+    -- function (server_name)
+    --   lspconfig[server_name].setup {}
+    -- end,
   }
 
   for server_name, config in pairs(handle_by_mason) do
-    if (type(config) == "function") then
+    if config == true then
+      handler[server_name] = function ()
+        lspconfig[server_name].setup {}
+      end
+    else
       -- Next, provide dedicated handler for specific servers.
       handler[server_name] = function ()
         config {
@@ -188,17 +193,20 @@ local function lspconfig_only()
   for k, v in pairs(server_config_table) do
     local server_name = k
     local config = v
+
     if type(k) == "table" then
       server_name = k[1]
     else
       assert(type(k) == "string")
     end
+
     if type(v) == "table" then
       -- manual_setup make no difference if not using mason
       config = v.config
     else
       assert(type(v) == "boolean" or type(v) == "function")
     end
+
     name_config_table[server_name] = config
   end
   -- Preparing end
@@ -247,3 +255,4 @@ end
 
 -- Setup ufo for code folding
 ufo.setup()
+
