@@ -244,9 +244,18 @@ local profile = {
       },
       rust = {
         tools = {
-          ls = {
-            ["rust_analyzer"] = false,
-          }
+          -- Use `rustaceanvim` for full Rust support.
+          -- This require rust-analyzer
+          --
+          -- NOTE: rustaceanvim won't use rust-analyzer installed by mason without any additional configuration.
+          -- So you have to install it manually
+          -- The main reason for this choice is that it mason.nvim installations of rust-analyzer
+          -- will most likely have been built with a different toolchain than your project,
+          -- leading to inconsistencies and possibly subtle bugs.
+          --
+          -- ls = {
+          --   ["rust_analyzer"] = false,
+          -- }
         }
       }
     },
