@@ -14,12 +14,12 @@ return {
   },
   keys = {
     {
-      "<LEADER>chi", mode = "n",
+      "<LEADER>sci", mode = "n",
       "<CMD>Lspsaga incoming_calls<CR>",
       desc = "Display incoming call hierarchy"
     },
     {
-      "<LEADER>cho", mode = "n",
+      "<LEADER>sco", mode = "n",
       "<CMD>Lspsaga outgoing_calls<CR>",
       desc = "Display outgoing call hierarchy"
     },

@@ -14,22 +14,22 @@ return {
       desc = "Buffer Diagnostics (Trouble)",
     },
     {
-      "<leader>cs",
+      "<leader>ss",
       "<cmd>Trouble symbols toggle focus=true<cr>",
       desc = "Symbols (Trouble)",
     },
     {
-      "<leader>cl",
+      "<leader>sl",
       "<cmd>Trouble lsp toggle focus=true win.position=right<cr>",
       desc = "LSP Definitions / references / ... (Trouble)",
     },
     {
-      "<leader>xL",
+      "<leader>sL",
       "<cmd>Trouble loclist toggle focus=true<cr>",
       desc = "Location List (Trouble)",
     },
     {
-      "<leader>xQ",
+      "<leader>sQ",
       "<cmd>Trouble qflist toggle focus=true<cr>",
       desc = "Quickfix List (Trouble)",
     },

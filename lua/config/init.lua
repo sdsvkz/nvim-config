@@ -10,5 +10,6 @@ end
 require("config.lazy")
 require("config.lsp")
 require("config.lint")
+require("config.dap")
 require("config.theme")
 require('config.keymap')

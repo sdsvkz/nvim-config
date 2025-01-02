@@ -72,7 +72,7 @@ return {
     {
       "<LEADER>xt", mode = "n",
       "<CMD>Trouble todo toggle focus=true<CR>",
-      desc = "List all project todos in trouble"
+      desc = "List all project todos (Trouble)"
     },
   }
 }
