@@ -60,7 +60,7 @@ return {
     },
   },
   dependencies = {
-    'nvim-treesitter/nvim-treesitter', -- optional
-    'nvim-tree/nvim-web-devicons',     -- optional
+    require("plugins.treesitter"), -- optional
+    require("plugins.libs.web_devicons"), -- optional
   }
 }

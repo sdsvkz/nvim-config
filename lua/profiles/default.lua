@@ -120,12 +120,40 @@ local profile = {
         tools = {
           -- formatters = { "ormolu" }, -- HLS use Ormolu as built-in formatter
           linters = { "hlint" },
+          -- NOTE: This require Haskell Language Server in PATH
+          -- `haskell-tools.nvim` will handle setup
+          -- I recommend using GHCup to install HLS so that you can pick the one support your GHC version
+          --
+          -- ls = {
+          --   ["hls"] = {
+          --     -- Use HLS from PATH for better customization
+          --     -- Since only supported ghc versions can be used
+          --     config = true
+          --   },
+          -- },
+        },
+      },
+      json = {
+        ---@type profiles.Profile.Languages.Tools
+        tools = {
+          ---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
           ls = {
-            ["hls"] = {
-              -- Use HLS from PATH for better customization
-              -- Since only supported ghc versions can be used
-              config = true
-            },
+            [{ "jsonls", auto_update = true }] = function (info)
+              info.lspconfig.jsonls.setup {
+                on_new_config = function(new_config)
+                  new_config.settings.json.schemas = new_config.settings.json.schemas or {}
+                  vim.list_extend(new_config.settings.json.schemas, require("schemastore").json.schemas())
+                end,
+                settings = {
+                  json = {
+                    format = {
+                      enable = true,
+                    },
+                    validate = { enable = true },
+                  },
+                },
+              }
+            end,
           },
         },
       },
@@ -190,11 +218,10 @@ local profile = {
           },
         },
       },
-      json = {
+      markdown = {
         tools = {
-          ls = {
-            [{ "jsonls", auto_update = true }] = true,
-          },
+          formatters = { "prettier" },
+          linters = { "markdownlint-cli2" },
         },
       },
       ps1 = {
@@ -244,10 +271,9 @@ local profile = {
       },
       rust = {
         tools = {
-          -- Use `rustaceanvim` for full Rust support.
-          -- This require rust-analyzer
-          --
-          -- NOTE: rustaceanvim won't use rust-analyzer installed by mason without any additional configuration.
+          -- NOTE: This require `rust-analyzer` in PATH
+          -- `rustaceanvim` will handle setup.
+          -- rustaceanvim won't use rust-analyzer installed by mason without any additional configuration.
           -- So you have to install it manually
           -- The main reason for this choice is that it mason.nvim installations of rust-analyzer
           -- will most likely have been built with a different toolchain than your project,

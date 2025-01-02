@@ -1,8 +1,8 @@
 return {
   'goolord/alpha-nvim',
   dependencies = {
-    'nvim-tree/nvim-web-devicons',
-    'nvim-lua/plenary.nvim'
+    require("plugins.libs.web_devicons"),
+    require("plugins.libs.plenary"),
   },
   keys = {
     {

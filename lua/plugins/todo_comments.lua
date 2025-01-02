@@ -1,7 +1,9 @@
 return {
   "folke/todo-comments.nvim",
   lazy = false,
-  dependencies = { "nvim-lua/plenary.nvim" },
+  dependencies = {
+    require("plugins.libs.plenary")
+  },
   opts = {
     {
       signs = true, -- show icons in the signs column

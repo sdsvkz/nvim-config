@@ -18,13 +18,15 @@ return {
     )
     vim.keymap.set(
       "n", "<C-p>",
+      ---@diagnostic disable-next-line: missing-parameter
       function() hover.hover_switch("previous") end,
-      {desc = "hover.nvim (previous source)"}
+      { desc = "hover.nvim (previous source)" }
     )
     vim.keymap.set(
       "n", "<C-n>",
+      ---@diagnostic disable-next-line: missing-parameter
       function() hover.hover_switch("next") end,
-      {desc = "hover.nvim (next source)"}
+      { desc = "hover.nvim (next source)" }
     )
 
     -- Mouse support

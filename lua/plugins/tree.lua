@@ -4,7 +4,7 @@ return {
     version = "*",
     lazy = false,
     dependencies = {
-      "nvim-tree/nvim-web-devicons",
+      require("plugins.libs.web_devicons"),
     },
     init = function ()
       -- disable netrw
