@@ -116,6 +116,23 @@ local profile = {
           -- TODO: Add dap config here after nvim-dap is added
         },
       },
+      cmake = {
+        tools = {
+          -- linters = { "cmakelint" },
+          ls = {
+            [{ "neocmake", auto_update = true }] = function (info)
+              info.lspconfig.neocmake.setup {
+                init_options = {
+                  -- Annoying
+                  lint = {
+                    enable = false,
+                  },
+                },
+              }
+            end,
+          },
+        },
+      },
       haskell = {
         tools = {
           -- formatters = { "ormolu" }, -- HLS use Ormolu as built-in formatter
@@ -158,6 +175,7 @@ local profile = {
         },
       },
       lua = {
+        -- TODO: Enable lua by default
         tools = {
           formatters = { "stylua" },
           ---@type (string | config.lint.LinterSpec)[]?
@@ -227,7 +245,7 @@ local profile = {
       ps1 = {
         tools = {
           ls = {
-            ["powershell_es"] = function (t)
+            [{ "powershell_es", auto_update = true }] = function (t)
               t.lspconfig.powershell_es.setup {
                 bundle_path = vim.fn.stdpath("data") .. "/mason/packages/powershell-editor-services",
                 init_options = {
@@ -252,7 +270,7 @@ local profile = {
           formatters = { "shfmt" },
           linters = { "shellcheck" },
           ls = {
-            -- ["bashls"] = function (info)
+            -- [{ "bashls", auto_update = true }] = function (info)
             --   info.lspconfig.bashls.setup {
             --     settings = {
             --       bashIde = {
@@ -265,7 +283,7 @@ local profile = {
             --     }
             --   }
             -- end,
-            ["bashls"] = true,
+            [{ "bashls", auto_update = true }] = true,
           },
         },
       },

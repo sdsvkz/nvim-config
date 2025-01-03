@@ -49,6 +49,7 @@ local function get_language_tools(LANGUAGES)
   end
   Log.t(Vkzlib.core.to_string(supported))
 
+  -- TODO: Make enable by default possible
   -- All Languages are disabled by default
   -- So see if any of them in `custom` has been enabled
   for ft, lang in pairs(LANGUAGES.custom) do

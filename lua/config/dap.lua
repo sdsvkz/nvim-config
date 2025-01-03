@@ -6,15 +6,6 @@ local mason_dap = require("mason-nvim-dap")
 local profile = require("profiles")
 local options = require("profiles.options")
 
--- Conflict with `rustaceanvim`
--- dap.adapters.codelldb = {
--- 	type = "executable",
--- 	command = "codelldb", -- or if not in $PATH: "/absolute/path/to/codelldb"
---
--- 	-- On windows you may have to uncomment this:
--- 	detached = profile.preference.os == options.System.Windows,
--- }
-
 dapui.setup()
 
 -- Use nvim-dap events to open and close windows automatically

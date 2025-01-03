@@ -55,7 +55,7 @@ cmp.setup({
 	sources = cmp.config.sources(
 		{
 			{ name = "nvim_lsp" },
-			{ name = "nvim_lua" },
+			-- { name = "nvim_lua" },
 			{ name = "luasnip" }, -- For luasnip users.
 			-- { name = "orgmode" },
 			{ name = "render-markdown" },
@@ -77,10 +77,10 @@ cmp.setup({
 		comparators = {
 			cmp.config.compare.offset,
 			cmp.config.compare.exact,
-      cmp.config.compare.sort_text,
 			cmp.config.compare.score,
-			cmp_under_comparator.under,
+      cmp_under_comparator.under,
 			cmp.config.compare.kind,
+      cmp.config.compare.sort_text,
 			cmp.config.compare.length,
 			cmp.config.compare.order,
 		},
