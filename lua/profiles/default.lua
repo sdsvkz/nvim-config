@@ -362,11 +362,16 @@ local profile = {
 
   },
 
+  ---Name of profile
+  ---use module name if not overrided
+  ---@type string
+  name = "Default",
+
   -- This field will be injected in profile.init
 
   ---Utils for profile
   ---@module "profiles.utils"
-  utils = {}
+  utils = {},
 }
 
 return profile

@@ -19,6 +19,8 @@ return {
         "make", "cmake", "dockerfile", "ini", "meson", "nginx", "ninja", "requirements", "toml", "xml", "yaml",
         -- Vim
         "vim", "vimdoc", "query",
+        -- Pattern
+        "regex",
 
         -- Languages
 
@@ -32,6 +34,8 @@ return {
         "haskell", "haskell_persistent",
         -- JVM
         "java", "kotlin",
+        -- Rust
+        "rust",
         -- Lua
         "lua", "luap", "luau",
         -- Python

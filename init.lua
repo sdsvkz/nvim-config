@@ -25,9 +25,3 @@ Log = {
 }
 
 require("config")
-
--- Function = Vkzlib.functional.Function
--- F = function(x, y, z)
---   print(vim.inspect({ x = x, y = y, z = z }))
--- end
-

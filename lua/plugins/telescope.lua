@@ -4,5 +4,5 @@ return {
   dependencies = {
     require("plugins.libs.plenary"),
     require("plugins.libs.ripgrep"),
-  },
+  }
 }

@@ -2,7 +2,7 @@
 -- luacheck: no unused
 -- originally authored by @AdamWhittingham
 
-local profile = require("profiles")
+local profile, profile_name = require("profiles")
 
 local path_ok, plenary_path = pcall(require, "plenary.path")
 if not path_ok then
@@ -203,6 +203,8 @@ local header = {
 local section_mru = {
   type = "group",
   val = {
+    { type = "text", val = "Using profile: " .. profile.name, opts = { position = "center" } },
+    { type = "padding", val = 1 },
     -- {
     --     type = "text",
     --     val = "Recent",
@@ -246,7 +248,7 @@ local config = {
     header,
     { type = "padding", val = 2 },
     section_mru,
-    { type = "padding", val = 2 },
+    { type = "padding", val = 1 },
     buttons,
   },
   opts = {

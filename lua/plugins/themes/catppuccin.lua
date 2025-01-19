@@ -2,23 +2,28 @@ local opts = {}
 
 opts.vkz = {
   integrations = {
-    cmp = true,
-    gitsigns = true,
-    nvimtree = true,
-    treesitter = true,
-    notify = true,
-    mini = {
-      enabled = true,
-      indentscope_color = "",
-    },
     alpha = true,
+    cmp = true,
+    dap = true,
+    dap_ui = true,
+    gitsigns = true,
+    illuminate = {
+      enabled = true,
+      lsp = true
+    },
     indent_blankline = {
       enabled = true,
       scope_color = "", -- catppuccin color (eg. `lavender`) Default: text
       colored_indent_levels = false,
     },
+    lsp_saga = true,
+    lsp_trouble = true,
     markdown = true,
     mason = true,
+    mini = {
+      enabled = true,
+      indentscope_color = "",
+    },
     native_lsp = {
       enabled = true,
       virtual_text = {
@@ -39,11 +44,18 @@ opts.vkz = {
         background = true,
       },
     },
+    notify = true,
+    nvimtree = true,
+    rainbow_delimiters = true,
+    render_markdown = true,
+    semantic_tokens = true,
     telescope = {
       enabled = true,
       -- style = "nvchad"
     },
-    lsp_trouble = true,
+    treesitter = true,
+    treesitter_context = true,
+    ufo = true,
     which_key = true,
   }
 }
