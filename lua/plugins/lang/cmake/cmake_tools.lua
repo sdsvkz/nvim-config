@@ -1,5 +1,6 @@
 return {
   'Civitasv/cmake-tools.nvim',
+  lazy = true,
   dependencies = {
     require("plugins.toggleterm"),
   },

@@ -1,6 +1,7 @@
 return {
 	{
 		"hrsh7th/nvim-cmp",
+    event = "InsertEnter",
 		dependencies = {
 			require("plugins.lspconfig"),
       require("plugins.luaSnip"),
@@ -15,5 +16,6 @@ return {
 	},
 	{
 		"lukas-reineke/cmp-under-comparator",
+    event = "InsertEnter",
 	},
 }

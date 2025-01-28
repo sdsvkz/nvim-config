@@ -933,6 +933,7 @@ opts.plastilin_frappe = {
 
 return {
   "catppuccin/nvim",
+  lazy = true,
   name = "catppuccin",
   priority = 1000,
   opts = vim.tbl_extend('force', opts.plastilin_frappe, {

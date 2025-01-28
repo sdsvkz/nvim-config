@@ -42,7 +42,7 @@ Log.t(Vkzlib.core.to_string(linters_by_ft))
 lint.linters_by_ft = linters_by_ft
 
 -- Setup autocmd to trigger lint
-vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost", "InsertLeave" }, {
   callback = function()
     -- try_lint without arguments runs the linters defined in `linters_by_ft`
     -- for the current filetype

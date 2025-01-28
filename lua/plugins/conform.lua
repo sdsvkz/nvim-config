@@ -3,6 +3,8 @@ assert(formatters ~= nil, "Profile with invalid formatters")
 
 return {
 	"stevearc/conform.nvim",
+  event = { "BufWritePre" },
+  cmd = { "ConformInfo" },
   main = "conform",
   opts = {
     formatters_by_ft = formatters

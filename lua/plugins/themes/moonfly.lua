@@ -1,6 +1,6 @@
 return {
   "bluz71/vim-moonfly-colors",
   name = "moonfly",
-  lazy = false,
+  lazy = true,
   priority = 1000
 }

@@ -1,6 +1,6 @@
 return {
   'nvimdev/lspsaga.nvim',
-  lazy = false,
+  event = 'LspAttach',
   opts = {
     diagnostic = {
       show_layout = "normal"
