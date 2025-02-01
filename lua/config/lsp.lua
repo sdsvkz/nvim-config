@@ -1,5 +1,4 @@
 local lspconfig = require('lspconfig')
-local ufo = require("ufo")
 local profile = require("profiles")
 local server_config_table = profile.languages.ls
 assert(server_config_table ~= nil, "Profile with invalid language server config")
@@ -252,7 +251,4 @@ else
   lspconfig_only()
 
 end
-
--- Setup ufo for code folding
-ufo.setup()
 

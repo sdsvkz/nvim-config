@@ -3,7 +3,8 @@ return {
   dependencies = {
     require("plugins.libs.promise_async")
   },
-  lazy = false,
+  event = "UIEnter",
+  opts = {},
   init = function ()
     vim.o.foldcolumn = "1"
     vim.o.foldlevel = 99

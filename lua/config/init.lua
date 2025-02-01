@@ -9,7 +9,6 @@ end
 
 require("config.lazy")
 require("config.lsp")
-require("config.cmp")
 require("config.lint")
 require("config.dap")
 require("config.theme")
