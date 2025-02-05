@@ -35,6 +35,10 @@ local profile = {
     ---Otherwise, configure all language servers with lspconfig
     ---@type boolean
     use_mason = true,
+
+    ---@type boolean
+    enable_discord_rich_presence = false,
+
   },
 
   ---Editor
