@@ -24,6 +24,7 @@ end
 
 ---Retrieve required tools from profile
 ---@param LANGUAGES profiles.Profile.Languages
+---@return { formatters: table<string, conform.FiletypeFormatter>, linters: table<string, (string | config.lint.LinterSpec)[]>, ls: { [config.lsp.Server.MasonConfig]: config.lsp.Handler } }
 local function get_language_tools(LANGUAGES)
   -- TODO: Extract dap as soon as nvim-dap is added
 
@@ -97,7 +98,29 @@ local function get_language_tools(LANGUAGES)
   }
 end
 
+---comment
+---@param colorscheme string
+---@param theme_config (fun(plugin: table, opts: table, spec: LazyPlugin) | true)?
+---@return ((fun(main: string): fun(self: LazyPlugin, opts: table)) | true)?
+local function generate_config(colorscheme, theme_config)
+  if theme_config == true or theme_config == nil then
+    return theme_config
+  end
+  return function (main)
+    return function (self, opts)
+      -- This prevent failing from loading not existing module
+      local ok, plugin = pcall(require, main)
+      if ok then
+        theme_config(plugin, opts, self)
+        -- This prevent setup code of other themes from changing colorscheme
+        vim.cmd.colorscheme(colorscheme)
+      end
+    end
+  end
+end
+
 return {
   is_ft_support_enabled = is_ft_support_enabled,
+  generate_config = generate_config,
   get_language_tools = get_language_tools,
 }

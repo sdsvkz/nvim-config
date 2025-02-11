@@ -15,6 +15,10 @@ for _, FILE_NAME in ipairs(vim.fn.readdir(vim.fn.stdpath("config") .. "/lua/prof
   end
 end
 
+if profile.appearence.theme.config == nil then
+  profile.appearence.theme.config = utils.generate_config(profile.appearence.theme.colorscheme, profile.appearence.theme.theme_config)
+end
+
 local tools = utils.get_language_tools(profile.languages)
 
 profile.languages.formatters = tools.formatters

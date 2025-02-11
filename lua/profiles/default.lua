@@ -39,6 +39,11 @@ local profile = {
     ---@type boolean
     enable_discord_rich_presence = false,
 
+    ---Setup required flags here
+    ---This will only be called if using Neovide
+    ---@type fun()?
+    config_neovide = nil,
+
   },
 
   ---Editor
@@ -71,13 +76,35 @@ local profile = {
   ---Appearence
   ---@class profiles.Profile.Appearence
   appearence = {
-    ---To get list of available themes
-    ---Run `:lua for _, theme in ipairs(vim.fn.getcompletion("", "color")) do print(theme) end`
-    ---@type string
-    theme = "catppuccin",
+    ---@class profiles.Profile.Appearence.Theme
+    ---`options.Themes` included some default setup
+    ---This equivalent to `theme = options.Themes.moonfly`
+    --- NOTE: Better override this field to change colorscheme instead of using vim command
+    ---
+    ---@see Themes
+    theme = {
+      ---To get list of available themes
+      ---Run `:lua for _, theme in ipairs(vim.fn.getcompletion("", "color")) do print(theme) end`
+      --- NOTE: This only show loaded themes at this point
+      ---
+      ---@type string
+      colorscheme = "habamax",
+
+      ---Configure theme here
+      ---e.g. Calling `plugin.setup`, set vim.g
+      ---
+      ---@type (fun(plugin: table, opts: table, spec: LazyPlugin) | true)?
+      theme_config = nil,
+
+      --- Pass theme module name `main` to get `config` function for `LazyPluginSpec`
+      --- or other valid values for `config`
+      ---
+      ---@type ((fun(main: string): fun(self: LazyPlugin, opts: table)) | true)?
+      config = nil,
+    },
 
     ---Put startup menus into "lua/config/menu"
-    ---Choose here using file name without extension
+    ---Choose here using module name
     ---@type string
     menu = "theta_modified",
   },

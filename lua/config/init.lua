@@ -7,6 +7,7 @@ if profile.preference.os == options.System.Windows then
   require("config.powershell")
 end
 
+require("config.neovide")
 require("config.lazy")
 require("config.lsp")
 require("config.lint")

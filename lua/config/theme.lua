@@ -1,6 +1,6 @@
 local profile = require("profiles")
 
-local colorscheme = profile.appearence.theme
+local colorscheme = profile.appearence.theme.colorscheme
 -- local main_menu = require("config.options").main_menu
 local main_menu = require("config.menu." .. profile.appearence.menu).config
 
