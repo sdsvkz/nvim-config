@@ -1,3 +1,5 @@
+local Groups = require("config.key_groups").Groups
+
 return {
   "folke/todo-comments.nvim",
   lazy = false,
@@ -72,7 +74,7 @@ return {
   },
   keys = {
     {
-      "<LEADER>xt", mode = "n",
+      Groups.Trouble.lhs .. "t", mode = "n",
       "<CMD>Trouble todo toggle focus=true<CR>",
       desc = "List all project todos (Trouble)"
     },

@@ -1,3 +1,4 @@
+local Groups = require("config.key_groups").Groups
 local formatters = require("profiles").languages.formatters
 assert(formatters ~= nil, "Profile with invalid formatters")
 
@@ -12,6 +13,6 @@ return {
 	init = function()
 		local conform = require("conform")
 		-- Keymap
-		vim.keymap.set("n", "<LEADER>f", conform.format, { desc = "Conform: Format file" })
+		vim.keymap.set("n", Groups.Editing.lhs .. "f", conform.format, { desc = "Conform: Format file" })
 	end,
 }

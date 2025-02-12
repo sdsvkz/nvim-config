@@ -1,9 +1,11 @@
+local Groups = require("config.key_groups").Groups
+
 return {
   'akinsho/toggleterm.nvim',
   version = "*",
   config = true,
   opts = {
-    open_mapping = '<LEADER>xT',
+    open_mapping = '<LEADER>wT',
     -- direction = 'float'
     insert_mappings = false,
   },
@@ -16,7 +18,7 @@ return {
     })
     return {
       {
-        "<LEADER>xg", mode = { "n", "t" },
+        Groups.UI.lhs .. "g", mode = { "n", "t" },
         function() lazygit:toggle() end,
         desc = "Toggle Lazygit session"
       },

@@ -1,13 +1,14 @@
 local profile = require("profiles")
 
 if profile.preference.use_mason then
+  local Groups = require("config.key_groups").Groups
   return {
     {
       "williamboman/mason.nvim",
       opts = {},
       keys = {
         {
-          "<LEADER>,m", mode = "n",
+          Groups.Setting.lhs .. "m", mode = "n",
           "<CMD>Mason<CR>",
           desc = "Mason home"
         },

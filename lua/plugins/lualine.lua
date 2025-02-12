@@ -1,16 +1,23 @@
 return {
   'nvim-lualine/lualine.nvim',
   dependencies = {
-    require("plugins.libs.web_devicons")
+    require("plugins.libs.web_devicons"),
+    require("plugins.auto_session"),
   },
   opts = {
     options = {
       theme = "auto",
     },
     sections = {
-      lualine_a = {'mode'},
-      lualine_b = {'diagnostics'},
-      lualine_c = {'branch', 'diff'},
+      lualine_a = {'mode', 'diagnostics'},
+      lualine_b = {
+        'branch',
+        function()
+          return require('auto-session.lib').current_session_name(true)
+        end,
+        'diff',
+      },
+      lualine_c = {},
       lualine_x = {'filename', 'filetype'},
       lualine_y = {'encoding'},
       lualine_z = {'location'}
@@ -26,6 +33,7 @@ return {
     extensions = {
       'lazy',
       "mason",
+      "nvim-dap-ui",
       'nvim-tree',
       'toggleterm',
       "trouble",

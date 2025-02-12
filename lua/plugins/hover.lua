@@ -11,11 +11,13 @@ return {
       hover.hover,
       { desc = "hover.nvim" }
     )
-    vim.keymap.set(
-      "n", "gK",
-      hover.hover_select,
-      { desc = "hover.nvim (select)" }
-    )
+    -- Useless with noice or notify
+    -- Use `<C-w>w` instead
+    -- vim.keymap.set(
+    --   "n", "gK",
+    --   hover.hover_select,
+    --   { desc = "hover.nvim (select)" }
+    -- )
     vim.keymap.set(
       "n", "<C-p>",
       ---@diagnostic disable-next-line: missing-parameter

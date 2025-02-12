@@ -1,3 +1,5 @@
+local Groups = require("config.key_groups").Groups
+
 return {
   'rmagatti/auto-session',
   lazy = false,
@@ -6,7 +8,7 @@ return {
   ---@module "auto-session"
   ---@type AutoSession.Config
   opts = {
-    suppressed_dirs = { '~/', '/' },
+    suppressed_dirs = { '~/', '/', [[C:\Users\*]] },
     bypass_save_filetypes = { 'alpha', 'dashboard' },
     -- log_level = 'debug',
   },
@@ -15,7 +17,7 @@ return {
   end,
   keys = {
     {
-      "<LEADER>xs", mode = "n",
+      Groups.UI.lhs .. "s", mode = "n",
       "<CMD>SessionSearch<CR>",
       desc = "Search for sessions"
     },

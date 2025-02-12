@@ -17,7 +17,7 @@ return {
         ['mini.surround'] = true,
         -- ['mini.operators'] = true,
         ['mini.pairs'] = true,
-        ['mini.jump2d'] = true,
+        -- ['mini.jump2d'] = true,
         -- ['mini.pick'] = true,
         -- Visual
         -- ['mini.animate'] = true,

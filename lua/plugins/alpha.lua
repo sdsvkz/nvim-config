@@ -1,3 +1,5 @@
+local Groups = require("config.key_groups").Groups
+
 return {
   'goolord/alpha-nvim',
   dependencies = {
@@ -6,7 +8,7 @@ return {
   },
   keys = {
     {
-      "<LEADER>gh", mode = "n",
+      Groups.Goto.lhs .. "h", mode = "n",
       "<CMD>Alpha<CR>",
       desc = "Go to home page (Alpha)"
     },

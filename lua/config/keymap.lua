@@ -1,64 +1,61 @@
+local Groups = require("config.key_groups").Groups
+local Mappings = require("config.key_groups").Mappings
 local wk = require("which-key")
 local dap = require("dap")
 local dap_widgets = require("dap.ui.widgets")
 local dapui = require("dapui")
 
-wk.add {
-  -- Groups
-  { "<LEADER>,", group = "Setting" },
-  { "<LEADER>x", group = "UIs" },
-  { "<LEADER>s", group = "Show / Send" },
-  { "<LEADER>g", group = "Goto / Generate" },
-  { "<LEADER>p", group = "Peek" },
-  { "<LEADER>d", group = "Debugging" }
-}
+wk.add(Mappings)
 
-vim.keymap.set("n", "<LEADER>,l", "<CMD>Lazy<CR>", { desc = "Lazy home" })
-vim.keymap.set("n", "<LEADER>F", function() return vim.lsp.buf.format() end, { desc = "LSP: Format buffer" })
+-- Set
 
--- Debugging keymap
-vim.keymap.set('n', '<LEADER>ddc', function() dap.continue() end, {
+Groups.Editing.set("n", "F", function() return vim.lsp.buf.format() end, { desc = "LSP: Format buffer" })
+
+Groups.Setting.set("n", "l", "<CMD>Lazy<CR>", { desc = "Lazy home" })
+
+Groups.Debugging.set('n', 'dc', function() dap.continue() end, {
   desc = "Launching debug sessions or resuming execution"
 })
-vim.keymap.set('n', '<LEADER>dn', function() dap.step_over() end, {
+Groups.Debugging.set('n', 'n', function() dap.step_over() end, {
   desc = "Step over the current line"
 })
-vim.keymap.set('n', '<LEADER>di', function() dap.step_into() end, {
+Groups.Debugging.set('n', 'i', function() dap.step_into() end, {
   desc = "Step into a function or method"
 })
-vim.keymap.set('n', '<LEADER>do', function() dap.step_out() end, {
+Groups.Debugging.set('n', 'o', function() dap.step_out() end, {
   desc = "Step out of a function or method"
 })
-vim.keymap.set('n', '<Leader>db', function() dap.toggle_breakpoint() end, {
+Groups.Debugging.set('n', 'b', function() dap.toggle_breakpoint() end, {
   desc = "Creates or removes a breakpoint at the current line."
 })
-vim.keymap.set('n', '<Leader>dB', function() dap.set_breakpoint() end, {
+Groups.Debugging.set('n', 'B', function() dap.set_breakpoint() end, {
   desc = "Create a breakpoint"
 })
-vim.keymap.set('n', '<Leader>dl',
+Groups.Debugging.set('n', 'l',
   function() dap.set_breakpoint(nil, nil, vim.fn.input('Log point message: ')) end,
   {
     desc = "Create a log point"
   }
 )
-vim.keymap.set('n', '<Leader>dr', function() dap.repl.open() end, {
+Groups.Debugging.set('n', 'r', function() dap.repl.open() end, {
   desc = "Open a REPL / Debug-console."
 })
-vim.keymap.set('n', '<Leader>ddl', function() dap.run_last() end, {
+Groups.Debugging.set('n', 'dl', function() dap.run_last() end, {
   desc = "Run the last debug session again"
 })
-vim.keymap.set({'n', 'v'}, '<Leader>dh', function()
+Groups.Debugging.set({'n', 'v'}, 'h', function()
   dap_widgets.hover()
 end, { desc = "View the value for the expression under the cursor (Hover)" })
-vim.keymap.set({'n', 'v'}, '<Leader>dp', function()
+Groups.Debugging.set({'n', 'v'}, 'p', function()
   dap_widgets.preview()
 end, { desc = "View the value of the expression under the cursor (Preview)" })
-vim.keymap.set('n', '<Leader>df', function()
+Groups.Debugging.set('n', 'f', function()
   dap_widgets.centered_float(dap_widgets.frames)
 end, { desc = "Frames" })
-vim.keymap.set('n', '<Leader>ds', function()
+Groups.Debugging.set('n', 's', function()
   dap_widgets.centered_float(dap_widgets.scopes)
 end, { desc = "Scopes" })
-vim.keymap.set("n", "<LEADER>xD", function() return dapui.toggle() end, {
+
+Groups.UI.set("n", "D", function() return dapui.toggle() end, {
   desc = "Toggle all debugging windows"
 })

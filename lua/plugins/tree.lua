@@ -1,3 +1,5 @@
+local Groups = require("config.key_groups").Groups
+
 return {
   {
     "nvim-tree/nvim-tree.lua",
@@ -21,12 +23,12 @@ return {
     },
     keys = {
       {
-        '<leader>xe', mode = 'n',
+        Groups.UI.lhs .. 'e', mode = 'n',
         '<CMD>NvimTreeToggle<CR>',
         desc = "Toggle file explorer"
       },
       {
-        '<leader>xE', mode = 'n',
+        Groups.UI.lhs .. 'E', mode = 'n',
         '<CMD>NvimTreeFindFile<CR>',
         desc = "Show current file in file explorer"
       }
