@@ -4,6 +4,25 @@ return {
   dependencies = {
     require("plugins.toggleterm"),
   },
+  init = function()
+    local loaded = false
+    local function check()
+      ---@diagnostic disable-next-line: undefined-field
+      local cwd = vim.uv.cwd()
+      if vim.fn.filereadable(cwd .. "/CMakeLists.txt") == 1 then
+        require("lazy").load({ plugins = { "cmake-tools.nvim" } })
+        loaded = true
+      end
+    end
+    check()
+    vim.api.nvim_create_autocmd("DirChanged", {
+      callback = function()
+        if not loaded then
+          check()
+        end
+      end,
+    })
+  end,
   config = function ()
     local osys = require("cmake-tools.osys")
     require("cmake-tools").setup {

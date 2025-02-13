@@ -9,7 +9,15 @@ wk.add(Mappings)
 
 -- Set
 
+vim.keymap.set({ "i", "c" }, "<C-v>", "<C-r>+", { desc = "Paste" })
+
 Groups.Editing.set("n", "F", function() return vim.lsp.buf.format() end, { desc = "LSP: Format buffer" })
+Groups.Editing.set({"n", "v"}, "c", '"+y', { desc = "Copy motion" })
+Groups.Editing.set({"n", "v"}, "C", '"+Y', { desc = "Copy line" })
+Groups.Editing.set({"n", "v"}, "x", '"+d', { desc = "Cut motion" })
+Groups.Editing.set({"n", "v"}, "X", '"+D', { desc = "Cut line" })
+Groups.Editing.set("n", "v", '"+p', { desc = "Paste after cursor" })
+Groups.Editing.set("n", "V", '"+P', { desc = "Paste before cursor" })
 
 Groups.Setting.set("n", "l", "<CMD>Lazy<CR>", { desc = "Lazy home" })
 
