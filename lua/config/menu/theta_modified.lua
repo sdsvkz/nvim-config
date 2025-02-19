@@ -218,7 +218,12 @@ local section_mru = {
     {
       type = "group",
       val = function()
-        return { mru(0, cdir) }
+        local cwd = vim.fn.getcwd()
+        if cwd == vim.env.HOME then
+          return {}
+        else
+          return { mru(0, cdir) }
+        end
       end,
       opts = { shrink_margin = false },
     },

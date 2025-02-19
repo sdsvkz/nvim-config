@@ -53,7 +53,7 @@ local func_new_test = {
     local info = debug.getinfo(utils.calc, "u")
     assert(
       f(2, 3, 1) == utils.calc(2, 3, 1) and
-      f:get_argc() == info.nparams and
+      f:get_nparams() == info.nparams and
       f:is_vararg() == info.isvararg,
 
       fail("new")("basic")
@@ -81,7 +81,7 @@ local to_const_test = {
 to_const_test.test = function ()
   local f = to_const_test.f
   assert(to_const(f) (1, 2, 3) == 2 + 3, fail("to_const")("basic"))
-  assert((to_const(Function { f }) (1, 2, 3)) == 2 + 3, fail("to_const")("basic (Function)"))
+  assert((to_const(Function:new { f }) (1, 2, 3)) == 2 + 3, fail("to_const")("basic (Function)"))
 end
 
 -- functional.curry
@@ -102,14 +102,14 @@ local curry_test = {
     return _f_2_3_1()
   end,
   pass_by_pack = function () return curry(utils.calc) (2, 3) (1) () end,
-  with_argc_1 = function () return curry(utils.calc, 3) (2, 3, 1) () end,
-  with_argc_2 = function () return curry(utils.calc, 3) (2) (3) (1) () end,
+  with_nparams_1 = function () return curry(utils.calc, 3) (2, 3, 1) () end,
+  with_nparams_2 = function () return curry(utils.calc, 3) (2) (3) (1) () end,
 }
 
 curry_test.test = function ()
   assert(curry_test.one_by_one() == curry_test.expect, fail("curry")("one_by_one"))
   assert(curry_test.one_by_one() == curry_test.pass_by_pack(), fail("curry")("pass_by_pack"))
-  assert(curry_test.with_argc_1() == curry_test.with_argc_2(), fail("curry")("with_argc"))
+  assert(curry_test.with_nparams_1() == curry_test.with_nparams_2(), fail("curry")("with_nparams"))
 end
 
 -- TODO: Rewrite test once memorize is reimplemented

@@ -1,5 +1,7 @@
 local profile = require("profiles")
 
+vim.o.mouse = profile.preference.mouse
+
 vim.o.termguicolors = true -- Enable 24-bit colour. Required by some plugins, such as toggleterm.nvim
 vim.o.signcolumn = "yes" -- Keep leftmost sign column on to avoid "shaking"
 

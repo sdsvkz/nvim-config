@@ -3,7 +3,6 @@ local MODULE = "functional"
 local internal = require("vkzlib.internal")
 local core = internal.core
 local list = internal.list
-local typing = internal.typing
 
 local get_qualified_name = internal.get_qualified_name(MODULE)
 local errmsg = internal.errmsg(MODULE)
@@ -17,7 +16,7 @@ local log = {
 ---@class vkzlib.data.Function
 ---@field protected _raw function Original `function`
 ---@field protected _value function Wrapped `function`
----@field protected _argc integer Parameter count of wrapped `function`
+---@field protected _nparams integer Number of Parameter of wrapped `function`
 ---@field protected _isvararg boolean Whether wrapped `function` has variadic argument
 ---
 ---@operator call(...): ...
@@ -33,7 +32,8 @@ end
 
 ---@class vkzlib.data.Function.new.Params
 ---@field [1] function
----@field argc integer?
+---@field nparams integer?
+---@field skip_nparams_check boolean? Disable check for `nparams >= debug.getinfo(f, "u").nparams`
 ---@field isvararg boolean?
 ---@field raw function?
 
@@ -45,18 +45,18 @@ end
 ---@see vkzlib.data.Function
 function Function:new(params)
   local deferred_errmsg = errmsg("Function:new")
-  assert(params ~= nil and type(params) == "table",
+  assert(type(params) == "table",
     deferred_errmsg("This function receive table as argument")
   )
   ---@type function
   local f = params[1]
-  assert(f ~= nil and type(f) == "function",
+  assert(type(f) == "function",
     deferred_errmsg("1st argument not a function")
   )
   ---@type integer?
-  local argc = params.argc
-  assert(argc == nil or type(argc) == "number",
-    deferred_errmsg("Invalid opts.argc")
+  local nparams = params.nparams
+  assert(nparams == nil or type(nparams) == "number",
+    deferred_errmsg("Invalid opts.nparams")
   )
   ---@type boolean?
   local isvararg = params.isvararg
@@ -68,11 +68,12 @@ function Function:new(params)
   assert(raw == nil or type(raw) == "function",
     deferred_errmsg("Invalid opts.raw")
   )
+  local skip_nparams_check = type(params.skip_nparams_check) == "boolean" and params.skip_nparams_check or false
   local info = debug.getinfo(f, "u")
-  assert(argc == nil or argc >= info.nparams, function ()
+  assert(nparams == nil or skip_nparams_check or nparams >= info.nparams, function ()
     return deferred_errmsg(string.format(
-      "`opts.argc` bigger then parameter count of wrapped `function` (%i : %i)",
-      argc,
+      "Required `nparams` < Expected `debug.getinfo(f, 'u').nparams` (%i < %i)",
+      nparams,
       info.nparams
     )) ()
   end)
@@ -85,9 +86,10 @@ function Function:new(params)
   local res = {
     _raw = raw or f,
     _value = f,
-    _argc = argc or info.nparams,
+    _nparams = nparams or info.nparams,
     _isvararg = isvararg,
   }
+
   -- This method should easily implement inheritance
   -- Literally use self (class object) as meta table
   -- But seems complicated to implement operator overload
@@ -118,7 +120,7 @@ function Function:new(params)
 end
 
 ---Copy function object
----@param noref boolean
+---@param noref boolean?
 function Function:copy(noref)
   local deferred_errmsg = errmsg("Function:copy")
   assert(Function.is_function_object(self),
@@ -126,43 +128,6 @@ function Function:copy(noref)
   )
   return core.deep_copy(self, noref)
 end
-
----@class vkzlib.data.Function.constructor.Params
----@field [1] function | vkzlib.data.Function
----@field argc integer?
----@field isvararg boolean?
----@field raw function?
----@field noref boolean?
----
----@see vkzlib.data.Function.new.Params
----@see Function.copy
-
-setmetatable(Function, {
-  ---Constructor overload
-  ---@param opts vkzlib.data.Function.constructor.Params
-  ---
-  ---@see vkzlib.data.Function.constructor.Params
-  __call = function (_, opts)
-    local deferred_errmsg = errmsg("Function.constructor")
-    assert(type(opts) == "table",
-      deferred_errmsg("This function receive `table` as argument")
-    )
-    local f = opts[1]
-    if typing.is_type(f, "function") then
-      ---@cast f function
-      return Function:new { f,
-        argc = opts.argc,
-        isvararg = opts.isvararg,
-        raw = opts.raw
-      }
-    elseif Function.is_function_object(f) then
-      ---@cast f vkzlib.data.Function
-      return f:copy(opts.noref)
-    else
-      error(deferred_errmsg("1st argument not a `function` or `Function`") ())
-    end
-  end
-})
 
 function Function:get()
   assert(type(self._value) == "function")
@@ -174,9 +139,9 @@ function Function:get_raw()
   return self._raw
 end
 
-function Function:get_argc()
-  assert(type(self._argc) == 'number')
-  return self._argc
+function Function:get_nparams()
+  assert(type(self._nparams) == 'number')
+  return self._nparams
 end
 
 function Function:is_vararg()
@@ -186,7 +151,7 @@ end
 
 function Function:apply(...)
   local deferred_errmsg = errmsg("Function:apply")
-  assert(select("#", ...) >= self._argc,
+  assert(select("#", ...) >= self._nparams,
     deferred_errmsg("require more arguments")
   )
   return self(...)
@@ -212,20 +177,20 @@ local function to_const(f)
   if type(f) == "function" then
     local info = debug.getinfo(f)
     return Function:new { _to_const(f),
-      argc = info.nparams + 1,
+      nparams = info.nparams + 1,
     }
   end
   assert(Function.is_function_object(f),
     deferred_errmsg("not a valid function object")
   )
-  return Function { _to_const(f:get()),
-    argc = f:get_argc() + 1,
+  return Function:new { _to_const(f:get()),
+    nparams = f:get_nparams() + 1,
     isvararg = f:is_vararg(),
     raw = f:get_raw()
   }
 end
 
----Currying `f` with `argc`
+---Currying `f` with `nparams`
 ---@param f vkzlib.data.Function
 ---@return vkzlib.data.Function
 local function _curry(f)
@@ -243,15 +208,15 @@ local function _curry(f)
     -- Storage of arguments (Cannot upvalue `...`)
     local argv = list.pack(...)
     log.t("_curry.curried", "All args", argv)
-    if argv.n >= f:get_argc() then
+    if argv.n >= f:get_nparams() then
       -- This means all parameters have been filled
-      log.t("_curry.curried", "Finalized", string.format("%i = argv.n >= f:get_argc() = %i", argv.n, f:get_argc()))
+      log.t("_curry.curried", "Finalized", string.format("%i = argv.n >= f:get_nparams() = %i", argv.n, f:get_nparams()))
       -- Apply arguments and return result in next call
       return Function:new {
         function ()
           return f(list.unpack(argv))
         end,
-        argc = 0,
+        nparams = 0,
         isvararg = f:is_vararg(),
         raw = f:get_raw()
       }
@@ -262,7 +227,7 @@ local function _curry(f)
       local newArgs = list.pack(...)
       if newArgs.n == 0 then
         log.t("_curry.curried@return", "No arg, skipped")
-        return Function:new { res, argc = argv.n, isvararg = f:is_vararg(), raw = f:get_raw() }
+        return Function:new { res, nparams = argv.n, isvararg = f:is_vararg(), raw = f:get_raw() }
       end
 
       -- Copy of `argv`, to perform side effect
@@ -279,7 +244,7 @@ local function _curry(f)
 
     return Function:new {
       res,
-      argc = Function.get_argc(f) - argv.n,
+      nparams = f:get_nparams() - argv.n,
       isvararg = f:is_vararg(),
       raw = f:get_raw()
     }
@@ -288,60 +253,60 @@ local function _curry(f)
   return curried()
 end
 
----Currying function `f` with optional argument count
+---Currying function `f` with optional number of parameters
 ---By default, `maxArgc` is the number of arguments `f` expect
----Variadic function must provide argc
+---Variadic function must provide nparams
 ---@param f function | vkzlib.data.Function
----@param argc integer?
+---@param nparams integer?
 ---@return vkzlib.data.Function
-local function curry(f, argc)
+local function curry(f, nparams)
   local deferred_errmsg = errmsg("curry")
   -- TODO: Refactor
-  local nparams = nil
+  local __nparams = nil
   local opts = {}
   if type(f) == "function" then
     local info = debug.getinfo(f)
     opts.isvararg = info.isvararg
     if not opts.isvararg then
       -- Not vararg, retrieve anything
-      argc = core.from_maybe(info.nparams, argc)
-      assert(argc >= 0 and argc <= info.nparams,
-        deferred_errmsg("argc out of range")
+      nparams = core.from_maybe(info.nparams, nparams)
+      assert(nparams >= 0 and nparams <= info.nparams,
+        deferred_errmsg("nparams out of range")
       )
     else
-      -- If isvararg, leave argc untouched
+      -- If isvararg, leave nparams untouched
       -- Let caller decide how many arguments it takes
-      -- But argc must greater or equal than minimal requirement
-      assert(type(argc) == "number",
-        deferred_errmsg("argc is required for vararg function")
+      -- But nparams must greater or equal than minimal requirement
+      assert(type(nparams) == "number",
+        deferred_errmsg("nparams is required for vararg function")
       )
-      assert(argc >= info.nparams,
-        deferred_errmsg("argc less than minimal requirement")
+      assert(nparams >= info.nparams,
+        deferred_errmsg("nparams less than minimal requirement")
       )
     end
   elseif Function.is_function_object(f) then
     -- Almost the same
-    opts.isvararg = Function.is_vararg(f)
+    opts.isvararg = f:is_vararg()
     if not opts.isvararg then
-      argc = core.from_maybe(Function.get_argc(f), argc)
-      assert(argc >= 0 and argc <= Function.get_argc(f),
-        deferred_errmsg("argc out of range")
+      nparams = core.from_maybe(f:get_nparams(), nparams)
+      assert(nparams >= 0 and nparams <= f:get_nparams(),
+        deferred_errmsg("nparams out of range")
       )
     else
-      assert(type(argc) == "number",
-        deferred_errmsg("argc is required for vararg function")
+      assert(type(nparams) == "number",
+        deferred_errmsg("nparams is required for vararg function")
       )
-      assert(argc >= Function.get_argc(f),
-        deferred_errmsg("argc less than minimal requirement")
+      assert(nparams >= f:get_nparams(),
+        deferred_errmsg("nparams less than minimal requirement")
       )
     end
   else
     error(deferred_errmsg("Not a callable") ())
   end
 
-  -- TODO: Use argc
-  -- Actually, figure out what argc does first
-  f = Function { f, opts.isvararg }
+  -- TODO: Use nparams
+  -- Actually, figure out what nparams does first
+  f = type(f) == "function" and Function:new { f, is_vararg = opts.isvararg } or f:copy(true)
 
   log.t("curry", "Object passed to _curry", f)
 

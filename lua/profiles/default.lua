@@ -36,6 +36,12 @@ local profile = {
     ---@type boolean
     use_mason = true,
 
+    ---Enables mouse support
+    ---@see vim.o.mouse
+    ---
+    ---@type string
+    mouse = "niv",
+
     ---@type boolean
     enable_discord_rich_presence = false,
 
