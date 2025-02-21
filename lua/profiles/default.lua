@@ -188,15 +188,26 @@ local profile = {
         },
       },
       json = {
+        -- TODO: Enable json by default
         ---@type profiles.Profile.Languages.Tools
         tools = {
           ---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
           ls = {
             [{ "jsonls", auto_update = true }] = function (info)
               info.lspconfig.jsonls.setup {
+                -- lazy-load schemastore when needed
                 on_new_config = function(new_config)
                   new_config.settings.json.schemas = new_config.settings.json.schemas or {}
-                  vim.list_extend(new_config.settings.json.schemas, require("schemastore").json.schemas())
+                  vim.list_extend(new_config.settings.json.schemas, require("schemastore").json.schemas {
+                    extra = {
+                      {
+                        description = "Lua language server configuration file",
+                        fileMatch = { ".luarc.json" },
+                        name = ".luarc.json",
+                        url = "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
+                      },
+                    },
+                  })
                 end,
                 settings = {
                   json = {
@@ -282,8 +293,8 @@ local profile = {
       ps1 = {
         tools = {
           ls = {
-            [{ "powershell_es", auto_update = true }] = function (t)
-              t.lspconfig.powershell_es.setup {
+            [{ "powershell_es", auto_update = true }] = function (info)
+              info.lspconfig.powershell_es.setup {
                 bundle_path = vim.fn.stdpath("data") .. "/mason/packages/powershell-editor-services",
                 init_options = {
                   enableProfileLoading = false
@@ -337,8 +348,44 @@ local profile = {
           -- ls = {
           --   ["rust_analyzer"] = false,
           -- }
-        }
-      }
+        },
+      },
+      yaml = {
+        -- TODO: Enable yaml by default
+        tools = {
+          formatters = { "prettier" },
+          linters = { "yamllint" },
+          ls = {
+            [{ "yamlls", auto_update = true  }] = function (info)
+              info.lspconfig.yamlls.setup {
+                -- lazy-load schemastore when needed
+                on_new_config = function(new_config)
+                  new_config.settings.yaml.schemas = vim.tbl_deep_extend(
+                    "force",
+                    new_config.settings.yaml.schemas or {},
+                    require("schemastore").yaml.schemas()
+                  )
+                end,
+                settings = {
+                  yaml = {
+                    format = {
+                      enable = true,
+                    },
+                    validate = true,
+                    schemaStore = {
+                      -- Must disable built-in schemaStore support to use
+                      -- schemas from SchemaStore.nvim plugin
+                      enable = false,
+                      -- Avoid TypeError: Cannot read properties of undefined (reading 'length')
+                      url = "",
+                    },
+                  },
+                },
+              }
+            end
+          },
+        },
+      },
     },
 
     ---Map filetype into language options
