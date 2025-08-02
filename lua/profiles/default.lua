@@ -13,12 +13,12 @@
 -- If you want to disable other profile, you can change extension to others
 -- e.g. sdsvkz.lua.disabled
 --
--- !!! Don't use Vkzlib, as profile contains debugging flags
---
 --]]
 
 ---@module "lint"
 ---@module "conform"
+
+local vkzlib = Vkz.vkzlib
 
 ---@class profiles.Profile
 local profile = {
@@ -198,7 +198,7 @@ local profile = {
                 -- lazy-load schemastore when needed
                 on_new_config = function(new_config)
                   new_config.settings.json.schemas = new_config.settings.json.schemas or {}
-                  vim.list_extend(new_config.settings.json.schemas, require("schemastore").json.schemas {
+                  vkzlib.data.list.concat(new_config.settings.json.schemas, require("schemastore").json.schemas {
                     extra = {
                       {
                         description = "Lua language server configuration file",
@@ -238,10 +238,10 @@ local profile = {
                     -- Ignore some warnings, see https://luacheck.readthedocs.io/en/stable/warnings.html
                     -- Some of them are duplicated with `luals`, others are annoying
                     "--ignore", "21*", "611", "612", "631",
-                    Vkzlib.list.unpack(linter.args),
+                    vkzlib.data.list.unpack(linter.args),
                   }
                 }
-                return Vkzlib.table.deep_merge('force', linter, properties)
+                return vkzlib.data.table.deep_merge('force', linter, properties)
               end
             }
           },

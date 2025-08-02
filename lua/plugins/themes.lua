@@ -1,7 +1,9 @@
 local profile = require("profiles")
 local config = profile.appearence.theme.config
 
-Themes = Vkzlib.table.map(function (spec)
+local vkzlib = Vkz.vkzlib
+
+local themes = vkzlib.data.table.map(function (spec)
   spec.config = type(config) == "function" and config(spec.main) or config
   return spec
 end, {
@@ -12,4 +14,4 @@ end, {
   require("plugins.themes.catppuccin"),
 })
 
-return Themes
+return themes

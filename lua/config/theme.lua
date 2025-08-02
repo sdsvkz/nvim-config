@@ -1,3 +1,5 @@
+local vkzlib = Vkz.vkzlib
+
 local profile = require("profiles")
 
 local colorscheme = profile.appearence.theme.colorscheme
@@ -14,7 +16,7 @@ require("alpha").setup(main_menu)
 -- This is the workaround for that.
 --]]
 vim.api.nvim_create_autocmd({ "FocusGained" }, {
-  group = Vkzlib.vim.augroup("theme", "fix_visual"),
+  group = vkzlib.vim.augroup("theme", "fix_visual"),
   pattern = "*",
   command = "hi link Visual NONE"
 })

@@ -4,12 +4,10 @@ local options = require("vkzlib.options")
 local vkzlib = {
   options = options,
   core = require("vkzlib.core"),
+  data = require("vkzlib.data"),
   functional = require("vkzlib.functional"),
-  internal = require("vkzlib.internal"),
-  list = require("vkzlib.list"),
+  io = require("vkzlib.io"),
   logging = require("vkzlib.logging"),
-  str = require("vkzlib.str"),
-  table = require("vkzlib.table"),
   typing = require("vkzlib.typing"),
   vim = require("vkzlib.vim"),
 }

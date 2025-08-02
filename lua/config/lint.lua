@@ -1,3 +1,6 @@
+local vkzlib = Vkz.vkzlib
+local log = Vkz.log
+
 -- Use `nvim-lint.nvim`
 local lint = require("lint")
 local linters = require("profiles").languages.linters
@@ -21,7 +24,7 @@ local function get_linter_by_opts(linter, opts)
   end
 end
 
-local linters_by_ft = Vkzlib.core.deep_copy(linters, true)
+local linters_by_ft = vkzlib.core.deep_copy(linters, true)
 
 for ft, linters_of_ft in pairs(linters) do
   for index, linter in ipairs(linters_of_ft) do
@@ -35,7 +38,7 @@ for ft, linters_of_ft in pairs(linters) do
   end
 end
 
-Log.t(Vkzlib.core.to_string(linters_by_ft))
+log.t(vkzlib.core.to_string(linters_by_ft))
 
 --- Process above should ensure all `LinterSpec`s have been replaced by linter's name
 ---@cast linters_by_ft table<string, string[]>

@@ -1,29 +1,26 @@
--- Generate profile
+local vkzlib = Vkz.vkzlib
+local log = Vkz.log
 
-local profile = Vkzlib.core.deep_copy(require("profiles.default"), true)
+local profile = vkzlib.core.deep_copy(require("profiles.default"), true)
 local utils = require("profiles.utils")
 
 -- Scan for profile
-for _, FILE_NAME in ipairs(vim.fn.readdir(vim.fn.stdpath("config") .. "/lua/profiles", [[ v:val =~ '\.lua$' ]])) do
-  if FILE_NAME ~= "init.lua" and FILE_NAME ~= "options.lua" and FILE_NAME ~= "default.lua" then
+local profiles_found = {}
+
+for _, FILE_NAME in ipairs(vim.fn.readdir(vkzlib.data.str.join({ vim.fn.stdpath("config"), "lua", "profiles"}, "/"), [[ v:val =~ '\.lua$' ]])) do
+  if FILE_NAME ~= "init.lua" and FILE_NAME ~= "options.lua" and FILE_NAME ~= "default.lua" and FILE_NAME ~= "utils.lua" then
     local MODULE_NAME = FILE_NAME:sub(1, #FILE_NAME - 4)
-    ---@type profiles.Profile
-    local USER_PROFILE = Vkzlib.core.deep_copy(require("profiles." .. MODULE_NAME), true)
-    profile = Vkzlib.table.deep_merge("force", profile, USER_PROFILE)
-    profile.name = USER_PROFILE.name or MODULE_NAME
-    break
+    table.insert(profiles_found, MODULE_NAME)
   end
 end
 
-if profile.appearence.theme.config == nil then
-  profile.appearence.theme.config = utils.generate_config(profile.appearence.theme.colorscheme, profile.appearence.theme.theme_config)
+log.t(vkzlib.core.to_string(profiles_found))
+
+if #profiles_found == 1 then
+  profile = utils.merge_profile(profile, profiles_found[1])
+  -- TODO: Save the used profile
+  
 end
+-- TODO: Load saved profile if exists
 
-local tools = utils.get_language_tools(profile.languages)
-
-profile.languages.formatters = tools.formatters
-profile.languages.linters = tools.linters
-profile.languages.ls = tools.ls
-profile.utils = utils
-
-return profile
+return utils.preprocess_profile(profile)

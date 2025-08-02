@@ -6,7 +6,6 @@ globals = {
 }
 
 read_globals = {
-  "Vkzlib",
-  "Log"
+  "Vkz",
 }
 

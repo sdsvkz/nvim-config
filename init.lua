@@ -4,24 +4,37 @@ package.path =
   current_path .. "/lua/libs/?/init.lua;" ..
   package.path
 
--- luacheck: ignore
-Vkzlib = require("vkzlib")
--- luacheck: ignore
-Log = {
-  t = Vkzlib.logging.get_logger(Vkzlib.logging.default_format, {
+local vkzlib = require("vkzlib")
+
+Vkz = {}
+Vkz.vkzlib = vkzlib
+Vkz.log = {
+  t = vkzlib.logging.get_logger(vkzlib.logging.default_format, {
     print = print,
     level = "trace",
     with_traceback = true,
   }),
-  d = Vkzlib.logging.get_logger(Vkzlib.logging.default_format, {
+  d = vkzlib.logging.get_logger(vkzlib.logging.default_format, {
     print = print,
     level = "debug",
     with_traceback = true,
   }),
-  i = Vkzlib.logging.get_logger(Vkzlib.logging.default_format, {
+  i = vkzlib.logging.get_logger(vkzlib.logging.default_format, {
     print = print,
     level = "info",
   }),
+  w = vkzlib.logging.get_logger(vkzlib.logging.default_format, {
+    print = print,
+    level = "warn"
+  }),
+  e = vkzlib.logging.get_logger(vkzlib.logging.default_format, {
+    print = print,
+    level = "error"
+  }),
+}
+
+Vkz.storage = {
+  path = vim.fn.stdpath("data") .. "/vkz/",
 }
 
 require("config")

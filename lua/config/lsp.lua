@@ -1,3 +1,6 @@
+local vkzlib = Vkz.vkzlib
+local Table = vkzlib.data.table
+
 local lspconfig = require('lspconfig')
 local profile = require("profiles")
 local server_config_table = profile.languages.ls
@@ -219,11 +222,11 @@ local function lspconfig_only()
 end
 
 -- Append required capabilities
-lspconfig.util.default_config = Vkzlib.table.merge(
+lspconfig.util.default_config = Table.merge(
   'force',
   lspconfig.util.default_config,
   {
-    capabilities = Vkzlib.table.deep_merge(
+    capabilities = Table.deep_merge(
       "force",
       vim.lsp.protocol.make_client_capabilities(),
       require('lsp-file-operations').default_capabilities(),
