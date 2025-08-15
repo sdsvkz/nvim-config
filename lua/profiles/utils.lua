@@ -129,8 +129,8 @@ local function generate_config(colorscheme, theme_config)
 end
 
 ---Generate complete profile table
----@param PROFILE any
----@return any
+---@param PROFILE profiles.Profile
+---@return profiles.Profile
 local function preprocess_profile(PROFILE)
 	local profile = deep_copy(PROFILE, true)
 	if profile.appearence.theme.config == nil then
@@ -165,7 +165,7 @@ end
 local function read_profile_name()
   local file = io.open(Vkz.storage.path .. "profile.used", "r")
   if file then
-    
+
   else
     return false
   end

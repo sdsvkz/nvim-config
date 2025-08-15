@@ -2,7 +2,7 @@
 -- luacheck: no unused
 -- originally authored by @AdamWhittingham
 
-local profile, profile_name = require("profiles")
+local profile = require("profiles")
 
 local path_ok, plenary_path = pcall(require, "plenary.path")
 if not path_ok then

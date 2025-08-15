@@ -1,9 +1,9 @@
+local profile = require("profiles")
+
 return {
   "lewis6991/hover.nvim",
   init = function ()
     local hover = require("hover")
-
-    vim.o.mousemoveevent = true
 
     -- Keymap
     vim.keymap.set(
@@ -32,7 +32,10 @@ return {
     )
 
     -- Mouse support
-    vim.keymap.set('n', '<MouseMove>', hover.hover_mouse, { desc = "hover.nvim (mouse)" })
+    if profile.preference.mouse ~= "" then
+      vim.o.mousemoveevent = true
+      vim.keymap.set('n', '<MouseMove>', hover.hover_mouse, { desc = "hover.nvim (mouse)" })
+    end
   end,
   opts = {
     init = function()
