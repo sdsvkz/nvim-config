@@ -43,14 +43,17 @@ local function read_file(FILE_PATH)
   )
 end
 
+---Write `CONTENT` to the file
+---@param FILE_PATH string
+---@param CONTENT string
+---@return string? errmsg
 local function write_file(FILE_PATH, CONTENT)
   return with_file_do(
     function (file)
       file:write(CONTENT)
-      return true
     end,
-    function ()
-      return false
+    function (errmsg)
+      return errmsg
     end,
     FILE_PATH,
     "w"

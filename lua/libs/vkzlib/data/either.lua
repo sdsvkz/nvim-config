@@ -8,12 +8,12 @@ local _TYPES = {
 	RIGHT = "Either.Right",
 }
 
----@class Either.Left<T>: { val: T }
-local _Left = { val = nil }
+---@class Either.Left<L> : { val: L }
+local _Left = {}
 
----@generic T
----@param val T
----@return Either.Left<T>
+---@generic L
+---@param val L
+---@return Either.Left<L>
 function _Left:new(val)
 	local instance = { val = val }
 	setmetatable(instance, self)
@@ -21,8 +21,9 @@ function _Left:new(val)
 	return instance
 end
 
----@generic T
----@return T
+---@generic L
+---@param self Either.Left<L>
+---@return L
 function _Left:get()
 	return self.val
 end
@@ -32,12 +33,12 @@ function _Left.type()
 	return _TYPES.LEFT
 end
 
----@class Either.Right<T>: { val: T }
-local _Right = { val = nil }
+---@class Either.Right<R> : { val: R }
+local _Right = {}
 
----@generic T
----@param val T
----@return Either.Right<T>
+---@generic R
+---@param val R
+---@return Either.Right<R>
 function _Right:new(val)
 	local instance = { val = val }
 	setmetatable(instance, self)
@@ -45,8 +46,9 @@ function _Right:new(val)
 	return instance
 end
 
----@generic T
----@return T
+---@generic R
+---@param self Either.Right<R>
+---@return R
 function _Right:get()
 	return self.val
 end
@@ -56,8 +58,8 @@ function _Right.type()
 	return _TYPES.RIGHT
 end
 
----@class Either<L, R>: { val: Either.Left<L> | Either.Right<R> }
-local Either = { val = nil }
+---@class Either<L, R> : { val: Either.Left<L> | Either.Right<R>, __l: L, __r: R }
+local Either = {}
 
 ---@private
 ---@generic L, R
@@ -72,47 +74,51 @@ end
 
 ---@private
 ---@generic L, R
+---@param self Either<L, R>
 ---@return Either.Left<L> | Either.Right<R>
 function Either:get()
 	return self.val
 end
 
----@generic L
+---@generic L, R
 ---@param x L
----@return Either<L, any>
+---@return Either<L, R>
 local function Left(x)
 	return Either:new(_Left:new(x))
 end
 
----@generic R
+---@generic L, R
 ---@param x R
----@return Either<any, R>
+---@return Either<L, R>
 local function Right(x)
 	return Either:new(_Right:new(x))
 end
 
 ---@generic Left, Right, R
+---@param self Either<Left, Right>
 ---@param on_left fun(l: Left): R
 ---@param on_right fun(r: Right): R
 ---@return R
 function Either:match(on_left, on_right)
 	local VAL = self:get()
 	if VAL:type() == "Either.Left" then
-		---@cast VAL Either.Left
 		return on_left(VAL:get())
 	elseif VAL:type() == "Either.Right" then
-		---@cast VAL Either.Right
 		return on_right(VAL:get())
 	else
 		error("Either.match: Not an Either")
 	end
 end
 
+---@generic L, R
+---@param self Either<L, R>
 ---@return boolean
 function Either:is_left()
 	return self:get():type() == _TYPES.LEFT
 end
 
+---@generic L, R
+---@param self Either<L, R>
 ---@return boolean
 function Either:is_right()
 	return self:get():type() == _TYPES.RIGHT

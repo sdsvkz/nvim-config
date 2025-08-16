@@ -19,8 +19,22 @@ local function concat(...)
   return res
 end
 
+---Check if element `e` is in list `xs`
+---@param xs any[]
+---@param e any
+---@return boolean
+local function elem(xs, e)
+  for _, x in ipairs(xs) do
+    if x == e then
+      return true
+    end
+  end
+  return false
+end
+
 return {
   pack = pack,
   unpack = unpack,
   concat = concat,
+  elem = elem,
 }

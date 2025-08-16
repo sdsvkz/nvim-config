@@ -1,11 +1,9 @@
 local MODULE = "data"
 
-local PREFIX = "vkzlib.data."
-
 return {
-	either = require(PREFIX .. "either"),
-	maybe = require(PREFIX .. "maybe"),
-	list = require(PREFIX .. "list"),
-	str = require(PREFIX .. "str"),
-	table = require(PREFIX .. "table"),
+	either = require("vkzlib.data.either"),
+	maybe = require("vkzlib.data.maybe"),
+	list = require("vkzlib.data.list"),
+	str = require("vkzlib.data.str"),
+	table = require("vkzlib.data.table"),
 }

@@ -4,6 +4,7 @@ local vkzlib = Vkz.vkzlib
 local log = Vkz.log
 local deep_copy = vkzlib.core.deep_copy
 local deep_merge = vkzlib.data.table.deep_merge
+local fileIO = vkzlib.io.file
 
 local utils = {}
 
@@ -147,27 +148,25 @@ local function preprocess_profile(PROFILE)
 	return profile
 end
 
----Write the profile name to a file in storage
+---Write the profile name to storage
 ---@param NAME string
----@return boolean ok
+---@return string? errmsg
 local function write_profile_name(NAME)
-  local file = io.open(Vkz.storage.path .. "profile.used", "w")
-  if file then
-    file:write(NAME)
-    file:close()
-    return true
-  else
-    Vkz.log.e("Failed to save profile name to storage")
-    return false
+  local errmsg = fileIO.write_file(Vkz.storage.path .. "profile.used", NAME)
+  if errmsg ~= nil then
+    log.e("Failed to write profile name to storage: " .. vkzlib.core.to_string(errmsg))
   end
+  return errmsg
 end
 
+---Read the profile name from storage
+---@return string?
 local function read_profile_name()
-  local file = io.open(Vkz.storage.path .. "profile.used", "r")
-  if file then
-
+  local res = fileIO.read_file(Vkz.storage.path .. "profile.used")
+  if res.content ~= nil then
+    return res.content
   else
-    return false
+    log.e("Failed to read profile name from storage: " .. (res.errmsg or "Unexpected exception."))
   end
 end
 

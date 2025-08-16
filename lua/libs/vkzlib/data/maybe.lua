@@ -21,8 +21,8 @@ function _Nothing.type()
   return _TYPES.NOTHING
 end
 
----@class Maybe.Just<T>: { val: T }
-local _Just = { val = nil }
+---@class Maybe.Just<T> : { val: T }
+local _Just = {}
 
 ---@generic T
 ---@param val T
@@ -35,6 +35,7 @@ function _Just:new(val)
 end
 
 ---@generic T
+---@param self Maybe.Just<T>
 ---@return T
 function _Just:get()
 	return self.val
@@ -45,8 +46,8 @@ function _Just.type()
   return _TYPES.JUST
 end
 
----@class Maybe<T>: { val: Maybe.Just<T> | Maybe.Nothing }
-local Maybe = { val = nil }
+---@class Maybe<T> : { val: Maybe.Just<T> | Maybe.Nothing, __t: T }
+local Maybe = {}
 
 ---@private
 ---@generic T
@@ -61,6 +62,7 @@ end
 
 ---@private
 ---@generic T
+---@param self Maybe<T>
 ---@return Maybe.Just<T> | Maybe.Nothing
 function Maybe:get()
 	return self.val
@@ -78,27 +80,30 @@ local function Just(x)
 end
 
 ---@generic T, R
+---@param self Maybe<T>
 ---@param on_just fun(x: T): R
 ---@param on_nothing fun(): R
 ---@return R
 function Maybe:match(on_just, on_nothing)
 	local VAL = self:get()
 	if VAL:type() == _TYPES.NOTHING then
-    ---@cast VAL Maybe.Nothing
 		return on_nothing()
   elseif VAL:type() == _TYPES.JUST then
-    ---@cast VAL Maybe.Just
 	  return on_just(VAL:get())
   else
     error("Maybe.match: Not a Maybe")
   end
 end
 
+---@generic T
+---@param self Maybe<T>
 ---@return boolean
 function Maybe:is_nothing()
 	return self:get() == _Nothing
 end
 
+---@generic T
+---@param self Maybe<T>
 ---@return boolean
 function Maybe:is_just()
 	return not self:is_nothing()

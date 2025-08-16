@@ -33,8 +33,19 @@ Vkz.log = {
   }),
 }
 
+-- Setup storage
+
 Vkz.storage = {
   path = vim.fn.stdpath("data") .. "/vkz/",
 }
+
+if vim.fn.isdirectory(Vkz.storage.path) == 0 then
+  local code = vim.fn.mkdir(Vkz.storage.path, "p")
+  if code == 0 then
+    Vkz.log.e("Failed to create storage directory in: " .. Vkz.storage.path)
+  end
+end
+
+-- Run config
 
 require("config")
