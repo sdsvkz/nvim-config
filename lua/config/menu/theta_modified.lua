@@ -239,6 +239,7 @@ local buttons = {
     dashboard.button("n", "  New file", "<CMD>ene<CR>"),
     dashboard.button("s", "  Sessions", "<CMD>SessionSearch<CR>"),
     dashboard.button("c", "  Configuration", "<CMD>cd " .. vim.fn.stdpath("config") .. "<CR>"),
+    -- TODO: I need to create a panel for changing profile
     dashboard.button("l", "  Lazy home", "<CMD>Lazy<CR>"),
     profile.preference.use_mason == true and dashboard.button("m", "  Mason home", "<CMD>Mason<CR>") or nil,
     dashboard.button("q", "󰅚  Quit", "<CMD>qa<CR>"),

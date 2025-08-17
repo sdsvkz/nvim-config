@@ -18,6 +18,7 @@
 ---@module "lint"
 ---@module "conform"
 
+local toolsConfig = require("profiles.utils").toolsConfig
 local vkzlib = Vkz.vkzlib
 
 ---@class profiles.Profile
@@ -82,18 +83,16 @@ local profile = {
 	---@class profiles.Profile.Appearence
 	appearence = {
 		---@class profiles.Profile.Appearence.Theme
-		---`options.Themes` included some default setup
-		---This equivalent to `theme = options.Themes.moonfly`
+		---`profiles.options.Themes` included some presets
+		---Default is equivalent to `theme = options.Themes.moonfly`
 		--- NOTE: Better override this field to change colorscheme instead of using vim command
-		---
-		---@see Themes
 		theme = {
 			---To get list of available themes
 			---Run `:lua for _, theme in ipairs(vim.fn.getcompletion("", "color")) do print(theme) end`
 			--- NOTE: This only show loaded themes at this point
 			---
 			---@type string
-			colorscheme = "habamax",
+			colorscheme = "moonfly",
 
 			---Configure theme here
 			---e.g. Calling `plugin.setup`, set vim.g
@@ -129,7 +128,7 @@ local profile = {
 				---Whether to use this language
 				---e.g. You can use this to implement platform
 				---@type boolean?
-				enable = nil,
+				enable = false,
 				---@class profiles.Profile.Languages.Tools
 				tools = {
 					-- TEST: Add `conform` supported options to `formatters`
@@ -147,32 +146,30 @@ local profile = {
 					---Use names from lspconfig, not mason
 					---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
 					ls = {
-						[{ "clangd", auto_update = true }] = true,
+						[toolsConfig.clangd.masonConfig] = true,
 					},
 					-- TODO: Add dap config here after nvim-dap is added
 				},
 			},
+      ---@type profiles.Profile.Languages.Language
 			cmake = {
+        enable = false,
+        ---@type profiles.Profile.Languages.Tools
 				tools = {
-					-- linters = { "cmakelint" },
+          ---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
 					ls = {
-						[{ "neocmake", auto_update = true }] = function()
-							vim.lsp.config("neocmake", {
-								init_options = {
-									-- Annoying
-									lint = {
-										enable = false,
-									},
-								},
-							})
-              vim.lsp.enable("neocmake")
-						end,
+						[toolsConfig.neocmake.masonConfig] = toolsConfig.neocmake.handler,
 					},
 				},
 			},
+      ---@type profiles.Profile.Languages.Language
 			haskell = {
+        enable = false,
+        ---@type profiles.Profile.Languages.Tools
 				tools = {
 					-- formatters = { "ormolu" }, -- HLS use Ormolu as built-in formatter
+
+          ---@type (string | config.lint.LinterSpec)[]?
 					linters = { "hlint" },
 					-- NOTE: This require Haskell Language Server in PATH
 					-- `haskell-tools.nvim` will handle setup
@@ -187,151 +184,90 @@ local profile = {
 					-- },
 				},
 			},
+      -- NOTE: Enabled by default
+      ---@type profiles.Profile.Languages.Language
 			json = {
-				-- TODO: Enable json by default
+        enable = true,
 				---@type profiles.Profile.Languages.Tools
 				tools = {
 					---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
 					ls = {
-						[{ "jsonls", auto_update = true }] = function()
-							vim.lsp.config("jsonls", {
-								settings = {
-									json = {
-										format = {
-											enable = true,
-										},
-										schemas = vkzlib.data.list.concat(require("schemastore").json.schemas({
-											extra = {
-												{
-													description = "Lua language server configuration file",
-													fileMatch = { ".luarc.json" },
-													name = ".luarc.json",
-													url = "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
-												},
-											},
-										})),
-										validate = { enable = true },
-									},
-								},
-							})
-              vim.lsp.enable("jsonls")
-						end,
-					},
+						[toolsConfig.jsonls.masonConfig] = toolsConfig.jsonls.handler,
+          },
 				},
 			},
+      -- NOTE: Enabled by default
+      ---@type profiles.Profile.Languages.Language
 			lua = {
-				-- TODO: Enable lua by default
+        enable = true,
+        ---@type profiles.Profile.Languages.Tools
 				tools = {
+          ---@type conform.FiletypeFormatter?
 					formatters = { "stylua" },
 					---@type (string | config.lint.LinterSpec)[]?
 					linters = {
-						{
-							"luacheck",
-							opts = function(linter)
-								---@type lint.Linter
-								---@diagnostic disable-next-line: missing-fields
-								local properties = {
-									args = {
-										-- Ignore some warnings, see https://luacheck.readthedocs.io/en/stable/warnings.html
-										-- Some of them are duplicated with `luals`, others are annoying
-										"--ignore",
-										"21*",
-										"611",
-										"612",
-										"631",
-										vkzlib.data.list.unpack(linter.args),
-									},
-								}
-								return vkzlib.data.table.deep_merge("force", linter, properties)
-							end,
-						},
+						toolsConfig.luacheck,
 					},
+          ---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
 					ls = {
-						[{ "lua_ls", auto_update = true }] = function()
-							vim.lsp.config("lua_ls", {
-								on_init = function(client)
-									local path = client.workspace_folders[1].name
-									---@diagnostic disable-next-line: undefined-field
-									if
-										---@diagnostic disable-next-line: undefined-field
-										vim.uv.fs_stat(path .. "/.luarc.json")
-										---@diagnostic disable-next-line: undefined-field
-										or vim.uv.fs_stat(path .. "/.luarc.jsonc")
-									then
-										return
-									end
-
-									client.config.settings.Lua =
-										vim.tbl_deep_extend("force", client.config.settings.Lua, {
-											runtime = {
-												-- Tell the language server which version of Lua you're using
-												-- (most likely LuaJIT in the case of Neovim)
-												version = "LuaJIT",
-											},
-											-- Make the server aware of Neovim runtime files
-											workspace = {
-												checkThirdParty = false,
-												library = {
-													vim.env.VIMRUNTIME,
-													-- Depending on the usage, you might want to add additional paths here.
-													-- "${3rd}/luv/library"
-													-- "${3rd}/busted/library",
-												},
-												-- or pull in all of 'runtimepath'.
-												-- library = vim.api.nvim_get_runtime_file("", true)
-											},
-										})
-								end,
-
-								settings = {
-									Lua = {},
-								},
-							})
-              vim.lsp.enable("lua_ls")
-						end,
+						[toolsConfig.lua_ls.masonConfig] = toolsConfig.lua_ls.handler,
 					},
 				},
 			},
+      ---@type profiles.Profile.Languages.Language
 			markdown = {
+        enable = false,
+        ---@type profiles.Profile.Languages.Tools
 				tools = {
+          ---@type conform.FiletypeFormatter?
 					formatters = { "prettier" },
-					linters = { "markdownlint-cli2" },
 				},
 			},
+      ---@type profiles.Profile.Languages.Language
 			ps1 = {
+        enable = false,
+        ---@type profiles.Profile.Languages.Tools
 				tools = {
+          ---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
 					ls = {
-						[{ "powershell_es", auto_update = true }] = function()
-							vim.lsp.config("powershell_es", {
-								bundle_path = vim.fn.stdpath("data") .. "/mason/packages/powershell-editor-services",
-								init_options = {
-									enableProfileLoading = false,
-								},
-							})
-              vim.lsp.enable("powershell_es")
-						end,
+						[toolsConfig.powershell_es.masonConfig] = toolsConfig.powershell_es.handler,
 					},
 				},
 			},
+      ---@type profiles.Profile.Languages.Language
 			python = {
+        enable = false,
+        ---@type profiles.Profile.Languages.Tools
 				tools = {
+          ---@type conform.FiletypeFormatter?
 					formatters = { "isort", "black" },
+          ---@type (string | config.lint.LinterSpec)[]?
 					linters = { "flake8", "bandit" },
+          ---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
 					ls = {
-						[{ "pyright", auto_update = true }] = true,
+						[toolsConfig.pyright.masonConfig] = true,
 					},
 				},
 			},
+      ---@type profiles.Profile.Languages.Language
 			[{ "bash", "sh" }] = {
+        enable = false,
+        ---@type profiles.Profile.Languages.Tools
 				tools = {
+          ---@type conform.FiletypeFormatter?
 					formatters = { "shfmt" },
+          ---@type (string | config.lint.LinterSpec)[]?
 					linters = { "shellcheck" },
+          ---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
 					ls = {
-						[{ "bashls", auto_update = true }] = true,
+						[toolsConfig.bashls.masonConfig] = true,
 					},
 				},
 			},
+      ---@type profiles.Profile.Languages.Language
 			rust = {
+        enable = false,
+        ---@type profiles.Profile.Languages.Tools
 				tools = {
 					-- NOTE: This require `rust-analyzer` in PATH
 					-- `rustaceanvim` will handle setup.
@@ -346,33 +282,19 @@ local profile = {
 					-- }
 				},
 			},
+      -- NOTE: Enabled by default
+      ---@type profiles.Profile.Languages.Language
 			yaml = {
-				-- TODO: Enable yaml by default
+        enable = true,
+        ---@type profiles.Profile.Languages.Tools
 				tools = {
+          ---@type conform.FiletypeFormatter?
 					formatters = { "prettier" },
+          ---@type (string | config.lint.LinterSpec)[]?
 					linters = { "yamllint" },
+          ---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
 					ls = {
-						[{ "yamlls", auto_update = true }] = function()
-							vim.lsp.config("yamlls", {
-								settings = {
-									yaml = {
-										format = {
-											enable = true,
-										},
-										validate = true,
-                    schemas = require('schemastore').yaml.schemas(),
-										schemaStore = {
-											-- Must disable built-in schemaStore support to use
-											-- schemas from SchemaStore.nvim plugin
-											enable = false,
-											-- Avoid TypeError: Cannot read properties of undefined (reading 'length')
-											url = "",
-										},
-									},
-								},
-							})
-              vim.lsp.enable("yamlls")
-						end,
+						[toolsConfig.yamlls.masonConfig] = toolsConfig.yamlls.handler,
 					},
 				},
 			},
@@ -412,6 +334,7 @@ local profile = {
 			-- sh = {
 			--   enable = default.preference.os == "Linux"
 			-- },
+      
 		},
 
 		--- !!! Don't touch those fields

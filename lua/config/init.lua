@@ -9,6 +9,7 @@ end
 
 require("config.neovide")
 require("config.lazy")
+require("config.mason")
 require("config.lsp")
 require("config.lint")
 require("config.dap")

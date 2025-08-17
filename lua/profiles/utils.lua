@@ -8,6 +8,158 @@ local fileIO = vkzlib.io.file
 
 local utils = {}
 
+utils.toolsConfig = {
+	bashls = {
+		masonConfig = { "bashls", auto_update = true },
+	},
+	clangd = {
+		masonConfig = { "clangd", auto_update = true },
+	},
+	luacheck = {
+		"luacheck",
+		opts = function(linter)
+			---@type lint.Linter
+			---@diagnostic disable-next-line: missing-fields
+			local properties = {
+				args = {
+					-- Ignore some warnings, see https://luacheck.readthedocs.io/en/stable/warnings.html
+					-- Some of them are duplicated with `luals`, others are annoying
+					"--ignore",
+					"21*",
+					"611",
+					"612",
+					"631",
+					vkzlib.data.list.unpack(linter.args),
+				},
+			}
+			return vkzlib.data.table.deep_merge("force", linter, properties)
+		end,
+	},
+	lua_ls = {
+		masonConfig = { "lua_ls", auto_update = true },
+		handler = function()
+			vim.lsp.config("lua_ls", {
+				on_init = function(client)
+					local path = client.workspace_folders[1].name
+					---@diagnostic disable-next-line: undefined-field
+					if
+						---@diagnostic disable-next-line: undefined-field
+						vim.uv.fs_stat(path .. "/.luarc.json")
+						---@diagnostic disable-next-line: undefined-field
+						or vim.uv.fs_stat(path .. "/.luarc.jsonc")
+					then
+						return
+					end
+
+					client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
+						runtime = {
+							-- Tell the language server which version of Lua you're using
+							-- (most likely LuaJIT in the case of Neovim)
+							version = "LuaJIT",
+						},
+						-- Make the server aware of Neovim runtime files
+						workspace = {
+							checkThirdParty = false,
+							library = {
+								vim.env.VIMRUNTIME,
+								-- Depending on the usage, you might want to add additional paths here.
+								-- "${3rd}/luv/library"
+								-- "${3rd}/busted/library",
+							},
+							-- or pull in all of 'runtimepath'.
+							-- library = vim.api.nvim_get_runtime_file("", true)
+						},
+					})
+				end,
+
+				settings = {
+					Lua = {},
+				},
+			})
+			vim.lsp.enable("lua_ls")
+		end,
+	},
+	jsonls = {
+		masonConfig = { "jsonls", auto_update = true },
+		handler = function()
+			vim.lsp.config("jsonls", {
+				settings = {
+					json = {
+						format = {
+							enable = true,
+						},
+						schemas = vkzlib.data.list.concat(require("schemastore").json.schemas({
+							extra = {
+								{
+									description = "Lua language server configuration file",
+									fileMatch = { ".luarc.json" },
+									name = ".luarc.json",
+									url = "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
+								},
+							},
+						})),
+						validate = { enable = true },
+					},
+				},
+			})
+			vim.lsp.enable("jsonls")
+		end,
+	},
+	neocmake = {
+		masonConfig = { "neocmake", auto_update = true },
+		handler = function()
+			vim.lsp.config("neocmake", {
+				init_options = {
+					-- Annoying
+					lint = {
+						enable = false,
+					},
+				},
+			})
+			vim.lsp.enable("neocmake")
+		end,
+	},
+	powershell_es = {
+		masonConfig = { "powershell_es", auto_update = true },
+		handler = function()
+			vim.lsp.config("powershell_es", {
+				bundle_path = vim.fn.stdpath("data") .. "/mason/packages/powershell-editor-services",
+				init_options = {
+					enableProfileLoading = false,
+				},
+			})
+			vim.lsp.enable("powershell_es")
+		end,
+	},
+	pyright = {
+		masonConfig = { "pyright", auto_update = true },
+	},
+	yamlls = {
+		masonConfig = { "yamlls", auto_update = true },
+		handler = function()
+			vim.lsp.config("yamlls", {
+				settings = {
+					yaml = {
+						format = {
+							enable = true,
+						},
+						validate = true,
+						schemas = require("schemastore").yaml.schemas(),
+						schemaStore = {
+							-- Must disable built-in schemaStore support to use
+							-- schemas from SchemaStore.nvim plugin
+							enable = false,
+							-- Avoid TypeError: Cannot read properties of undefined (reading 'length')
+							url = "",
+						},
+					},
+				},
+			})
+			vim.lsp.enable("yamlls")
+		end,
+	},
+}
+
 ---@param PROFILE profiles.Profile
 ---@param MODULE_NAME string
 ---@return profiles.Profile
@@ -152,22 +304,22 @@ end
 ---@param NAME string
 ---@return string? errmsg
 local function write_profile_name(NAME)
-  local errmsg = fileIO.write_file(Vkz.storage.path .. "profile.used", NAME)
-  if errmsg ~= nil then
-    log.e("Failed to write profile name to storage: " .. vkzlib.core.to_string(errmsg))
-  end
-  return errmsg
+	local errmsg = fileIO.write_file(Vkz.storage.path .. "profile.used", NAME)
+	if errmsg ~= nil then
+		log.e("Failed to write profile name to storage: " .. vkzlib.core.to_string(errmsg))
+	end
+	return errmsg
 end
 
 ---Read the profile name from storage
 ---@return string?
 local function read_profile_name()
-  local res = fileIO.read_file(Vkz.storage.path .. "profile.used")
-  if res.content ~= nil then
-    return res.content
-  else
-    log.e("Failed to read profile name from storage: " .. (res.errmsg or "Unexpected exception."))
-  end
+	local res = fileIO.read_file(Vkz.storage.path .. "profile.used")
+	if res.content ~= nil then
+		return res.content
+	else
+		log.e("Failed to read profile name from storage: " .. (res.errmsg or "Unexpected exception."))
+	end
 end
 
 utils.merge_profile = merge_profile

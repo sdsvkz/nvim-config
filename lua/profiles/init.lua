@@ -10,6 +10,7 @@ local utils = require("profiles.utils")
 
 local profiles_found = {}
 
+---@diagnostic disable-next-line: param-type-mismatch
 for _, FILE_NAME in ipairs(vim.fn.readdir(str.join({ vim.fn.stdpath("config"), "lua", "profiles"}, "/"), [[ v:val =~ '\.lua$' ]])) do
   if FILE_NAME ~= "init.lua" and FILE_NAME ~= "options.lua" and FILE_NAME ~= "default.lua" and FILE_NAME ~= "utils.lua" then
     local MODULE_NAME = FILE_NAME:sub(1, #FILE_NAME - 4)
@@ -27,8 +28,14 @@ if profile_count == 1 then
 elseif profile_count > 1 then
   local profile_name = utils.read_profile_name()
   log.t(vkzlib.core.to_string(profile_name))
-  if profile_name ~= nil then
-    list.elem(profiles_found, profile_name)
+  if profile_name ~= nil and profile_name ~= "Default" then
+    local profile_index = list.elemIndex(profile_name, profiles_found)
+    if profile_index ~= nil then
+      profile = utils.merge_profile(profile, profiles_found[profile_index])
+    else
+      log.e("Profile not exists: " .. vkzlib.core.to_string(profile_name))
+      utils.write_profile_name("Default")
+    end
   end
 end
 
