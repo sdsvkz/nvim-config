@@ -4,6 +4,8 @@ This is my own Neovim configuration and also, a shitty little library written by
 
 ## Requirements
 
+Neovim >= 0.11
+
 Latest version of
 
 - `pip`
