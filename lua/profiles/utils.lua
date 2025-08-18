@@ -219,10 +219,10 @@ local function get_language_tools(LANGUAGES)
 	end
 	log.t(vkzlib.core.to_string(supported))
 
-	-- TODO: Make enable by default possible
-	-- All Languages are disabled by default
-	-- So see if any of them in `custom` has been enabled
 	for FT, LANG in pairs(LANGUAGES.custom) do
+    -- This way make any language with enable flag set to `false`
+    -- not be included in the final toolset.
+    -- Just like they are "disabled"
 		if LANG.enable then
 			---Process to extract tools for `filetype`, from `lang`
 			---@param filetype string

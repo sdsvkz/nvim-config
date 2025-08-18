@@ -9,9 +9,9 @@ end
 
 require("config.neovide")
 require("config.lazy")
-require("config.mason")
 require("config.lsp")
 require("config.lint")
 require("config.dap")
+require("config.mason")
 require("config.theme")
 require('config.keymap')

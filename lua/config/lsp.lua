@@ -51,7 +51,6 @@ end
 
 local function with_mason()
 	local mason_lspconfig = require("mason-lspconfig")
-	local mason_tool_installer = require("mason-tool-installer")
 	-- Preparing begin
 
 	---@type { [string]: config.lsp.Handler.Config }
@@ -71,7 +70,6 @@ local function with_mason()
 		if type(handler) == "table" then
 			-- Put manual ones into manual_setup instead of ensure_installed
 			manual_setup[server_name] = handler.config
-			goto continue
 		else
 			-- Put all others into ensure_installed
 			table.insert(ensure_installed, server_config)
@@ -80,57 +78,12 @@ local function with_mason()
 				handle_by_mason[server_name] = handler
 			end
 		end
-		::continue::
-	end
-
-	-- This has better customize options
-	mason_tool_installer.setup({
-		ensure_installed = ensure_installed,
-
-		-- if set to true this will check each tool for updates. If updates
-		-- are available the tool will be updated. This setting does not
-		-- affect :MasonToolsUpdate or :MasonToolsInstall.
-		-- Default: false
-		auto_update = false,
-
-		-- automatically install / update on startup. If set to false nothing
-		-- will happen on startup. You can use :MasonToolsInstall or
-		-- :MasonToolsUpdate to install tools and check for updates.
-		-- Default: true
-		run_on_start = true,
-
-		-- set a delay (in ms) before the installation starts. This is only
-		-- effective if run_on_start is set to true.
-		-- e.g.: 5000 = 5 second delay, 10000 = 10 second delay, etc...
-		-- Default: 0
-		start_delay = 10000,
-
-		-- Only attempt to install if 'debounce_hours' number of hours has
-		-- elapsed since the last time Neovim was started. This stores a
-		-- timestamp in a file named stdpath('data')/mason-tool-installer-debounce.
-		-- This is only relevant when you are using 'run_on_start'. It has no
-		-- effect when running manually via ':MasonToolsInstall' etc....
-		-- Default: nil
-		debounce_hours = nil,
-
-		-- By default all integrations are enabled. If you turn on an integration
-		-- and you have the required module(s) installed this means you can use
-		-- alternative names, supplied by the modules, for the thing that you want
-		-- to install. If you turn off the integration (by setting it to false) you
-		-- cannot use these alternative names. It also suppresses loading of those
-		-- module(s) (assuming any are installed) which is sometimes wanted when
-		-- doing lazy loading.
-		integrations = {
-			["mason-lspconfig"] = true,
-			["mason-null-ls"] = false,
-			["mason-nvim-dap"] = false, -- TODO: Change to true after dap integration is done
-		},
-	})
+	end	
 
 	-- Preparing end
 
 	-- LSP server begin
-  --[[ 
+	--[[ 
 	local handler = {}
 
 	for server_name, config in pairs(handle_by_mason) do
@@ -146,7 +99,7 @@ local function with_mason()
 	end
   ]]
 
-  mason_lspconfig.setup({
+	mason_lspconfig.setup({
 		-- A list of servers to automatically install if they're not already installed.
 		-- Example: { "rust_analyzer@nightly", "lua_ls" }
 		--
@@ -169,13 +122,19 @@ local function with_mason()
 		automatic_installation = false,
 	})
 
-  -- Setup mason installed servers
-  lspconfig_setup(handle_by_mason)
+	-- Setup mason installed servers
+	lspconfig_setup(handle_by_mason)
 
 	-- Setup manually
 	lspconfig_setup(manual_setup)
 
 	-- LSP server end
+
+	return {
+		handle_by_mason = handle_by_mason,
+		manual_setup = manual_setup,
+		ensure_installed = ensure_installed,
+	}
 end
 
 local function lspconfig_only()
@@ -208,6 +167,10 @@ local function lspconfig_only()
 	lspconfig_setup(name_config_table)
 
 	-- LSP server end
+
+  return {
+    manual_setup = name_config_table,
+  }
 end
 
 -- Append required capabilities
@@ -229,9 +192,25 @@ lspconfig.util.default_config = Table.merge("force", lspconfig.util.default_conf
 	),
 })
 
+local M = {
+  ---@type config.lsp.Server.MasonConfig[]
+  ensure_installed = {},
+	---@type { [string]: config.lsp.Handler.Config }
+	handle_by_mason = {},
+	---@type { [string]: config.lsp.Handler.Config }
+	manual_setup = {},
+}
+
 -- Setup LSP
 if profile.preference.use_mason then
-	with_mason()
+	---@return integer
+	local res = with_mason()
+  M.ensure_installed = res.ensure_installed
+  M.handle_by_mason = res.handle_by_mason
+  M.manual_setup = res.manual_setup
 else
-	lspconfig_only()
+	M.manual_setup = lspconfig_only().manual_setup
 end
+
+return M
+
