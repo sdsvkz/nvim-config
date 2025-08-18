@@ -76,7 +76,7 @@ return {
     {
       Groups.Telescope.lhs .. "t", mode = "n",
       "<CMD>TodoTelescope<CR>",
-      desc = "List all project todos (Telescope)"
+      desc = "Project TODOs (Telescope)"
     },
   }
 }
