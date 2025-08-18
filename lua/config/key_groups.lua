@@ -47,7 +47,8 @@ end
 ---@type table<string, config.keymap.Group>
 local Groups = {
   Setting = { lhs = "<LEADER>,", desc = "Settings" },
-  Trouble = { lhs = "<LEADER>x", desc = "Trouble UIs" },
+  Trouble = { lhs = "<LEADER>x", desc = "UIs (Trouble)" },
+  Telescope = { lhs = "<LEADER>t", desc = "UIs (Telescope)" },
   UI = { lhs = "<LEADER>w", desc = "UIs" },
   Show = { lhs = "<LEADER>s", desc = "Show" },
   Send = { lhs = "<LEADER>s", desc = "Send" },

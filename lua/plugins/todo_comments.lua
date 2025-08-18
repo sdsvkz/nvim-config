@@ -74,9 +74,9 @@ return {
   },
   keys = {
     {
-      Groups.Trouble.lhs .. "t", mode = "n",
-      "<CMD>Trouble todo toggle focus=true<CR>",
-      desc = "List all project todos (Trouble)"
+      Groups.Telescope.lhs .. "t", mode = "n",
+      "<CMD>TodoTelescope<CR>",
+      desc = "List all project todos (Telescope)"
     },
   }
 }
