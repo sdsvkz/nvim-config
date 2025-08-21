@@ -309,6 +309,17 @@ local profile = {
 					-- }
 				},
 			},
+      ---@type profiles.Profile.Languages.Language
+      typescript = {
+        enable = true,
+        ---@type profiles.Profile.Languages.Tools
+        tools = {
+          ---@type profiles.Profile.Languages.Tools.LanguageServers
+          ls = {
+            [toolsConfig.vtsls.masonConfig] = toolsConfig.vtsls.handler,
+          },
+        },
+      },
 			-- NOTE: Enabled by default
 			---@type profiles.Profile.Languages.Language
 			yaml = {

@@ -21,14 +21,14 @@ utils.toolsConfig = {
 	clangd = {
 		masonConfig = { "clangd", auto_update = true },
 	},
-  ---@type config.lint.LinterSpec
+	---@type config.lint.LinterSpec
 	luacheck = {
 		"luacheck",
 		auto_update = true,
-    -- -- Example on disable auto-installation
-    -- condition = function ()
-    --   return false
-    -- end,
+		-- -- Example on disable auto-installation
+		-- condition = function ()
+		--   return false
+		-- end,
 		opts = function(linter)
 			---@type lint.Linter
 			---@diagnostic disable-next-line: missing-fields
@@ -145,6 +145,62 @@ utils.toolsConfig = {
 	},
 	pyright = {
 		masonConfig = { "pyright", auto_update = true },
+	},
+	vtsls = {
+		masonConfig = { "vtsls", auto_update = true },
+		handler = function()
+			vim.lsp.config("vtsls", {
+				filetypes = {
+					"javascript",
+					"javascriptreact",
+					"javascript.jsx",
+					"typescript",
+					"typescriptreact",
+					"typescript.tsx",
+				},
+				settings = {
+					complete_function_calls = false,
+					vtsls = {
+						enableMoveToFileCodeAction = true,
+						autoUseWorkspaceTsdk = true,
+						experimental = {
+							maxInlayHintLength = 30,
+							completion = {
+								enableServerSideFuzzyMatch = true,
+							},
+						},
+					},
+					javascript = {
+						updateImportsOnFileMove = { enabled = "always" },
+						suggest = {
+							completeFunctionCalls = false,
+						},
+						inlayHints = {
+							functionLikeReturnTypes = { enabled = true },
+							parameterNames = { enabled = "literals" },
+							parameterTypes = { enabled = true },
+							propertyDeclarationTypes = { enabled = true },
+							variableTypes = { enabled = false },
+						},
+					},
+					typescript = {
+						updateImportsOnFileMove = { enabled = "always" },
+						suggest = {
+							completeFunctionCalls = false,
+						},
+						inlayHints = {
+							enumMemberValues = { enabled = true },
+							functionLikeReturnTypes = { enabled = true },
+							parameterNames = { enabled = "literals" },
+							parameterTypes = { enabled = true },
+							propertyDeclarationTypes = { enabled = true },
+							variableTypes = { enabled = false },
+						},
+					},
+				},
+			})
+		end,
+		vim.lsp.enable("vtsls"),
 	},
 	yamlls = {
 		masonConfig = { "yamlls", auto_update = true },
@@ -466,7 +522,7 @@ local DEFAULT_PROFILE_NAME = "Default"
 ---@param NAME string
 ---@return string? errmsg
 local function write_profile_name(NAME)
-  return fileIO.write_file(Vkz.storage.path .. "profile.used", NAME)
+	return fileIO.write_file(Vkz.storage.path .. "profile.used", NAME)
 end
 
 ---Read the profile name from storage
@@ -480,7 +536,7 @@ end
 ---@param PROFILE_NAMES string[]
 ---@param on_select fun(PROFILE_NAME: string)?
 local function open_profile_menu(PROFILE_NAMES, on_select)
-  table.insert(PROFILE_NAMES, 1, DEFAULT_PROFILE_NAME)
+	table.insert(PROFILE_NAMES, 1, DEFAULT_PROFILE_NAME)
 
 	local buf = vim.api.nvim_create_buf(false, true)
 	local PROFILE_COUNT = #PROFILE_NAMES
@@ -519,27 +575,27 @@ local function open_profile_menu(PROFILE_NAMES, on_select)
 		close()
 	end, key_opts)
 
-  ---@diagnostic disable-next-line: param-type-mismatch
-  vim.api.nvim_buf_set_keymap(buf, "n", "q", function ()
-    close()
-  end, key_opts)
+	---@diagnostic disable-next-line: param-type-mismatch
+	vim.api.nvim_buf_set_keymap(buf, "n", "q", function()
+		close()
+	end, key_opts)
 
-  ---@diagnostic disable-next-line: param-type-mismatch
-  vim.api.nvim_buf_set_keymap(buf, "n", "<cr>", function ()
-    local PROFILE_NAME = vim.api.nvim_get_current_line()
-    close()
-    vim.schedule(function ()
-      log.t("Select: " ..  core.to_string(PROFILE_NAME))
-      local errmsg = write_profile_name(PROFILE_NAME)
-      if errmsg ~= nil then
-        log.e("Failed to write profile name: " .. errmsg)
-      end
-      log.w("Restart Neovim to take effect", vim.log.levels.WARN)
-      if on_select ~= nil then
-        on_select(PROFILE_NAME)
-      end
-    end)
-  end, key_opts)
+	---@diagnostic disable-next-line: param-type-mismatch
+	vim.api.nvim_buf_set_keymap(buf, "n", "<cr>", function()
+		local PROFILE_NAME = vim.api.nvim_get_current_line()
+		close()
+		vim.schedule(function()
+			log.t("Select: " .. core.to_string(PROFILE_NAME))
+			local errmsg = write_profile_name(PROFILE_NAME)
+			if errmsg ~= nil then
+				log.e("Failed to write profile name: " .. errmsg)
+			end
+			log.w("Restart Neovim to take effect", vim.log.levels.WARN)
+			if on_select ~= nil then
+				on_select(PROFILE_NAME)
+			end
+		end)
+	end, key_opts)
 end
 
 utils.merge_profile = merge_profile
