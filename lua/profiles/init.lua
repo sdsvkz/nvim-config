@@ -13,9 +13,14 @@ log.t(core.to_string(profiles_found))
 
 local profile_count = #profiles_found
 
+local read_res = utils.read_profile_name()
+
 -- Decide profile
-if profile_count >= 1 then
-  local profile_name = utils.read_profile_name()
+if read_res.errmsg ~= nil then
+  utils.write_profile_name(DEFAULT_PROFILE_NAME)
+elseif profile_count >= 1 then
+  ---@type string
+  local profile_name = read_res.content
   log.t(core.to_string(profile_name))
   if profile_name ~= nil and profile_name ~= DEFAULT_PROFILE_NAME then
     local profile_index = list.elemIndex(profile_name, profiles_found)
@@ -27,6 +32,8 @@ if profile_count >= 1 then
       utils.write_profile_name(DEFAULT_PROFILE_NAME)
     end
   end
+else
+  log.e("Unexpected exception occurred when deciding profile")
 end
 
 return utils.preprocess_profile(profile)

@@ -457,25 +457,18 @@ end
 local DEFAULT_PROFILE_NAME = "Default"
 
 ---Write the profile name to storage
+---On success, `errmsg == nil`
 ---@param NAME string
 ---@return string? errmsg
 local function write_profile_name(NAME)
-	local errmsg = fileIO.write_file(Vkz.storage.path .. "profile.used", NAME)
-	if errmsg ~= nil then
-		log.e("Failed to write profile name to storage: " .. core.to_string(errmsg))
-	end
-	return errmsg
+  return fileIO.write_file(Vkz.storage.path .. "profile.used", NAME)
 end
 
 ---Read the profile name from storage
----@return string?
+---On success, `errmsg == nil`
+---@return { content: string?, errmsg: string? }
 local function read_profile_name()
-	local res = fileIO.read_file(Vkz.storage.path .. "profile.used")
-	if res.content ~= nil then
-		return res.content
-	else
-		log.e("Failed to read profile name from storage: " .. (res.errmsg or "Unexpected exception."))
-	end
+	return fileIO.read_file(Vkz.storage.path .. "profile.used")
 end
 
 ---Open a menu for user to choose profile
@@ -532,7 +525,10 @@ local function open_profile_menu(PROFILE_NAMES, on_select)
     close()
     vim.schedule(function ()
       log.t("Select: " ..  core.to_string(PROFILE_NAME))
-      write_profile_name(PROFILE_NAME)
+      local errmsg = write_profile_name(PROFILE_NAME)
+      if errmsg ~= nil then
+        log.e("Failed to write profile name: " .. errmsg)
+      end
       log.w("Restart Neovim to take effect", vim.log.levels.WARN)
       if on_select ~= nil then
         on_select(PROFILE_NAME)
