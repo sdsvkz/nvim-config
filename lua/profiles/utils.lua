@@ -21,9 +21,14 @@ utils.toolsConfig = {
 	clangd = {
 		masonConfig = { "clangd", auto_update = true },
 	},
+  ---@type config.lint.LinterSpec
 	luacheck = {
 		"luacheck",
 		auto_update = true,
+    -- -- Example on disable auto-installation
+    -- condition = function ()
+    --   return false
+    -- end,
 		opts = function(linter)
 			---@type lint.Linter
 			---@diagnostic disable-next-line: missing-fields

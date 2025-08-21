@@ -1364,12 +1364,9 @@ local profile = {
         enable = true,
       },
       ps1 = {
-        -- -- Platform-specific example
-        -- enable = default.preference.os == options.System.Windows,
         enable = false
       },
       [{ "bash", "sh" }] = {
-        -- enable = default.preference.os == options.System.Linux,
         enable = false,
       },
       rust = {
