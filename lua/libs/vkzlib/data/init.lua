@@ -1,9 +1,10 @@
 local MODULE = "data"
 
 return {
-	either = require("vkzlib.data.either"),
-	maybe = require("vkzlib.data.maybe"),
-	list = require("vkzlib.data.list"),
-	str = require("vkzlib.data.str"),
-	table = require("vkzlib.data.table"),
+	Either = require("vkzlib.Data.Either"),
+  LazyValue = require("vkzlib.Data.LazyValue"),
+  list = require("vkzlib.Data.list"),
+	Maybe = require("vkzlib.Data.Maybe"),
+	str = require("vkzlib.Data.str"),
+	table = require("vkzlib.Data.table"),
 }

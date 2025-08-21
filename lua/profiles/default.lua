@@ -18,8 +18,10 @@
 ---@module "lint"
 ---@module "conform"
 
+---@alias profiles.Profile.Default.Name "Default"
+---@type profiles.Profile.Default.Name
+local NAME = "Default"
 local toolsConfig = require("profiles.utils").toolsConfig
-local vkzlib = Vkz.vkzlib
 
 ---@class profiles.Profile
 local profile = {
@@ -50,6 +52,22 @@ local profile = {
 		---This will only be called if using Neovide
 		---@type fun()?
 		config_neovide = nil,
+
+		---@type fun(): LazyConfig
+		lazy_opts = function()
+      ---@type LazyConfig
+			return {
+				spec = {
+					-- import your plugins
+					{ import = "plugins" },
+				},
+				-- Configure any other settings here. See the documentation for more details.
+				-- colorscheme that will be used when installing plugins.
+				install = { colorscheme = { "habamax" } },
+				-- automatically check for plugin updates
+				checker = { enabled = true },
+			}
+		end,
 	},
 
 	---Editor
@@ -136,41 +154,45 @@ local profile = {
 					-- NOTE: To make formatters and linters work, install required tools (using Mason)
 					-- If Mason enabled, language servers will be automatically installed (by mason-tool-installer)
 
+					---@alias profiles.Profile.Languages.Tools.Formatters conform.FiletypeFormatter
+					---@alias profiles.Profile.Languages.Tools.Linters (string | config.lint.LinterSpec)[]
+					---@alias profiles.Profile.Languages.Tools.LanguageServers table<config.mason.InstallConfig, config.lsp.Handler>
+
 					---Formatters of this filetype
-					---@type conform.FiletypeFormatter?
+					---@type profiles.Profile.Languages.Tools.Formatters?
 					formatters = nil,
-					-- Linters of this filetype
-					---@type (string | config.lint.LinterSpec)[]?
+					---Linters of this filetype
+					---@type profiles.Profile.Languages.Tools.Linters?
 					linters = nil,
 					---Map of language server name to configuration
 					---Use names from lspconfig, not mason
-					---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
+					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
 						[toolsConfig.clangd.masonConfig] = true,
 					},
 					-- TODO: Add dap config here after nvim-dap is added
 				},
 			},
-      ---@type profiles.Profile.Languages.Language
+			---@type profiles.Profile.Languages.Language
 			cmake = {
-        enable = false,
-        ---@type profiles.Profile.Languages.Tools
+				enable = false,
+				---@type profiles.Profile.Languages.Tools
 				tools = {
-          ---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
+					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
 						[toolsConfig.neocmake.masonConfig] = toolsConfig.neocmake.handler,
 					},
 				},
 			},
-      ---@type profiles.Profile.Languages.Language
+			---@type profiles.Profile.Languages.Language
 			haskell = {
-        enable = false,
-        ---@type profiles.Profile.Languages.Tools
+				enable = false,
+				---@type profiles.Profile.Languages.Tools
 				tools = {
 					-- formatters = { "ormolu" }, -- HLS use Ormolu as built-in formatter
 
-          ---@type (string | config.lint.LinterSpec)[]?
-					linters = { "hlint" },
+					---@type profiles.Profile.Languages.Tools.Linters?
+					linters = { { "hlint", auto_update = true } },
 					-- NOTE: This require Haskell Language Server in PATH
 					-- `haskell-tools.nvim` will handle setup
 					-- I recommend using GHCup to install HLS so that you can pick the one support your GHC version
@@ -184,90 +206,95 @@ local profile = {
 					-- },
 				},
 			},
-      -- NOTE: Enabled by default
-      ---@type profiles.Profile.Languages.Language
+			-- NOTE: Enabled by default
+			---@type profiles.Profile.Languages.Language
 			json = {
-        enable = true,
+				enable = true,
 				---@type profiles.Profile.Languages.Tools
 				tools = {
-					---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
+					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
 						[toolsConfig.jsonls.masonConfig] = toolsConfig.jsonls.handler,
-          },
+					},
 				},
 			},
-      -- NOTE: Enabled by default
-      ---@type profiles.Profile.Languages.Language
+			-- NOTE: Enabled by default
+			---@type profiles.Profile.Languages.Language
 			lua = {
-        enable = true,
-        ---@type profiles.Profile.Languages.Tools
+				enable = true,
+				---@type profiles.Profile.Languages.Tools
 				tools = {
-          ---@type conform.FiletypeFormatter?
+					---@type profiles.Profile.Languages.Tools.Formatters?
 					formatters = { "stylua" },
-					---@type (string | config.lint.LinterSpec)[]?
+					---@type profiles.Profile.Languages.Tools.Linters?
 					linters = {
 						toolsConfig.luacheck,
 					},
-          ---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
+					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
 						[toolsConfig.lua_ls.masonConfig] = toolsConfig.lua_ls.handler,
 					},
 				},
 			},
-      ---@type profiles.Profile.Languages.Language
+			---@type profiles.Profile.Languages.Language
 			markdown = {
-        enable = false,
-        ---@type profiles.Profile.Languages.Tools
+				enable = false,
+				---@type profiles.Profile.Languages.Tools
 				tools = {
-          ---@type conform.FiletypeFormatter?
+					---@type profiles.Profile.Languages.Tools.Formatters?
 					formatters = { "prettier" },
 				},
 			},
-      ---@type profiles.Profile.Languages.Language
+			---@type profiles.Profile.Languages.Language
 			ps1 = {
-        enable = false,
-        ---@type profiles.Profile.Languages.Tools
+				enable = false,
+				---@type profiles.Profile.Languages.Tools
 				tools = {
-          ---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
+					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
 						[toolsConfig.powershell_es.masonConfig] = toolsConfig.powershell_es.handler,
 					},
 				},
 			},
-      ---@type profiles.Profile.Languages.Language
+			---@type profiles.Profile.Languages.Language
 			python = {
-        enable = false,
-        ---@type profiles.Profile.Languages.Tools
+				enable = false,
+				---@type profiles.Profile.Languages.Tools
 				tools = {
-          ---@type conform.FiletypeFormatter?
+					---@type profiles.Profile.Languages.Tools.Formatters?
 					formatters = { "isort", "black" },
-          ---@type (string | config.lint.LinterSpec)[]?
-					linters = { "flake8", "bandit" },
-          ---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
+					---@type profiles.Profile.Languages.Tools.Linters?
+					linters = {
+            { "flake8", auto_update = true },
+            { "bandit", auto_update = true },
+          },
+					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
 						[toolsConfig.pyright.masonConfig] = true,
 					},
 				},
 			},
-      ---@type profiles.Profile.Languages.Language
+			---@type profiles.Profile.Languages.Language
 			[{ "bash", "sh" }] = {
-        enable = false,
-        ---@type profiles.Profile.Languages.Tools
+				enable = false,
+				---@type profiles.Profile.Languages.Tools
 				tools = {
-          ---@type conform.FiletypeFormatter?
+					---@type profiles.Profile.Languages.Tools.Formatters?
 					formatters = { "shfmt" },
-          ---@type (string | config.lint.LinterSpec)[]?
-					linters = { "shellcheck" },
-          ---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
+					---@type profiles.Profile.Languages.Tools.Linters?
+					linters = {
+            { "shellcheck", auto_update = true },
+          },
+					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
 						[toolsConfig.bashls.masonConfig] = true,
 					},
 				},
 			},
-      ---@type profiles.Profile.Languages.Language
+			---@type profiles.Profile.Languages.Language
 			rust = {
-        enable = false,
-        ---@type profiles.Profile.Languages.Tools
+				enable = false,
+				---@type profiles.Profile.Languages.Tools
 				tools = {
 					-- NOTE: This require `rust-analyzer` in PATH
 					-- `rustaceanvim` will handle setup.
@@ -282,17 +309,19 @@ local profile = {
 					-- }
 				},
 			},
-      -- NOTE: Enabled by default
-      ---@type profiles.Profile.Languages.Language
+			-- NOTE: Enabled by default
+			---@type profiles.Profile.Languages.Language
 			yaml = {
-        enable = true,
-        ---@type profiles.Profile.Languages.Tools
+				enable = true,
+				---@type profiles.Profile.Languages.Tools
 				tools = {
-          ---@type conform.FiletypeFormatter?
+					---@type profiles.Profile.Languages.Tools.Formatters?
 					formatters = { "prettier" },
-          ---@type (string | config.lint.LinterSpec)[]?
-					linters = { "yamllint" },
-          ---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
+					---@type profiles.Profile.Languages.Tools.Linters?
+					linters = {
+            { "yamllint", auto_update = true },
+          },
+					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
 						[toolsConfig.yamlls.masonConfig] = toolsConfig.yamlls.handler,
 					},
@@ -334,33 +363,35 @@ local profile = {
 			-- sh = {
 			--   enable = default.preference.os == "Linux"
 			-- },
-      
 		},
 
 		--- !!! Don't touch those fields
 		--- Those will be extracted automatically from fields above
 
 		---This should be extracted automatically from fields above
-		---@type table<string, conform.FiletypeFormatter>?
+		---@type table<string, profiles.Profile.Languages.Tools.Formatters>?
 		formatters = nil,
 
 		---This should be extracted automatically from fields above
-		---@type table<string, (string | config.lint.LinterSpec)[]>?
+		---@type table<string, profiles.Profile.Languages.Tools.Linters>?
 		linters = nil,
 
 		---This should be extracted automatically from fields above
-		---@type { [config.lsp.Server.MasonConfig]: config.lsp.Handler }?
+		---@type profiles.Profile.Languages.Tools.LanguageServers?
 		ls = nil,
 	},
 
 	---Debugging
 	---@class profiles.Profile.Debugging
-	debugging = {},
+	debugging = {
+    ---@type vim.log.levels
+    log_level = vim.log.levels.INFO
+  },
 
 	---Name of profile
 	---use module name if not overrided
 	---@type string
-	name = "Default",
+	name = NAME,
 
 	-- This field will be injected in profile.init
 

@@ -51,6 +51,7 @@ local function write_file(FILE_PATH, CONTENT)
   return with_file_do(
     function (file)
       file:write(CONTENT)
+      return nil
     end,
     function (errmsg)
       return errmsg

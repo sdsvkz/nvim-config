@@ -27,6 +27,9 @@ local Function = {}
 ---@return boolean
 Function.is_function_object = function (x)
   -- FIX: I think this wouldn't be true for subclasses (Inheritance implementation from PiL 16.2)
+  if type(x) ~= "table" then
+    return false
+  end
   return getmetatable(x).__index == Function
 end
 

@@ -1,7 +1,7 @@
 local MODULE = "table"
 
 local internal = require("vkzlib.internal")
-local tbl = internal.table
+local tbl = internal.Data.table
 
 local errmsg = internal.errmsg(MODULE)
 

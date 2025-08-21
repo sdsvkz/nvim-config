@@ -83,28 +83,28 @@ end
 ---@generic L, R
 ---@param x L
 ---@return Either<L, R>
-local function Left(x)
+function Either.Left(x)
 	return Either:new(_Left:new(x))
 end
 
 ---@generic L, R
 ---@param x R
 ---@return Either<L, R>
-local function Right(x)
+function Either.Right(x)
 	return Either:new(_Right:new(x))
 end
 
 ---@generic Left, Right, R
 ---@param self Either<Left, Right>
----@param on_left fun(l: Left): R
----@param on_right fun(r: Right): R
+---@param onLeft fun(l: Left): R
+---@param onRight fun(r: Right): R
 ---@return R
-function Either:match(on_left, on_right)
+function Either:match(onLeft, onRight)
 	local VAL = self:get()
 	if VAL:type() == "Either.Left" then
-		return on_left(VAL:get())
+		return onLeft(VAL:get())
 	elseif VAL:type() == "Either.Right" then
-		return on_right(VAL:get())
+		return onRight(VAL:get())
 	else
 		error("Either.match: Not an Either")
 	end
@@ -113,23 +113,23 @@ end
 ---@generic L, R
 ---@param self Either<L, R>
 ---@return boolean
-function Either:is_left()
+function Either:isLeft()
 	return self:get():type() == _TYPES.LEFT
 end
 
 ---@generic L, R
 ---@param self Either<L, R>
 ---@return boolean
-function Either:is_right()
+function Either:isRight()
 	return self:get():type() == _TYPES.RIGHT
 end
 
 ---@generic L, R
+---@param self Either<L, R>
 ---@param a L
----@param e Either<L, R>
 ---@return L
-local function from_left(a, e)
-	return e:match(function(l)
+function Either:fromLeft(a)
+	return self:match(function(l)
 		return l
 	end, function(_)
 		return a
@@ -137,11 +137,11 @@ local function from_left(a, e)
 end
 
 ---@generic L, R
+---@param self Either<L, R>
 ---@param b R
----@param e Either<L, R>
 ---@return R
-local function from_right(b, e)
-	return e:match(function(_)
+function Either:fromRight(b)
+	return self:match(function(_)
 		return b
 	end, function(r)
 		return r
@@ -149,61 +149,49 @@ local function from_right(b, e)
 end
 
 ---@generic L1, L2, R1, R2
+---@param self Either<L1, R1>
 ---@param f fun(l: L1): L2
 ---@param g fun(r: R1): R2
----@param e Either<L1, R1>
 ---@return Either<L2, R2>
-local function bimap(f, g, e)
-	return e:match(function(l)
-		return Left(f(l))
+function Either:bimap(f, g)
+	return self:match(function(l)
+		return Either.Left(f(l))
 	end, function(r)
-		return Right(g(r))
+		return Either.Right(g(r))
 	end)
 end
 
 ---@generic Left, Right, R
+---@param self Either<Left, Right>
 ---@param f fun(l: Left): R
----@param e Either<Left, Right>
 ---@return Either<R, Right>
-local function map_left(f, e)
-	return bimap(f, function (r)
+function Either:mapLeft(f)
+	return self:bimap(f, function (r)
     return r
-	end, e)
+	end)
 end
 
 ---@generic Left, Right, R
+---@param self Either<Left, Right>
 ---@param f fun(r: Right): R
----@param e Either<Left, Right>
 ---@return Either<Left, R>
-local function map(f, e)
-	return bimap(function (l)
+function Either:map(f)
+	return self:bimap(function (l)
 	  return l
-	end, f, e)
+	end, f)
 end
 
 ---@generic Left, Right, R
+---@param self Either<Left, Right>
 ---@param f fun(l: Left): R
 ---@param g fun(r: Right): R
----@param e Either<Left, Right>
 ---@return R
-local function either(f, g, e)
-  return e:match(function (l)
+function Either:either(f, g)
+  return self:match(function (l)
     return f(l)
   end, function (r)
     return g(r)
   end)
 end
 
-return {
-	Left = Left,
-	Right = Right,
-	match = Either.match,
-	is_left = Either.is_left,
-	is_right = Either.is_right,
-	from_left = from_left,
-	from_right = from_right,
-	bimap = bimap,
-	map_left = map_left,
-	map = map,
-  either = either,
-}
+return Either

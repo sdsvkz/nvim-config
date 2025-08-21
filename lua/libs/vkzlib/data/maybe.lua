@@ -70,26 +70,26 @@ end
 
 ---@generic T
 ---@type Maybe<T>
-local Nothing = Maybe:new(_Nothing)
+Maybe.Nothing = Maybe:new(_Nothing)
 
 ---@generic T
 ---@param x T
 ---@return Maybe<T>
-local function Just(x)
+function Maybe.Just(x)
 	return Maybe:new(_Just:new(x))
 end
 
 ---@generic T, R
 ---@param self Maybe<T>
----@param on_just fun(x: T): R
----@param on_nothing fun(): R
+---@param onJust fun(x: T): R
+---@param onNothing fun(): R
 ---@return R
-function Maybe:match(on_just, on_nothing)
+function Maybe:match(onJust, onNothing)
 	local VAL = self:get()
 	if VAL:type() == _TYPES.NOTHING then
-		return on_nothing()
+		return onNothing()
   elseif VAL:type() == _TYPES.JUST then
-	  return on_just(VAL:get())
+	  return onJust(VAL:get())
   else
     error("Maybe.match: Not a Maybe")
   end
@@ -98,23 +98,23 @@ end
 ---@generic T
 ---@param self Maybe<T>
 ---@return boolean
-function Maybe:is_nothing()
+function Maybe:isNothing()
 	return self:get() == _Nothing
 end
 
 ---@generic T
 ---@param self Maybe<T>
 ---@return boolean
-function Maybe:is_just()
-	return not self:is_nothing()
+function Maybe:isJust()
+	return not self:isNothing()
 end
 
 ---@generic T
+---@param self Maybe<T>
 ---@param x T
----@param m Maybe<T>
 ---@return T
-local function from_maybe(x, m)
-	return m:match(function(val)
+function Maybe:fromMaybe(x)
+	return self:match(function(val)
 		return val
 	end, function()
 		return x
@@ -122,10 +122,10 @@ local function from_maybe(x, m)
 end
 
 ---@generic T
----@param m Maybe<T>
+---@param self Maybe<T>
 ---@return T
-local function from_just(m)
-	return m:match(function(x)
+function Maybe:fromJust()
+	return self:match(function(x)
 		return x
 	end, function()
 		return error("from_just: Nothing")
@@ -134,25 +134,25 @@ end
 
 ---@generic T, R
 ---@param f fun(x: T): R
----@param m Maybe<T>
+---@param self Maybe<T>
 ---@return Maybe<R>
-local function map(f, m)
-	return m:match(function(x)
-		return Just(f(x))
+function Maybe:map(f)
+	return self:match(function(x)
+		return Maybe.Just(f(x))
 	end, function()
-		return Nothing
+		return Maybe.Nothing
 	end)
 end
 
 ---@generic T, R
+---@param self Maybe<T>
 ---@param mf Maybe<fun(x: T): R>
----@param ma Maybe<T>
 ---@return Maybe<R>
-local function ap(mf, ma)
+function Maybe:ap(mf)
 	return mf:match(function(f)
-		return map(f, ma)
+		return self:map(f)
 	end, function()
-		return Nothing
+		return Maybe.Nothing
 	end)
 end
 
@@ -160,34 +160,24 @@ end
 ---@param f fun(x: T1, y: T2): R
 ---@param ma Maybe<T1>
 ---@param mb Maybe<T2>
-local function liftA2(f, ma, mb)
+---@return Maybe<R>
+function Maybe.liftA2(f, ma, mb)
 	local curried = function(x)
 		return function(y)
 			return f(x, y)
 		end
 	end
-	return ap(map(curried, ma), mb)
+	return mb:ap(ma:map(curried))
 end
 
 ---@generic T, R
+---@param self Maybe<T>
 ---@param a R
 ---@param f fun(x: T): R
----@param m Maybe<T>
 ---@return R
-local function maybe(a, f, m)
-  return from_maybe(a, map(f, m))
+function Maybe:maybe(a, f)
+  return self:map(f):fromMaybe(a)
 end
 
-return {
-	Nothing = Nothing,
-	Just = Just,
-	match = Maybe.match,
-	is_nothing = Maybe.is_nothing,
-	is_just = Maybe.is_just,
-	from_maybe = from_maybe,
-	from_just = from_just,
-	map = map,
-	ap = ap,
-  liftA2 = liftA2,
-  maybe = maybe,
-}
+return Maybe
+

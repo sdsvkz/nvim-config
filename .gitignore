@@ -8,4 +8,5 @@ nvim-dev-1.rockspec
 !/lua/profiles/init.lua
 !/lua/profiles/default.lua
 !/lua/profiles/options.lua
+!/lua/profiles/sdsvkz.lua
 !/lua/profiles/utils.lua

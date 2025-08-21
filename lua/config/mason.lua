@@ -1,14 +1,26 @@
--- TODO: Move mason-tool-installer setup here
+local vkzlib = Vkz.vkzlib
 local profile = require("profiles")
 local lsp = require("config.lsp")
+local lint = require("config.lint")
 local mason_tool_installer = require("mason-tool-installer")
 
+local deep_merge = vkzlib.Data.table.deep_merge
+
 if profile.preference.use_mason == false then
-  return
+	return
 end
 
+---Options of Mason package
+---@class (exact) MasonInstallConfig
+---@field [1] string Package name
+---@field version string? Package version
+---@field auto_update boolean? Automatically update package if update available
+---@field condition (fun(): boolean)? Conditional installing
+
+---@alias config.mason.InstallConfig string | MasonInstallConfig
+
 mason_tool_installer.setup({
-	ensure_installed = lsp.ensure_installed,
+	ensure_installed = deep_merge("force", lsp.ensure_installed, lint.ensure_installed),
 
 	-- if set to true this will check each tool for updates. If updates
 	-- are available the tool will be updated. This setting does not

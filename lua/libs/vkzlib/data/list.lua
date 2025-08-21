@@ -1,6 +1,6 @@
 local MODULE = "list"
 
-local list = require("vkzlib.internal").list
+local list = require("vkzlib.internal").Data.list
 
 local pack = list.pack
 local unpack = list.unpack
@@ -99,6 +99,8 @@ local function foldl(f, initial, xs)
   return acc
 end
 
+local map = list.map
+
 return {
 	pack = pack,
 	unpack = unpack,
@@ -110,4 +112,5 @@ return {
 	findIndex = findIndex,
   findIndices = findIndices,
   foldl = foldl,
+  map = map,
 }

@@ -1,9 +1,9 @@
 local profile = require("profiles")
 local config = profile.appearence.theme.config
 
-local vkzlib = Vkz.vkzlib
+local map = Vkz.vkzlib.Data.table.map
 
-local themes = vkzlib.data.table.map(function (spec)
+local themes = map(function (spec)
   spec.config = type(config) == "function" and config(spec.main) or config
   return spec
 end, {

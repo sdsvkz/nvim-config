@@ -5,6 +5,7 @@ return {
   dependencies = {
     require("plugins.libs.web_devicons"),
     require("plugins.libs.plenary"),
+    require("plugins.libs.nui")
   },
   keys = {
     {

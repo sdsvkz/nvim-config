@@ -6,6 +6,7 @@ return {
   all = core.all,
   also = core.also,
   any = core.any,
+  assert = core.assert,
   conditional = core.conditional,
   deep_copy = core.deep_copy,
   enable_if = core.enable_if,

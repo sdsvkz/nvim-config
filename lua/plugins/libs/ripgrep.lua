@@ -1,3 +1,4 @@
 return {
-  "BurntSushi/ripgrep"
+  "BurntSushi/ripgrep",
+  lazy = true,
 }
