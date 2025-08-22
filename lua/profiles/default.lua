@@ -55,7 +55,7 @@ local profile = {
 
 		---@type fun(): LazyConfig
 		lazy_opts = function()
-      ---@type LazyConfig
+			---@type LazyConfig
 			return {
 				spec = {
 					-- import your plugins
@@ -265,9 +265,9 @@ local profile = {
 					formatters = { "isort", "black" },
 					---@type profiles.Profile.Languages.Tools.Linters?
 					linters = {
-            { "flake8", auto_update = true },
-            { "bandit", auto_update = true },
-          },
+						{ "flake8", auto_update = true },
+						{ "bandit", auto_update = true },
+					},
 					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
 						[toolsConfig.pyright.masonConfig] = true,
@@ -283,8 +283,8 @@ local profile = {
 					formatters = { "shfmt" },
 					---@type profiles.Profile.Languages.Tools.Linters?
 					linters = {
-            { "shellcheck", auto_update = true },
-          },
+						{ "shellcheck", auto_update = true },
+					},
 					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
 						[toolsConfig.bashls.masonConfig] = true,
@@ -309,17 +309,22 @@ local profile = {
 					-- }
 				},
 			},
-      ---@type profiles.Profile.Languages.Language
-      typescript = {
-        enable = true,
-        ---@type profiles.Profile.Languages.Tools
-        tools = {
-          ---@type profiles.Profile.Languages.Tools.LanguageServers
-          ls = {
-            [toolsConfig.vtsls.masonConfig] = toolsConfig.vtsls.handler,
-          },
-        },
-      },
+			---@type profiles.Profile.Languages.Language
+			typescript = {
+				enable = true,
+				---@type profiles.Profile.Languages.Tools
+				tools = {
+          formatters = { "prettier" },
+          ---@type profiles.Profile.Languages.Tools.Linters
+					linters = {
+						{ "eslint", auto_update = true },
+					},
+					---@type profiles.Profile.Languages.Tools.LanguageServers
+					ls = {
+						[toolsConfig.vtsls.masonConfig] = toolsConfig.vtsls.handler,
+					},
+				},
+			},
 			-- NOTE: Enabled by default
 			---@type profiles.Profile.Languages.Language
 			yaml = {
@@ -330,8 +335,8 @@ local profile = {
 					formatters = { "prettier" },
 					---@type profiles.Profile.Languages.Tools.Linters?
 					linters = {
-            { "yamllint", auto_update = true },
-          },
+						{ "yamllint", auto_update = true },
+					},
 					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
 						[toolsConfig.yamlls.masonConfig] = toolsConfig.yamlls.handler,
@@ -395,9 +400,9 @@ local profile = {
 	---Debugging
 	---@class profiles.Profile.Debugging
 	debugging = {
-    ---@type vim.log.levels
-    log_level = vim.log.levels.INFO
-  },
+		---@type vim.log.levels
+		log_level = vim.log.levels.INFO,
+	},
 
 	---Name of profile
 	---use module name if not overrided

@@ -164,7 +164,7 @@ utils.toolsConfig = {
 						enableMoveToFileCodeAction = true,
 						autoUseWorkspaceTsdk = true,
 						experimental = {
-							maxInlayHintLength = 30,
+							maxInlayHintLength = 50,
 							completion = {
 								enableServerSideFuzzyMatch = true,
 							},
