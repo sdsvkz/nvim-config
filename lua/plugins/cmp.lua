@@ -43,21 +43,21 @@ return {
 
 		local function confirm(fallback)
 			if cmp.visible() then
-				if luasnip.expandable() then
-					luasnip.expand({})
-				else
-					cmp.confirm({
-						select = true,
-					})
-				end
+				-- if luasnip.expandable() then
+				-- 	luasnip.expand({})
+				-- else
+				cmp.confirm({
+					select = true,
+				})
+				-- end
 			else
 				fallback()
 			end
 		end
 
-    local function abort(_)
-      cmp.mapping.abort()
-    end
+		local function abort(_)
+			cmp.mapping.abort()
+		end
 
 		cmp.setup({
 			snippet = {
@@ -74,9 +74,9 @@ return {
 			mapping = cmp.mapping.preset.insert({
 				["<CR>"] = cmp.mapping(confirm, { "i", "s" }),
 				["<Down>"] = cmp.mapping(select_next_item, { "i", "s" }),
-        ["<C-d>"] = cmp.mapping(select_next_item, { "i", "s" }),
+				["<C-d>"] = cmp.mapping(select_next_item, { "i", "s" }),
 				["<Up>"] = cmp.mapping(select_prev_item, { "i", "s" }),
-        ["<C-u>"] = cmp.mapping(select_prev_item, { "i", "s" }),
+				["<C-u>"] = cmp.mapping(select_prev_item, { "i", "s" }),
 				["<C-r>"] = cmp.mapping(abort),
 			}),
 
