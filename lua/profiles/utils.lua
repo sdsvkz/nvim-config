@@ -522,7 +522,7 @@ local DEFAULT_PROFILE_NAME = "Default"
 ---@param NAME string
 ---@return string? errmsg
 local function write_profile_name(NAME)
-	return fileIO.write_file(Vkz.storage.path .. "profile.used", NAME)
+  return fileIO.write_file(Vkz.storage.path .. "profile.used", NAME)
 end
 
 ---Read the profile name from storage

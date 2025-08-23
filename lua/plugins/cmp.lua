@@ -55,29 +55,29 @@ return {
 			end
 		end
 
-		local function abort(_)
-			cmp.mapping.abort()
-		end
-
 		cmp.setup({
 			snippet = {
 				expand = function(args)
 					luasnip.lsp_expand(args.body) -- For `luasnip` users.
+          vim.snippet.expand(args.body) -- For native neovim snippets (Neovim v0.10+)
 				end,
 			},
 
 			window = {
 				-- completion = cmp.config.window.bordered(),
-				-- documentation = cmp.config.window.bordered(),
+				documentation = cmp.config.window.bordered(),
 			},
 
 			mapping = cmp.mapping.preset.insert({
 				["<CR>"] = cmp.mapping(confirm, { "i", "s" }),
 				["<Down>"] = cmp.mapping(select_next_item, { "i", "s" }),
-				["<C-d>"] = cmp.mapping(select_next_item, { "i", "s" }),
+				["<C-n>"] = cmp.mapping(select_next_item, { "i", "s" }),
 				["<Up>"] = cmp.mapping(select_prev_item, { "i", "s" }),
-				["<C-u>"] = cmp.mapping(select_prev_item, { "i", "s" }),
-				["<C-r>"] = cmp.mapping(abort),
+				["<C-p>"] = cmp.mapping(select_prev_item, { "i", "s" }),
+        -- BUG: Scrool Docs doesn't work
+				["C-f"] = cmp.mapping.scroll_docs(4),
+				["C-b"] = cmp.mapping.scroll_docs(-4),
+				["<C-r>"] = cmp.mapping.abort(),
 			}),
 
 			sources = cmp.config.sources(
@@ -87,11 +87,9 @@ return {
 					{ name = "luasnip" }, -- For luasnip users.
 					-- { name = "orgmode" },
 					{ name = "render-markdown" },
-					{ name = "git" },
 				},
 				{
 					{ name = "buffer" },
-					{ name = "path" },
 				},
 				-- Lazydev completion source for require statements and module annotations
 				{
@@ -115,6 +113,15 @@ return {
 			},
 		})
 
+		cmp.setup.filetype("gitcommit", {
+			sources = cmp.config.sources({
+				{ name = "git" },
+			}, {
+				{ name = "buffer" },
+			}),
+		})
+		require("cmp_git").setup({})
+
 		cmp.setup.cmdline({ "/", "?" }, {
 			mapping = cmp.mapping.preset.cmdline(),
 			sources = {
@@ -129,6 +136,8 @@ return {
 			}, {
 				{ name = "cmdline" },
 			}),
+			---@diagnostic disable-next-line: missing-fields
+			matching = { disallow_symbol_nonprefix_matching = false },
 		})
 	end,
 }
