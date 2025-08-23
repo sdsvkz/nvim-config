@@ -20,6 +20,13 @@ Groups.Editing.set("n", "v", '"+p', { desc = "Paste after cursor" })
 Groups.Editing.set("n", "V", '"+P', { desc = "Paste before cursor" })
 
 Groups.Setting.set("n", "l", "<CMD>Lazy<CR>", { desc = "Lazy home" })
+Groups.Setting.set("n", "M", function ()
+  if vim.o.mouse == "" then
+    vim.o.mouse = "niv"
+  else
+    vim.o.mouse = ""
+  end
+end, { desc = "Toggle mouse" })
 
 Groups.Debugging.set('n', 'dc', function() dap.continue() end, {
   desc = "Launching debug sessions or resuming execution"
