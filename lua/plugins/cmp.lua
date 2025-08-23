@@ -74,9 +74,8 @@ return {
 				["<C-n>"] = cmp.mapping(select_next_item, { "i", "s" }),
 				["<Up>"] = cmp.mapping(select_prev_item, { "i", "s" }),
 				["<C-p>"] = cmp.mapping(select_prev_item, { "i", "s" }),
-        -- BUG: Scrool Docs doesn't work
-				["C-f"] = cmp.mapping.scroll_docs(4),
-				["C-b"] = cmp.mapping.scroll_docs(-4),
+				["<C-f>"] = cmp.mapping.scroll_docs(4),
+				["<C-b>"] = cmp.mapping.scroll_docs(-4),
 				["<C-r>"] = cmp.mapping.abort(),
 			}),
 
