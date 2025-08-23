@@ -26,7 +26,7 @@ Groups.Setting.set("n", "M", function ()
   else
     vim.o.mouse = ""
   end
-end, { desc = "Toggle mouse" })
+end, { desc = "Toggle mouse support" })
 
 Groups.Debugging.set('n', 'dc', function() dap.continue() end, {
   desc = "Launching debug sessions or resuming execution"
