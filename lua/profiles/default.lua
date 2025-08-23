@@ -310,18 +310,17 @@ local profile = {
 				},
 			},
 			---@type profiles.Profile.Languages.Language
-			typescript = {
+			[{ "typescript", "javascript" }] = {
+        -- NOTE: You still need to setup ESLint in your project
+        -- See https://eslint.org/docs/latest/use/getting-started#quick-start
 				enable = true,
 				---@type profiles.Profile.Languages.Tools
 				tools = {
-          formatters = { "prettier" },
-          ---@type profiles.Profile.Languages.Tools.Linters
-					linters = {
-						{ "eslint", auto_update = true },
-					},
+					formatters = { "prettier" },
 					---@type profiles.Profile.Languages.Tools.LanguageServers
 					ls = {
 						[toolsConfig.vtsls.masonConfig] = toolsConfig.vtsls.handler,
+						[toolsConfig.eslint.masonConfig] = toolsConfig.eslint.handler,
 					},
 				},
 			},

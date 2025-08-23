@@ -21,6 +21,40 @@ utils.toolsConfig = {
 	clangd = {
 		masonConfig = { "clangd", auto_update = true },
 	},
+	---@typ
+	eslint = {
+		masonConfig = { "eslint", auto_update = true },
+		-- Format on save
+		handler = function()
+			local base_on_attach = vim.lsp.config.eslint.on_attach
+			vim.lsp.config("eslint", {
+				on_attach = function(client, bufnr)
+					if not base_on_attach then
+						return
+					end
+
+					base_on_attach(client, bufnr)
+					vim.api.nvim_create_autocmd("BufWritePre", {
+						buffer = bufnr,
+						command = "LspEslintFixAll",
+					})
+				end,
+			})
+
+      --- Now that I use ESLint for linting, I can filter out diagnostics from `vtsls`
+			local default_handler = vim.lsp.handlers["textDocument/publishDiagnostics"]
+			vim.lsp.handlers["textDocument/publishDiagnostics"] = function(err, result, ctx, config)
+				if result and result.diagnostics then
+					result.diagnostics = vim.tbl_filter(function(diagnostic)
+						return diagnostic.source ~= "ts"
+					end, result.diagnostics)
+				end
+				return default_handler(err, result, ctx, config)
+			end
+
+			vim.lsp.enable("eslint")
+		end,
+	},
 	---@type config.lint.LinterSpec
 	luacheck = {
 		"luacheck",
@@ -522,7 +556,7 @@ local DEFAULT_PROFILE_NAME = "Default"
 ---@param NAME string
 ---@return string? errmsg
 local function write_profile_name(NAME)
-  return fileIO.write_file(Vkz.storage.path .. "profile.used", NAME)
+	return fileIO.write_file(Vkz.storage.path .. "profile.used", NAME)
 end
 
 ---Read the profile name from storage
