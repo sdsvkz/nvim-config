@@ -39,6 +39,9 @@ local profile = {
 		---@type boolean
 		use_mason = true,
 
+    ---Enable AI-powered tools
+    use_ai = false,
+
 		---Enables mouse support
 		---@see vim.o.mouse
 		---
@@ -142,9 +145,8 @@ local profile = {
 		---@class profiles.Profile.Languages.Supported
 		supported = {
 			---@class profiles.Profile.Languages.Language
-			[{ "c", "cpp" }] = {
+			angular = {
 				---Whether to use this language
-				---e.g. You can use this to implement platform
 				---@type boolean?
 				enable = false,
 				---@class profiles.Profile.Languages.Tools
@@ -154,23 +156,35 @@ local profile = {
 					-- NOTE: To make formatters and linters work, install required tools (using Mason)
 					-- If Mason enabled, language servers will be automatically installed (by mason-tool-installer)
 
+          ---Formatters of this filetype
 					---@alias profiles.Profile.Languages.Tools.Formatters conform.FiletypeFormatter
+          ---Linters of this filetype
 					---@alias profiles.Profile.Languages.Tools.Linters (string | config.lint.LinterSpec)[]
+          ---Map of language server name to configuration
+          ---Use names from lspconfig, not mason
 					---@alias profiles.Profile.Languages.Tools.LanguageServers table<config.mason.InstallConfig, config.lsp.Handler>
 
-					---Formatters of this filetype
 					---@type profiles.Profile.Languages.Tools.Formatters?
 					formatters = nil,
-					---Linters of this filetype
 					---@type profiles.Profile.Languages.Tools.Linters?
 					linters = nil,
-					---Map of language server name to configuration
-					---Use names from lspconfig, not mason
+					---@type profiles.Profile.Languages.Tools.LanguageServers?
+					ls = {
+            [toolsConfig.angularls.masonConfig] = true,
+					},
+					-- TODO: Add dap config here after nvim-dap is added
+				},
+			},
+			---@type profiles.Profile.Languages.Language
+			[{ "c", "cpp" }] = {
+				---@type boolean?
+				enable = false,
+				---@type profiles.Profile.Languages.Tools
+				tools = {
 					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
 						[toolsConfig.clangd.masonConfig] = true,
 					},
-					-- TODO: Add dap config here after nvim-dap is added
 				},
 			},
 			---@type profiles.Profile.Languages.Language
@@ -311,8 +325,8 @@ local profile = {
 			},
 			---@type profiles.Profile.Languages.Language
 			[{ "typescript", "javascript" }] = {
-        -- NOTE: You still need to setup ESLint in your project
-        -- See https://eslint.org/docs/latest/use/getting-started#quick-start
+				-- NOTE: You still need to setup ESLint in your project
+				-- See https://eslint.org/docs/latest/use/getting-started#quick-start
 				enable = true,
 				---@type profiles.Profile.Languages.Tools
 				tools = {

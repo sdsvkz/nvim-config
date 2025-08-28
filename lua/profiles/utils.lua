@@ -15,6 +15,9 @@ local fileIO = vkzlib.io.file
 local utils = {}
 
 utils.toolsConfig = {
+  angularls = {
+    masonConfig = { "angularls", auto_update = true },
+  },
 	bashls = {
 		masonConfig = { "bashls", auto_update = true },
 	},
@@ -41,16 +44,16 @@ utils.toolsConfig = {
 				end,
 			})
 
-      --- Now that I use ESLint for linting, I can filter out diagnostics from `vtsls`
-			local default_handler = vim.lsp.handlers["textDocument/publishDiagnostics"]
-			vim.lsp.handlers["textDocument/publishDiagnostics"] = function(err, result, ctx, config)
-				if result and result.diagnostics then
-					result.diagnostics = vim.tbl_filter(function(diagnostic)
-						return diagnostic.source ~= "ts"
-					end, result.diagnostics)
-				end
-				return default_handler(err, result, ctx, config)
-			end
+			-- --- Filter out diagnostics from `vtsls`
+			-- local default_handler = vim.lsp.handlers["textDocument/publishDiagnostics"]
+			-- vim.lsp.handlers["textDocument/publishDiagnostics"] = function(err, result, ctx, config)
+			-- 	if result and result.diagnostics then
+			-- 		result.diagnostics = vim.tbl_filter(function(diagnostic)
+			-- 			return diagnostic.source ~= "ts"
+			-- 		end, result.diagnostics)
+			-- 	end
+			-- 	return default_handler(err, result, ctx, config)
+			-- end
 
 			vim.lsp.enable("eslint")
 		end,

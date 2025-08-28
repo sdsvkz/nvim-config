@@ -292,7 +292,7 @@ local buttons = {
 		{ type = "padding", val = 1 },
 		dashboard.button("e", "󰙅  File Explorer", "<CMD>NvimTreeOpen<CR>"),
 		dashboard.button("n", "  New file", "<CMD>ene<CR>"),
-		dashboard.button("s", "  Sessions", "<CMD>SessionSearch<CR>"),
+		dashboard.button("s", "  Sessions", "<CMD>AutoSession search<CR>"),
 		dashboard.button("c", "  Configuration", "<CMD>cd " .. vim.fn.stdpath("config") .. "<CR>"),
 		open_profile_menu ~= nil
 				---@diagnostic disable-next-line: param-type-mismatch

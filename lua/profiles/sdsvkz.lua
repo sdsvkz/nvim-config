@@ -1325,6 +1325,7 @@ local profile = {
   ---@type profiles.Profile.Preference
   preference = {
     use_mason = true,
+    use_ai = true,
     mouse = "",
     enable_discord_rich_presence = true,
     config_neovide = neovide,
@@ -1342,6 +1343,9 @@ local profile = {
   languages = {
     ---@type table<string | string[], profiles.Profile.Languages.Language>
     custom = {
+      angular = {
+        enable = true,
+      },
       [{ "c", "cpp" }] = {
         enable = true,
       },

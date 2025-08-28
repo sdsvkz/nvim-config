@@ -18,7 +18,7 @@ return {
   keys = {
     {
       Groups.UI.lhs .. "s", mode = "n",
-      "<CMD>SessionSearch<CR>",
+      "<CMD>AutoSession search<CR>",
       desc = "Search for sessions"
     },
   },
