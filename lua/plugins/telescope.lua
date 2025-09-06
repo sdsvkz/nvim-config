@@ -81,5 +81,17 @@ return {
 			"<CMD>Telescope lsp_implementations<CR>",
 			desc = "LSP Implementations",
 		},
+		{
+			Groups.Telescope.lhs .. "lhi",
+			mode = "n",
+			"<CMD>Telescope lsp_incoming_calls<CR>",
+			desc = "LSP Incoming calls",
+		},
+		{
+			Groups.Telescope.lhs .. "lho",
+			mode = "n",
+			"<CMD>Telescope lsp_outgoing_calls<CR>",
+			desc = "LSP Outgoing calls",
+		},
 	},
 }
