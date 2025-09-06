@@ -13,11 +13,11 @@ log.t(core.to_string(profiles_found))
 
 local profile_count = #profiles_found
 
-local read_res = utils.read_profile_name()
+local read_res = utils.profile_name_handle:read()
 
 -- Decide profile
 if read_res.errmsg ~= nil then
-  utils.write_profile_name(DEFAULT_PROFILE_NAME)
+  utils.profile_name_handle:write(DEFAULT_PROFILE_NAME)
 elseif profile_count >= 1 then
   ---@type string
   local profile_name = read_res.content
@@ -29,7 +29,7 @@ elseif profile_count >= 1 then
     else
       log.e("Profile not exists: " .. core.to_string(profile_name))
       log.e("Switching to default")
-      utils.write_profile_name(DEFAULT_PROFILE_NAME)
+      utils.profile_name_handle:write(DEFAULT_PROFILE_NAME)
     end
   end
 else

@@ -568,23 +568,31 @@ local function scan_profile()
 	return found
 end
 
+local function create_file(NAME)
+  local handle = {}
+
+	---Write `CONTENT` to file
+	---On success, `errmsg == nil`
+	---@param CONTENT string
+	---@return string? errmsg
+	function handle:write(CONTENT)
+		return fileIO.write_file(Vkz.storage.path .. NAME, CONTENT)
+	end
+
+	---Read content from file
+	---On success, `errmsg == nil`
+	---@return { content: string?, errmsg: string? }
+	function handle:read()
+		return fileIO.read_file(Vkz.storage.path .. NAME)
+	end
+
+  return handle
+end
+
 ---@type profiles.Profile.Default.Name
 local DEFAULT_PROFILE_NAME = "Default"
 
----Write the profile name to storage
----On success, `errmsg == nil`
----@param NAME string
----@return string? errmsg
-local function write_profile_name(NAME)
-	return fileIO.write_file(Vkz.storage.path .. "profile.used", NAME)
-end
-
----Read the profile name from storage
----On success, `errmsg == nil`
----@return { content: string?, errmsg: string? }
-local function read_profile_name()
-	return fileIO.read_file(Vkz.storage.path .. "profile.used")
-end
+local profile_name_handle = create_file("profile.used")
 
 ---Open a menu for user to choose profile
 ---@param PROFILE_NAMES string[]
@@ -640,7 +648,7 @@ local function open_profile_menu(PROFILE_NAMES, on_select)
 		close()
 		vim.schedule(function()
 			log.t("Select: " .. to_string(PROFILE_NAME))
-			local errmsg = write_profile_name(PROFILE_NAME)
+			local errmsg = profile_name_handle:write(PROFILE_NAME)
 			if errmsg ~= nil then
 				log.e("Failed to write profile name: " .. errmsg)
 			end
@@ -731,9 +739,9 @@ utils.extract_lspconfigs = extract_lspconfigs
 utils.extract_mason_lspconfig = extract_mason_lspconfigs
 utils.extract_required_linters = extract_required_linters
 utils.scan_profile = scan_profile
+utils.create_file = create_file
 utils.DEFAULT_PROFILE_NAME = DEFAULT_PROFILE_NAME
-utils.write_profile_name = write_profile_name
-utils.read_profile_name = read_profile_name
+utils.profile_name_handle = profile_name_handle
 utils.open_profile_menu = open_profile_menu
 utils.merge_plugin_opts = merge_plugin_opts
 

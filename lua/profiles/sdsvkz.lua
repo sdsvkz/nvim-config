@@ -3,6 +3,7 @@
 local vkzlib = Vkz.vkzlib
 local deep_merge = vkzlib.Data.table.deep_merge
 local default = require("profiles.default")
+local utils = require("profiles.utils")
 local options = require("profiles.options")
 
 local catppuccin_opts = {}
@@ -1279,7 +1280,7 @@ catppuccin_opts.plastilin_frappe = {
 local themes = {
 	catppuccin_vkz = {
 		colorscheme = "catppuccin",
-    plugin = "catppuccin",
+		plugin = "catppuccin",
 		theme_config = function(plugin)
 			if type(plugin.setup) == "function" then
 				plugin.setup(catppuccin_opts.plastilin_frappe_vkz)
@@ -1288,6 +1289,8 @@ local themes = {
 	},
 }
 
+local neovide_fullscreen_handle = utils.create_file("neovide_fullscreen.state")
+
 local function neovide()
 	vim.g.neovide_theme = "auto"
 	vim.o.guifont = "CaskaydiaCove Nerd Font"
@@ -1295,11 +1298,20 @@ local function neovide()
 	vim.g.neovide_normal_opacity = 0.6
 	vim.g.neovide_hide_mouse_when_typing = true
 	vim.g.neovide_remember_window_size = true
+	-- Restore fullscreen state
+	local res = neovide_fullscreen_handle:read()
+	-- Vkz.log.d(vkzlib.core.to_string(res))
+	local neovide_fullscreen = res.content
+	if neovide_fullscreen then
+		vim.g.neovide_fullscreen = neovide_fullscreen == "1" and true or false
+	end
+
+	-- Try make windows title bar less out of place
 	if default.preference.os == options.System.Windows then
 		vim.api.nvim_create_autocmd({ "ColorScheme" }, {
 			group = vkzlib.vim.augroup("neovide", "windows_title_bar"),
 			pattern = "*",
-			callback = function()
+			callback = function(_)
 				vim.g.neovide_title_text_color =
 					string.format("%x", vim.api.nvim_get_hl(0, { id = vim.api.nvim_get_hl_id_by_name("Normal") }).fg)
 				vim.g.neovide_title_background_color =
@@ -1307,24 +1319,40 @@ local function neovide()
 			end,
 		})
 	end
+
+	-- Set keymap for quickly toggle fullscreen
 	vim.api.nvim_create_autocmd({ "VimEnter" }, {
 		group = vkzlib.vim.augroup("neovide", "toggle_fullscreen_keymap"),
 		pattern = "*",
-		callback = function()
+		callback = function(_)
 			vim.keymap.set({ "n", "v" }, "<F11>", function()
-				vim.g.neovide_fullscreen = vim.g.neovide_fullscreen == nil and true or not vim.g.neovide_fullscreen
+        local is_fullscreen = vim.g.neovide_fullscreen == nil and true or not vim.g.neovide_fullscreen
+				vim.g.neovide_fullscreen = is_fullscreen
+				neovide_fullscreen_handle:write(is_fullscreen == true and "1" or "0")
 			end)
 		end,
 	})
+
+  -- This doesn't work
+  --
+	-- Remember fullscreen state
+	-- vim.api.nvim_create_autocmd({ "VimLeavePre" }, {
+	-- 	group = vkzlib.vim.augroup("neovide", "save_fullscreen_state"),
+	-- 	pattern = "n",
+	-- 	callback = function(_)
+	-- 		Vkz.log.d("Saving fullscreen state")
+ --      neovide_fullscreen_handle:write(vim.g.neovide_fullscreen == true and "1" or "0")
+	-- 	end,
+	-- })
 end
 
 ---@type profiles.Profile
 local profile = {
 	---@type profiles.Profile.Preference
 	preference = {
-    cc = "D:/mingw1310_64/bin/gcc.exe",
+		cc = "D:/mingw1310_64/bin/gcc.exe",
 		use_mason = true,
-    enable_inlay_hint = true,
+		enable_inlay_hint = true,
 		use_ai = true,
 		use_global_statusline = true,
 		mouse = "",
@@ -1361,21 +1389,21 @@ local profile = {
 									string.format(
 										"AGE_IDENTITY_PATH = %s\nAGE_GEMINI_API_KEY_PATH = %s",
 										identity_path,
-                    gemini_api_key_path
-                  )
-                )
-                local new_opts = {}
-                if type(identity_path) == "string" and type(gemini_api_key_path) == "string" then
-                  new_opts = {
-                    env = {
-                      api_key = string.format(
-                        "cmd: age -d -i %s %s",
-                        identity_path,
-                        gemini_api_key_path
-                      ),
-                    },
-                  }
-                end
+										gemini_api_key_path
+									)
+								)
+								local new_opts = {}
+								if type(identity_path) == "string" and type(gemini_api_key_path) == "string" then
+									new_opts = {
+										env = {
+											api_key = string.format(
+												"cmd: age -d -i %s %s",
+												identity_path,
+												gemini_api_key_path
+											),
+										},
+									}
+								end
 								return extend(true, "gemini_cli", new_opts)
 							end,
 						},

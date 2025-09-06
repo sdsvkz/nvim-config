@@ -54,7 +54,7 @@ if nui_menu_ok then
 			},
 			on_submit = function(item)
 				log.t("Select: " .. to_string(item))
-				profile.utils.write_profile_name(item.text)
+				profile.utils.profile_name_handle:write(item.text)
 				log.w("Restart Neovim to take effect")
 			end,
 		})
