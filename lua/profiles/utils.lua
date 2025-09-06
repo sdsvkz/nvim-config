@@ -1,23 +1,26 @@
+---@module "lazy"
 ---@module "conform"
 ---@module "lint"
 
 local vkzlib = Vkz.vkzlib
 local log = Vkz.log
 local LazyValue = vkzlib.Data.LazyValue
-local core = vkzlib.core
+local vassert = vkzlib.core.assert
+local to_string = vkzlib.core.to_string
 local deep_copy = vkzlib.core.deep_copy
 local concat = vkzlib.Data.list.concat
 local deep_merge = vkzlib.Data.table.deep_merge
 local unpack = vkzlib.Data.list.unpack
 local join = vkzlib.Data.str.join
 local fileIO = vkzlib.io.file
+local is_module_exists = vkzlib.io.lua.is_module_exists
 
 local utils = {}
 
 utils.toolsConfig = {
-  angularls = {
-    masonConfig = { "angularls", auto_update = true },
-  },
+	angularls = {
+		masonConfig = { "angularls", auto_update = true },
+	},
 	bashls = {
 		masonConfig = { "bashls", auto_update = true },
 	},
@@ -89,28 +92,35 @@ utils.toolsConfig = {
 		handler = function()
 			vim.lsp.config("lua_ls", {
 				on_init = function(client)
-					local path = client.workspace_folders[1].name
-					---@diagnostic disable-next-line: undefined-field
-					if
-						---@diagnostic disable-next-line: undefined-field
-						vim.uv.fs_stat(path .. "/.luarc.json")
-						---@diagnostic disable-next-line: undefined-field
-						or vim.uv.fs_stat(path .. "/.luarc.jsonc")
-					then
-						return
+					if client.workspace_folders then
+						local path = client.workspace_folders[1].name
+						local config_path = vim.fn.stdpath("config")
+						if path ~= config_path and path ~= config_path:gsub("\\", "/") then
+							return
+						end
 					end
 
-					client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
+					client.config.settings.Lua = deep_merge("force", client.config.settings.Lua, {
 						runtime = {
 							-- Tell the language server which version of Lua you're using
 							-- (most likely LuaJIT in the case of Neovim)
 							version = "LuaJIT",
+							-- Tell the language server how to find Lua modules same way as Neovim
+							-- (see `:h lua-module-load`)
+							path = {
+								"lua/?.lua",
+								"lua/?/init.lua",
+								"/lua/libs/?.lua",
+								"/lua/libs/?/init.lua",
+							},
 						},
 						-- Make the server aware of Neovim runtime files
 						workspace = {
 							checkThirdParty = false,
 							library = {
 								vim.env.VIMRUNTIME,
+								vim.fn.stdpath("config") .. "/lua",
+								vim.fn.stdpath("config") .. "/lua/libs",
 								-- Depending on the usage, you might want to add additional paths here.
 								-- "${3rd}/luv/library"
 								-- "${3rd}/busted/library",
@@ -122,7 +132,12 @@ utils.toolsConfig = {
 				end,
 
 				settings = {
-					Lua = {},
+					Lua = {
+						hint = {
+							enable = true,
+							-- setType = true,
+						},
+					},
 				},
 			})
 			vim.lsp.enable("lua_ls")
@@ -270,7 +285,7 @@ utils.toolsConfig = {
 ---@return profiles.Profile
 local function merge_profile(PROFILE, MODULE_NAME)
 	---@type profiles.Profile
-	local USER_PROFILE = core.deep_copy(require("profiles." .. MODULE_NAME), true)
+	local USER_PROFILE = deep_copy(require("profiles." .. MODULE_NAME), true)
 	local merged = deep_merge("force", PROFILE, USER_PROFILE)
 	merged.name = USER_PROFILE.name or MODULE_NAME
 	return merged
@@ -325,7 +340,7 @@ local function get_language_tools(LANGUAGES)
 			end
 		end
 	end
-	log.t(core.to_string(supported))
+	log.t(to_string(supported))
 
 	-- Merge tools of each languages
 	for FT, LANG in pairs(LANGUAGES.custom) do
@@ -342,9 +357,8 @@ local function get_language_tools(LANGUAGES)
 				if type(DEFAULT) == "table" then
 					local is_tools_exists = type(LANG.tools) == "table"
 					formatters[FILETYPE] = is_tools_exists and LANG.tools.formatters
-						or core.deep_copy(DEFAULT.tools.formatters, true)
-					linters[FILETYPE] = is_tools_exists and LANG.tools.linters
-						or core.deep_copy(DEFAULT.tools.linters, true)
+						or deep_copy(DEFAULT.tools.formatters, true)
+					linters[FILETYPE] = is_tools_exists and LANG.tools.linters or deep_copy(DEFAULT.tools.linters, true)
 					ls = deep_merge("force", ls, is_tools_exists and LANG.tools.ls or DEFAULT.tools.ls or {})
 				else
 					formatters[FILETYPE] = LANG.tools.formatters
@@ -372,22 +386,22 @@ local function get_language_tools(LANGUAGES)
 	}
 end
 
+---@param spec (string | LazyPluginSpec)?
 ---@param colorscheme string
 ---@param theme_config (fun(plugin: table, opts: table, spec: LazyPlugin) | true)?
 ---@return ((fun(main: string): fun(self: LazyPlugin, opts: table)) | true)?
-local function generate_config(colorscheme, theme_config)
+local function generate_config(spec, colorscheme, theme_config)
 	if theme_config == true or theme_config == nil then
 		return theme_config
+	elseif type(spec) ~= "string" then
+		return nil
 	end
 	return function(main)
 		return function(self, opts)
 			-- This prevent failing from loading not existing module
-			local ok, plugin = pcall(require, main)
-			if ok then
-				theme_config(plugin, opts, self)
-				-- This prevent setup code of other themes from changing colorscheme
-				vim.cmd.colorscheme(colorscheme)
-			end
+			local plugin = require(main)
+			theme_config(plugin, opts, self)
+			vim.cmd.colorscheme(colorscheme)
 		end
 	end
 end
@@ -398,8 +412,11 @@ end
 local function preprocess_profile(PROFILE)
 	local profile = deep_copy(PROFILE, true)
 	if profile.appearence.theme.config == nil then
-		profile.appearence.theme.config =
-			generate_config(profile.appearence.theme.colorscheme, profile.appearence.theme.theme_config)
+		profile.appearence.theme.config = generate_config(
+			profile.appearence.theme.plugin,
+			profile.appearence.theme.colorscheme,
+			profile.appearence.theme.theme_config
+		)
 	end
 
 	local TOOLS = get_language_tools(profile.languages)
@@ -499,9 +516,9 @@ local function extract_required_linters(LINTERS)
 				}
 				local opts = linter.opts
 				local errmsg = LazyValue:new(function()
-					return "Invalid LinterSpec: " .. core.to_string(linter)
+					return "Invalid LinterSpec: " .. to_string(linter)
 				end)
-				core.assert(type(config[1]) == "string", errmsg)
+				vassert(type(config[1]) == "string", errmsg)
 				if type(opts) == "function" then
 					-- Register or override linter
 					res.linters[config[1]] = opts
@@ -513,7 +530,7 @@ local function extract_required_linters(LINTERS)
 				linters_by_ft[ft][index] = linter
 				table.insert(res.ensure_installed, linter)
 			else
-				log.w("Invalid linter: " .. core.to_string(linter))
+				log.w("Invalid linter: " .. to_string(linter))
 			end
 		end
 	end
@@ -521,7 +538,7 @@ local function extract_required_linters(LINTERS)
 	--- Process above should ensure all `LinterSpec`s have been replaced by linter's name
 	res.linters_by_ft = linters_by_ft
 
-	log.t("Extracted linter config: " .. core.to_string(res))
+	log.t("Extracted linter config: " .. to_string(res))
 
 	return res
 end
@@ -622,7 +639,7 @@ local function open_profile_menu(PROFILE_NAMES, on_select)
 		local PROFILE_NAME = vim.api.nvim_get_current_line()
 		close()
 		vim.schedule(function()
-			log.t("Select: " .. core.to_string(PROFILE_NAME))
+			log.t("Select: " .. to_string(PROFILE_NAME))
 			local errmsg = write_profile_name(PROFILE_NAME)
 			if errmsg ~= nil then
 				log.e("Failed to write profile name: " .. errmsg)
@@ -633,6 +650,76 @@ local function open_profile_menu(PROFILE_NAMES, on_select)
 			end
 		end)
 	end, key_opts)
+end
+
+---Merge opts for current plugin module (Caller of this function)
+---Throw error on exception or failure
+---@param path string
+---@param opts table | fun(self: LazyPluginSpec, o: table): table? Default opts
+---@param extras table?
+---@return table | fun(self: LazyPluginSpec, o: table): table? merged
+local function merge_plugin_opts(path, opts, extras)
+	log.t("Merging plugin for " .. path .. "\nopts: " .. to_string(opts) .. "\nextras: " .. to_string(extras))
+	if type(opts) ~= "function" and type(opts) ~= "table" then
+		error("Cannot merge opts for module: Invalid default opts")
+	end
+	local profile = require("profiles")
+	local regex = "[/\\](plugins[/\\].-[^/\\]+)%.lua$"
+	---@type string
+	local matched = path:match(regex)
+	vassert(
+		matched ~= nil,
+		LazyValue:new(function()
+			return "Cannot merge opts for module: Not a plugin: " .. path
+		end)
+	)
+	---@cast matched string
+	local plugin_module_path = matched:gsub("[/\\]", ".")
+	vassert(
+		is_module_exists(plugin_module_path),
+		LazyValue:new(function()
+			return "Cannot merge opts for module: Plugin not loaded/loading: " .. plugin_module_path .. "\nIn: " .. path
+		end)
+	)
+	local plugin_name = plugin_module_path:match(".*%.(.*)$")
+	local override = profile.preference.plugin_opts[plugin_name]
+	log.t("override: " .. to_string(override))
+	if type(opts) == "table" then
+		if type(override) == "table" then
+			local res = deep_merge("force", opts, override)
+			log.t("opts merged for " .. plugin_name .. ": " .. to_string(res))
+			return res
+		elseif type(override) == "function" then
+			return function(self, o)
+				local new_opts = deep_merge("force", o, opts)
+				local res = override(self, new_opts, extras) or new_opts
+				log.t("opts merged for " .. plugin_name .. ": " .. to_string(res))
+				return res
+			end
+		else
+			return opts
+		end
+	elseif type(opts) == "function" then
+		if type(override) == "table" then
+			return function(self, o)
+				local new_opts = opts(self, o) or o
+				local res = deep_merge("force", new_opts, override)
+				log.t("opts merged for " .. plugin_name .. ": " .. to_string(res))
+				return res
+			end
+		elseif type(override) == "function" then
+			return function(self, o)
+				local new_opts = opts(self, o) or o
+				local res = override(self, new_opts, extras) or new_opts
+				log.t("opts merged for " .. plugin_name .. ": " .. to_string(res))
+				return res
+			end
+		else
+			return opts
+		end
+	else
+		error("Cannot merge opts for module: Invalid default opts")
+	end
 end
 
 utils.merge_profile = merge_profile
@@ -648,5 +735,6 @@ utils.DEFAULT_PROFILE_NAME = DEFAULT_PROFILE_NAME
 utils.write_profile_name = write_profile_name
 utils.read_profile_name = read_profile_name
 utils.open_profile_menu = open_profile_menu
+utils.merge_plugin_opts = merge_plugin_opts
 
 return utils

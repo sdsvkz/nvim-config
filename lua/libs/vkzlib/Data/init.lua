@@ -1,4 +1,4 @@
-local MODULE = "data"
+local MODULE = "Data"
 
 return {
 	Either = require("vkzlib.Data.Either"),

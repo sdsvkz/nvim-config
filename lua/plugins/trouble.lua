@@ -1,8 +1,17 @@
+local merge_plugin_opts = require("profiles.utils").merge_plugin_opts
+
 local Groups = require("config.key_groups").Groups
+
+---@module "trouble"
+
+---@type trouble.Config
+local opts = {
+  auto_close = true,
+}
 
 return {
   "folke/trouble.nvim",
-  opts = {}, -- for default options, refer to the configuration section for custom setup.
+  opts = merge_plugin_opts(Vkz.vkzlib.io.lua.get_caller_module_path(), opts),
   cmd = "Trouble",
   keys = {
     {

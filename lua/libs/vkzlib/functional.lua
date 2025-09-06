@@ -3,6 +3,7 @@ local MODULE = "functional"
 local internal = require("vkzlib.internal")
 local core = internal.core
 local list = internal.list
+local LazyValue = internal.Data.LazyValue
 
 local get_qualified_name = internal.get_qualified_name(MODULE)
 local errmsg = internal.errmsg(MODULE)
@@ -48,38 +49,38 @@ end
 ---@see vkzlib.data.Function
 function Function:new(params)
   local deferred_errmsg = errmsg("Function:new")
-  assert(type(params) == "table",
-    deferred_errmsg("This function receive table as argument")
-  )
+  assert(type(params) == "table", LazyValue:new(function ()
+    return deferred_errmsg("This function receive table as argument"):toStrict()
+  end))
   ---@type function
   local f = params[1]
-  assert(type(f) == "function",
-    deferred_errmsg("1st argument not a function")
-  )
+  assert(type(f) == "function", LazyValue:new(function ()
+    return deferred_errmsg("1st argument not a function"):toStrict()
+  end))
   ---@type integer?
   local nparams = params.nparams
-  assert(nparams == nil or type(nparams) == "number",
-    deferred_errmsg("Invalid opts.nparams")
-  )
+  assert(nparams == nil or type(nparams) == "number", LazyValue:new(function ()
+    return deferred_errmsg("Invalid opts.nparams"):toStrict()
+  end))
   ---@type boolean?
   local isvararg = params.isvararg
-  assert(isvararg == nil or type(isvararg) == "boolean",
-    deferred_errmsg("Invalid opts.isvararg")
-  )
+  assert(isvararg == nil or type(isvararg) == "boolean", LazyValue:new(function ()
+    return deferred_errmsg("Invalid opts.isvararg"):toStrict()
+  end))
   ---@type function?
   local raw = params.raw
-  assert(raw == nil or type(raw) == "function",
-    deferred_errmsg("Invalid opts.raw")
-  )
+  assert(raw == nil or type(raw) == "function", LazyValue:new(function ()
+    return deferred_errmsg("Invalid opts.raw"):toStrict()
+  end))
   local skip_nparams_check = type(params.skip_nparams_check) == "boolean" and params.skip_nparams_check or false
   local info = debug.getinfo(f, "u")
-  assert(nparams == nil or skip_nparams_check or nparams >= info.nparams, function ()
+  assert(nparams == nil or skip_nparams_check or nparams >= info.nparams, LazyValue:new(function ()
     return deferred_errmsg(string.format(
       "Required `nparams` < Expected `debug.getinfo(f, 'u').nparams` (%i < %i)",
       nparams,
       info.nparams
-    )) ()
-  end)
+    )):toStrict()
+  end))
 
   if isvararg == nil then
     isvararg = info.isvararg
@@ -126,9 +127,9 @@ end
 ---@param noref boolean?
 function Function:copy(noref)
   local deferred_errmsg = errmsg("Function:copy")
-  assert(Function.is_function_object(self),
-    deferred_errmsg("not a `Function`")
-  )
+  assert(Function.is_function_object(self), LazyValue:new(function ()
+    return deferred_errmsg("not a `Function`"):toStrict()
+  end))
   return core.deep_copy(self, noref)
 end
 
@@ -154,9 +155,9 @@ end
 
 function Function:apply(...)
   local deferred_errmsg = errmsg("Function:apply")
-  assert(select("#", ...) >= self._nparams,
-    deferred_errmsg("require more arguments")
-  )
+  assert(select("#", ...) >= self._nparams, LazyValue:new(function ()
+    return deferred_errmsg("require more arguments"):toStrict()
+  end))
   return self(...)
 end
 
@@ -183,9 +184,9 @@ local function to_const(f)
       nparams = info.nparams + 1,
     }
   end
-  assert(Function.is_function_object(f),
-    deferred_errmsg("not a valid function object")
-  )
+  assert(Function.is_function_object(f), LazyValue:new(function ()
+    return deferred_errmsg("not a valid function object"):toStrict()
+  end))
   return Function:new { _to_const(f:get()),
     nparams = f:get_nparams() + 1,
     isvararg = f:is_vararg(),
@@ -200,7 +201,9 @@ local function _curry(f)
   -- Don't write variables here to avoid side effect
 
   local deferred_errmsg = errmsg("_curry")
-  assert(Function.is_function_object(f), deferred_errmsg("1st argument is not a function object"))
+  assert(Function.is_function_object(f), LazyValue:new(function ()
+    return deferred_errmsg("1st argument is not a function object"):toStrict()
+  end))
 
   ---A clousure to contained arguments
   ---@param ... any All previously passed arguments
@@ -273,38 +276,38 @@ local function curry(f, nparams)
     if not opts.isvararg then
       -- Not vararg, retrieve anything
       nparams = core.from_maybe(info.nparams, nparams)
-      assert(nparams >= 0 and nparams <= info.nparams,
-        deferred_errmsg("nparams out of range")
-      )
+      assert(nparams >= 0 and nparams <= info.nparams, LazyValue:new(function ()
+        return deferred_errmsg("nparams out of range"):toStrict()
+      end))
     else
       -- If isvararg, leave nparams untouched
       -- Let caller decide how many arguments it takes
       -- But nparams must greater or equal than minimal requirement
-      assert(type(nparams) == "number",
-        deferred_errmsg("nparams is required for vararg function")
-      )
-      assert(nparams >= info.nparams,
-        deferred_errmsg("nparams less than minimal requirement")
-      )
+      assert(type(nparams) == "number", LazyValue:new(function ()
+        return deferred_errmsg("nparams is required for vararg function"):toStrict()
+      end))
+      assert(nparams >= info.nparams, LazyValue:new(function ()
+        return deferred_errmsg("nparams less than minimal requirement"):toStrict()
+      end))
     end
   elseif Function.is_function_object(f) then
     -- Almost the same
     opts.isvararg = f:is_vararg()
     if not opts.isvararg then
       nparams = core.from_maybe(f:get_nparams(), nparams)
-      assert(nparams >= 0 and nparams <= f:get_nparams(),
-        deferred_errmsg("nparams out of range")
-      )
+      assert(nparams >= 0 and nparams <= f:get_nparams(), LazyValue:new(function ()
+        return deferred_errmsg("nparams out of range"):toStrict()
+      end))
     else
-      assert(type(nparams) == "number",
-        deferred_errmsg("nparams is required for vararg function")
-      )
-      assert(nparams >= f:get_nparams(),
-        deferred_errmsg("nparams less than minimal requirement")
-      )
+      assert(type(nparams) == "number", LazyValue:new(function ()
+        return deferred_errmsg("nparams is required for vararg function"):toStrict()
+      end))
+      assert(nparams >= f:get_nparams(), LazyValue:new(function ()
+        return deferred_errmsg("nparams less than minimal requirement"):toStrict()
+      end))
     end
   else
-    error(deferred_errmsg("Not a callable") ())
+    error(deferred_errmsg("Not a callable"):toStrict())
   end
 
   -- TODO: Use nparams
@@ -325,9 +328,9 @@ end
 ---@return function
 local function memorize(f)
   local deferred_errmsg = errmsg("memorize")
-  assert(type(f) == "function" and debug.getinfo(f, "u").nparams == 0,
-    deferred_errmsg("only function with no argument can be memorized")
-  )
+  assert(type(f) == "function" and debug.getinfo(f, "u").nparams == 0, LazyValue:new(function ()
+    return deferred_errmsg("only function with no argument can be memorized"):toStrict()
+  end))
   local function closure()
     local mem = nil
     return function ()
@@ -352,9 +355,9 @@ end
 ---@return any
 local function apply(f, ...)
   local deferred_errmsg = errmsg("apply")
-  assert(type(f) == "function",
-    deferred_errmsg("not a function")
-  )
+  assert(type(f) == "function", LazyValue:new(function ()
+    return deferred_errmsg("not a function"):toStrict()
+  end))
   return f(...)
 end
 

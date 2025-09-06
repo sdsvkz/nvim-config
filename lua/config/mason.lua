@@ -1,14 +1,11 @@
 local vkzlib = Vkz.vkzlib
-local profile = require("profiles")
 local lsp = require("config.lsp")
 local lint = require("config.lint")
 local mason_tool_installer = require("mason-tool-installer")
 
 local deep_merge = vkzlib.Data.table.deep_merge
 
-if profile.preference.use_mason == false then
-	return
-end
+
 
 ---Options of Mason package
 ---@class (exact) MasonInstallConfig

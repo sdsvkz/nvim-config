@@ -1,3 +1,7 @@
+-- Eagerly disable netrw for nvim-tree
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
 local current_path = vim.fn.stdpath("config")
 package.path = current_path .. "/lua/libs/?.lua;" .. current_path .. "/lua/libs/?/init.lua;" .. package.path
 

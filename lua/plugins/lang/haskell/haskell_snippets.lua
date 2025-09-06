@@ -1,7 +1,7 @@
 return {
   "mrcjkb/haskell-snippets.nvim",
   dependencies = {
-    require("plugins.luaSnip")
+    "L3MON4D3/LuaSnip",
   },
   ft = { "haskell", "lhaskell", "cabal", "cabalproject" },
   config = function()

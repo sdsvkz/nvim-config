@@ -16,7 +16,7 @@ return {
         ['mini.bracketed'] = true,
         ['mini.surround'] = true,
         -- ['mini.operators'] = true,
-        ['mini.pairs'] = true,
+        -- ['mini.pairs'] = true,
         -- ['mini.jump2d'] = true,
         -- ['mini.pick'] = true,
         -- Visual

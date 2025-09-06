@@ -1,3 +1,5 @@
+local MODULE = "Data.Either"
+
 ---@enum Either.Types
 local _TYPES = {
 	---@alias Either.Types.Left "Either.Left"

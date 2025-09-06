@@ -1,21 +1,25 @@
----@diagnostic disable: missing-fields
+---@module "which-key"
 
----@class (exact) config.keymap.Group
+local map = Vkz.vkzlib.Data.table.map
+local profile = require("profiles")
+
+---@class config.keymap.Group.Template
 ---@field lhs string The key
 ---@field desc string Group description
+
+---@class config.keymap.Group : config.keymap.Group.Template
 ---@field set fun(mode: string|string[], lhs: string, rhs: string|function, opts?: vim.keymap.set.Opts) `vim.keymap.set`
 
 ---Generate "set" for group
----@param group_lhs string
----@param desc string
+---@param template config.keymap.Group.Template
 ---@return config.keymap.Group
-local function mk_group(group_lhs, desc)
+local function mk_group(template)
   ---@type config.keymap.Group
   return {
-    lhs = group_lhs,
-    desc = desc,
+    lhs = template.lhs,
+    desc = template.desc,
     set = function (mode, lhs, rhs, opts)
-      vim.keymap.set(mode, group_lhs .. lhs, rhs, opts)
+      vim.keymap.set(mode, template.lhs .. lhs, rhs, opts)
     end
   }
 end
@@ -44,8 +48,9 @@ end
 
 -- TODO: Subgroup
 
----@type table<string, config.keymap.Group>
-local Groups = {
+---@type table<string, config.keymap.Group.Template>
+local groups = {
+  Buffer  = { lhs = "<LEADER>b", desc = "Buffer" },
   Setting = { lhs = "<LEADER>,", desc = "Settings" },
   Trouble = { lhs = "<LEADER>x", desc = "UIs (Trouble)" },
   Telescope = { lhs = "<LEADER>t", desc = "UIs (Telescope)" },
@@ -59,9 +64,12 @@ local Groups = {
   Editing = { lhs = "<LEADER>e", desc = "Editing" },
 }
 
-for key, value in pairs(Groups) do
-  Groups[key] = mk_group(value.lhs, value.desc)
+if profile.preference.use_ai then
+  groups.CodeCompanion = { lhs = "<LEADER>c", desc = "CodeCompanion" }
 end
+
+local Groups = map(mk_group, groups)
+---@cast Groups table<string, config.keymap.Group>
 
 local Mappings = get_mappings_from_groups(Groups)
 

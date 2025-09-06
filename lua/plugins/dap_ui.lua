@@ -1,7 +1,7 @@
 return {
   "rcarriga/nvim-dap-ui",
   dependencies = {
-    require("plugins.dap"),
-    require("plugins.libs.nio")
-  }
+    "mfussenegger/nvim-dap",
+    "nvim-neotest/nvim-nio",
+  },
 }

@@ -1,4 +1,4 @@
-local MODULE = "list"
+local MODULE = "Data.list"
 
 local list = require("vkzlib.internal").Data.list
 

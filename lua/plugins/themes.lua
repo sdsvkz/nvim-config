@@ -1,17 +1,15 @@
 local profile = require("profiles")
+local plugin = profile.appearence.theme.plugin
 local config = profile.appearence.theme.config
 
-local map = Vkz.vkzlib.Data.table.map
+if type(plugin) == "table" then
+  return plugin
+elseif plugin == nil then
+  return {}
+end
 
-local themes = map(function (spec)
-  spec.config = type(config) == "function" and config(spec.main) or config
-  return spec
-end, {
-  require("plugins.themes.fluoromachine"),
-  require("plugins.themes.night_owl"),
-  require("plugins.themes.tokyonight"),
-  require("plugins.themes.moonfly"),
-  require("plugins.themes.catppuccin"),
-})
+---@type LazyPluginSpec
+local theme = require("plugins.themes." .. plugin)
+theme.config = type(config) == "function" and config(theme.main) or config
 
-return themes
+return theme

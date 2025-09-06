@@ -1,7 +1,9 @@
-local MODULE = "table"
+local MODULE = "Data.table"
 
 local internal = require("vkzlib.internal")
+local vassert = internal.assert
 local tbl = internal.Data.table
+local LazyValue = internal.Data.LazyValue
 
 local errmsg = internal.errmsg(MODULE)
 
@@ -44,9 +46,11 @@ local function merge(behavior, ...)
       if behavior == 'force' or res[k] == nil then
         res[k] = v
       elseif behavior == 'error' then
-        error(deferred_errmsg("key duplicated") ())
+        error(deferred_errmsg("key duplicated"):toStrict())
       else
-        assert(behavior == 'keep', deferred_errmsg("invalid argument: behavior"))
+        vassert(behavior == 'keep', LazyValue:new(function ()
+          return deferred_errmsg("invalid argument: behavior"):toStrict()
+        end))
       end
     end
   end
@@ -65,7 +69,9 @@ merge = vim.tbl_extend or merge
 local function deep_merge(behavior, ...)
   local deferred_errmsg = errmsg("deep_merge")
   -- TODO: Implement this
-  assert(false, deferred_errmsg('Not implemented yet'))
+  vassert(false, LazyValue:new(function ()
+    return deferred_errmsg('Not implemented yet'):toStrict()
+  end))
   return {}
 end
 

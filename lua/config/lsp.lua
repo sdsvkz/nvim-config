@@ -110,6 +110,11 @@ local function lspconfig_only()
   }
 end
 
+-- Set LSP inlay hint
+if profile.preference.enable_inlay_hint then
+  vim.lsp.inlay_hint.enable()
+end
+
 -- Append required capabilities
 lspconfig.util.default_config = Table.merge("force", lspconfig.util.default_config, {
 	capabilities = Table.deep_merge(

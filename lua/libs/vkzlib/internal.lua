@@ -288,7 +288,9 @@ end
 core.all = function(bs)
 	local deferred_errmsg = errmsg("all")
 	for _, b in ipairs(bs) do
-		assert(type(b) == "boolean", deferred_errmsg("contains non-boolean argument"))
+		assert(type(b) == "boolean", LazyValue:new(function ()
+		  return deferred_errmsg("contains non-boolean argument"):toStrict()
+		end))
 		if not b then
 			return false
 		end
@@ -302,7 +304,9 @@ end
 core.any = function(bs)
 	local deferred_errmsg = errmsg("any")
 	for _, b in ipairs(bs) do
-		assert(type(b) == "boolean", deferred_errmsg("contains non-boolean argument"))
+		assert(type(b) == "boolean", LazyValue:new(function ()
+		  return deferred_errmsg("contains non-boolean argument"):toStrict()
+		end))
 		if b then
 			return true
 		end
@@ -384,7 +388,9 @@ local function get_logger(format, opts)
 		end
 	end
 
-	assert(level_num ~= nil and color ~= nil, deferred_errmsg("failed to get level and color"))
+	assert(level_num ~= nil and color ~= nil, LazyValue:new(function ()
+	  return deferred_errmsg("failed to get level and color"):toStrict()
+	end))
 
 	return function(...)
 		local deferred_errmsg_return = errmsg("get_logger.return")
@@ -419,7 +425,9 @@ local function get_logger(format, opts)
 		-- Log to file
 		if type(outfile) == "string" then
 			local fp = io.open(outfile, "a")
-			assert(fp ~= nil, deferred_errmsg_return("failed to open file: " .. outfile))
+			assert(fp ~= nil, LazyValue:new(function ()
+			  return deferred_errmsg_return("failed to open file: " .. outfile):toStrict()
+			end))
 			fp:write(format({
 				color = "",
 				info = info,
@@ -501,14 +509,15 @@ end
 ---@return any ...
 local function list_unpack(list, first, last)
 	local deferred_errmsg = errmsg("list_unpack")
-	assert(type(list) == "table", deferred_errmsg("bad argument #1 (table expected, got " .. type(list) .. ")"))
+	assert(type(list) == "table", LazyValue:new(function ()
+	  return deferred_errmsg("bad argument #1 (table expected, got " .. type(list) .. ")"):toStrict()
+	end))
 
 	local function get_integer(x, name, default)
 		if x then
-			assert(
-				type(x) == "number",
-				deferred_errmsg("bad argument " .. name .. " (number expected, got " .. type(x) .. ")")
-			)
+			assert(type(x) == "number", LazyValue:new(function ()
+			  return deferred_errmsg("bad argument " .. name .. " (number expected, got " .. type(x) .. ")"):toStrict()
+			end))
 			return x < 0 and math.ceil(x) or math.floor(x)
 		else
 			return default
@@ -560,12 +569,9 @@ local function ensure_type(x, get_msg, ...)
 	-- Shitty lua can't naming `...` so it is not inherited into inner function
 	-- I have to store those things
 	local args = { ... }
-	assert(
-		is_type(x, ...),
-		LazyValue:new(function()
-			return get_msg(deferred_errmsg("type " .. type(x) .. " but requires any of " .. core.to_string(args)))
-		end)
-	)
+	assert(is_type(x, ...), LazyValue:new(function()
+    return get_msg(deferred_errmsg("type " .. type(x) .. " but requires any of " .. core.to_string(args)))
+  end))
 end
 
 -- If `x` is an object and is callable
@@ -596,7 +602,18 @@ end
 
 -- vkzlib.table
 
-local table_map = vim.tbl_map -- TODO: Implement this
+---Apply `f` to all value of `t`
+---@generic K, V, R
+---@param f fun(v: V): R
+---@param t table<K, V>
+---@return table<K, R>
+local function table_map(f, t)
+  local res = {}
+  for k, v in pairs(t) do
+    res[k] = f(v)
+  end
+  return res
+end
 
 return {
 	_lib_name = LIB,
