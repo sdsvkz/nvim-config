@@ -6,6 +6,10 @@ local function preview()
 	return require("goto-preview")
 end
 
+local function preview_lib()
+  return require("goto-preview.lib")
+end
+
 local opts = {
 	force_close = true,
 	focus_on_open = true,
@@ -15,8 +19,8 @@ local opts = {
 }
 
 function opts.post_open_hook(buf, win)
-	vim.keymap.set("n", "q", function()
-		preview().dismiss_preview(win)
+	vim.keymap.set("n", "q", function ()
+	  preview_lib().close_if_is_goto_preview(win)
 	end, { buffer = buf, desc = "Close preview" })
 end
 
