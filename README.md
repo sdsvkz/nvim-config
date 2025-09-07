@@ -7,10 +7,12 @@ This is my own Neovim configuration and also, a shitty little library written by
 - Neovim >= 0.11
 - Git
 - pip
-- npm
+- [uv](https://docs.astral.sh/uv/)
+- Node.js (Latest LTS recommended)
 - ripgrep
 - a [Nerd Font](https://www.nerdfonts.com/) for display icons properly
 - [luarocks](https://luarocks.org/) for installing `luacheck` (Optional, you can disable auto-install for `luacheck`)
+- [jq](https://jqlang.org/) (Optional, for better MCPHub `servers.json` formatting)
 
 ## Notes
 

@@ -1,5 +1,3 @@
----@diagnostic disable: missing-fields
-
 local vkzlib = Vkz.vkzlib
 local deep_merge = vkzlib.Data.table.deep_merge
 local default = require("profiles.default")
@@ -1410,6 +1408,22 @@ local profile = {
 					},
 				})
 			end,
+      ---@module "mcphub"
+
+      ---@type MCPHub.Config
+      mcphub = {
+        ---@param context MCPHub.JobContext
+        ---@return table
+        global_env = function (context)
+          local env = {}
+          local function copy_vim_env(NAME)
+            env[NAME] = vim.env[NAME]
+          end
+          copy_vim_env("HTTP_PROXY")
+          copy_vim_env("HTTPS_PROXY")
+          return env
+        end
+      },
 			---@module "bufferline"
 
 			bufferline = function(_, opts)
