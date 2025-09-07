@@ -20,6 +20,19 @@ local utils = {}
 utils.toolsConfig = {
 	angularls = {
 		masonConfig = { "angularls", auto_update = true },
+    handler = function ()
+      vim.lsp.config("angularls", {
+        root_dir = function(bufnr, on_dir)
+          local fname = vim.api.nvim_buf_get_name(bufnr)
+          -- Look for angular.json as the project root
+          local root = require("lspconfig.util").root_pattern("angular.json")(fname)
+          if root then
+            on_dir(root)
+          end
+        end,
+      })
+      vim.lsp.enable("angularls")
+    end
 	},
 	bashls = {
 		masonConfig = { "bashls", auto_update = true },
