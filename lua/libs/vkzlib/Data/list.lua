@@ -51,14 +51,14 @@ end
 ---@param xs T[]
 ---@return integer[]
 local function findIndices(pred, xs)
-  ---@type integer[]
-  local indices = {}
-  for index, x in ipairs(xs) do
-    if pred(x) == true then
-      table.insert(indices, index)
-    end
-  end
-  return indices
+	---@type integer[]
+	local indices = {}
+	for index, x in ipairs(xs) do
+		if pred(x) == true then
+			table.insert(indices, index)
+		end
+	end
+	return indices
 end
 
 ---Check if element `e` is in list `xs`
@@ -66,7 +66,9 @@ end
 ---@param xs any[]
 ---@return boolean
 local function elem(e, xs)
-	return find(function (x) return x == e end, xs) ~= nil
+	return find(function(x)
+		return x == e
+	end, xs) ~= nil
 end
 
 ---Return index of the first element that equals `e` in `xs`
@@ -74,7 +76,9 @@ end
 ---@param xs any[]
 ---@return integer?
 local function elemIndex(e, xs)
-	return findIndex(function (x) return x == e	end, xs)
+	return findIndex(function(x)
+		return x == e
+	end, xs)
 end
 
 ---Return indices of every element that equals `e` in `xs`
@@ -82,7 +86,9 @@ end
 ---@param xs any[]
 ---@return integer[]
 local function elemIndices(e, xs)
-	return findIndices(function (x) return x == e	end, xs)
+	return findIndices(function(x)
+		return x == e
+	end, xs)
 end
 
 ---Left fold `xs` with `f`, with `initial` accumulator value
@@ -92,11 +98,25 @@ end
 ---@param xs T[]
 ---@return R
 local function foldl(f, initial, xs)
-  local acc = initial
-  for _, x in ipairs(xs) do
-    acc = f(acc, x)
-  end
-  return acc
+	local acc = initial
+	for _, x in ipairs(xs) do
+		acc = f(acc, x)
+	end
+	return acc
+end
+
+---Filter out elements of `xs` that doesn't satisfy `pred`
+---@generic T
+---@param pred fun(x: T): boolean
+---@param xs T[]
+---@return T[]
+local function filter(pred, xs)
+	return foldl(function(acc, x)
+    if pred(x) == true then
+      table.insert(acc, x)
+    end
+    return acc
+  end, {}, xs)
 end
 
 local map = list.map
@@ -110,7 +130,8 @@ return {
 	elemIndices = elemIndices,
 	find = find,
 	findIndex = findIndex,
-  findIndices = findIndices,
-  foldl = foldl,
-  map = map,
+	findIndices = findIndices,
+	foldl = foldl,
+  filter = filter,
+	map = map,
 }

@@ -484,18 +484,18 @@ end
 ---@return { [integer]: any, n: integer }
 ---
 ---@see table.pack
-local function list_pack(...)
+local function backup_list_pack(...)
 	return { n = select("#", ...), ... }
 end
 
-list_pack = table.pack or list_pack
+local list_pack = table.pack or backup_list_pack
 
 -- Recursive part of `v_unpack`
-local function _list_unpack(t, i, j)
+local function _backup_list_unpack(t, i, j)
 	if i > j then
 		return
 	else
-		return t[i], _list_unpack(t, i + 1, j)
+		return t[i], _backup_list_unpack(t, i + 1, j)
 	end
 end
 
@@ -507,7 +507,7 @@ end
 ---@param first integer? Index of first element (Default `1`)
 ---@param last integer? Index of last element (Default `#t`)
 ---@return any ...
-local function list_unpack(list, first, last)
+local function backup_list_unpack(list, first, last)
 	local deferred_errmsg = errmsg("list_unpack")
 	assert(type(list) == "table", LazyValue:new(function ()
 	  return deferred_errmsg("bad argument #1 (table expected, got " .. type(list) .. ")"):toStrict()
@@ -524,10 +524,10 @@ local function list_unpack(list, first, last)
 		end
 	end
 
-	return _list_unpack(list, get_integer(first, "#2", 1), get_integer(last, "#3", #list))
+	return _backup_list_unpack(list, get_integer(first, "#2", 1), get_integer(last, "#3", #list))
 end
 
-list_unpack = table.unpack or unpack or list_unpack
+local list_unpack = table.unpack or unpack or backup_list_unpack
 
 -- Apply function to list elements
 ---@generic T
@@ -602,6 +602,17 @@ end
 
 -- vkzlib.table
 
+---Check if `t` is empty
+---@param t table
+---@return boolean
+local function table_is_empty(t)
+  local deferred_errmsg = errmsg("table_is_empty")
+  if type(t) ~= "table" then
+    error(deferred_errmsg("t is not a table"):toStrict())
+  end
+  return next(t) == nil
+end
+
 ---Apply `f` to all value of `t`
 ---@generic K, V, R
 ---@param f fun(v: V): R
@@ -627,11 +638,13 @@ return {
 	Data = {
 		LazyValue = LazyValue,
 		list = {
+      is_empty = table_is_empty,
 			pack = list_pack,
 			unpack = list_unpack,
 			map = list_map,
 		},
 		table = {
+      is_empty = table_is_empty,
 			map = table_map,
 		},
 		str = {
@@ -651,4 +664,9 @@ return {
 		is_callable = is_callable,
 		is_callable_object = is_callable_object,
 	},
+
+  _backup = {
+    pack = backup_list_pack,
+    unpack = backup_list_unpack,
+  },
 }
