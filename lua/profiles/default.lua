@@ -292,7 +292,7 @@ local profile = {
 				---@type profiles.Profile.Languages.Tools
 				tools = {
 					---@type profiles.Profile.Languages.Tools.Formatters?
-					formatters = { "prettier" },
+					formatters = { "prettierd", "prettier", stop_after_first = true },
 				},
 			},
 			---@type profiles.Profile.Languages.Language
@@ -366,7 +366,7 @@ local profile = {
 				enable = true,
 				---@type profiles.Profile.Languages.Tools
 				tools = {
-					formatters = { "prettier" },
+					formatters = { "prettierd", "prettier", stop_after_first = true },
 					---@type profiles.Profile.Languages.Tools.LanguageServers
 					ls = {
 						[toolsConfig.vtsls.masonConfig] = toolsConfig.vtsls.handler,
@@ -381,11 +381,11 @@ local profile = {
 				---@type profiles.Profile.Languages.Tools
 				tools = {
 					---@type profiles.Profile.Languages.Tools.Formatters?
-					formatters = { "prettier" },
+					formatters = { "prettierd", "prettier", stop_after_first = true },
 					---@type profiles.Profile.Languages.Tools.Linters?
-					linters = {
-						{ "yamllint", auto_update = true },
-					},
+					-- linters = {
+					-- 	{ "yamllint", auto_update = true },
+					-- },
 					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
 						[toolsConfig.yamlls.masonConfig] = toolsConfig.yamlls.handler,

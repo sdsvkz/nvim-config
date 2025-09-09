@@ -1481,9 +1481,9 @@ local profile = {
 			rust = {
 				enable = true,
 			},
-			typescript = {
-				enable = true,
-			},
+      [{ "javascript", "typescript"}] = {
+        enable = true
+      },
 			yaml = {
 				enable = true,
 			},
