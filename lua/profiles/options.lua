@@ -38,8 +38,9 @@ Themes.catppuccin.opts = {
     },
     -- hop = true,
     illuminate = {
-      enabled = true,
-      lsp = true
+      -- Shit
+      enabled = false,
+      lsp = true,
     },
     indent_blankline = {
       enabled = true,

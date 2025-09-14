@@ -2,16 +2,17 @@ local profile = require("profiles")
 
 local Groups = require("config.key_groups").Groups
 
-local enabled = profile.preference.use_mason == true
+---@module "mason"
 
+---@type MasonSettings
 local opts = {}
 
 ---@type LazyPluginSpec[]
 return {
 	{
 		"williamboman/mason.nvim",
-		enabled = enabled,
-		lazy = true,
+		enabled = profile.preference.use_mason == true,
+		event = "VeryLazy",
 		opts = profile.utils.merge_plugin_opts(Vkz.vkzlib.io.lua.get_caller_module_path(), opts),
 		cmd = {
 			"Mason",
@@ -29,17 +30,5 @@ return {
 				desc = "Mason home",
 			},
 		},
-	},
-	{
-		"jay-babu/mason-nvim-dap.nvim",
-		enabled = enabled,
-	},
-	{
-		"williamboman/mason-lspconfig.nvim",
-		enabled = enabled,
-	},
-	{
-		"WhoIsSethDaniel/mason-tool-installer.nvim",
-		enabled = enabled,
 	},
 }

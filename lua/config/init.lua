@@ -14,11 +14,6 @@ end
 require("config.lazy")
 require("config.lsp")
 require("config.lint")
-require("config.dap")
-
-if profile.preference.use_mason == true then
-  require("config.mason")
-end
 
 if profile.preference.use_ai == true then
   require("config.ai")

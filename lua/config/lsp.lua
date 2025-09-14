@@ -1,8 +1,6 @@
-local vkzlib = Vkz.vkzlib
-local Table = vkzlib.Data.table
-
-local lspconfig = require("lspconfig")
 local profile = require("profiles")
+local Table = Vkz.vkzlib.Data.table
+
 local server_config_table = profile.languages.ls
 assert(server_config_table ~= nil, "Profile with invalid language server config")
 
@@ -27,6 +25,34 @@ assert(server_config_table ~= nil, "Profile with invalid language server config"
 ---@field handle_by_mason table<string, config.lsp.Handler.Config>
 ---@field manual_setup table<string, config.lsp.Handler.Config>
 
+local function common_setup()
+  local lspconfig = require("lspconfig")
+
+	-- Set LSP inlay hint
+	if profile.preference.enable_inlay_hint then
+		vim.lsp.inlay_hint.enable()
+	end
+
+	-- Append required capabilities
+	lspconfig.util.default_config = Table.merge("force", lspconfig.util.default_config, {
+		capabilities = Table.deep_merge(
+			"force",
+			vim.lsp.protocol.make_client_capabilities(),
+			require("lsp-file-operations").default_capabilities(),
+			require("cmp_nvim_lsp").default_capabilities(),
+			-- UFO default capabilities
+			{
+				textDocument = {
+					foldingRange = {
+						dynamicRegistration = false,
+						lineFoldingOnly = true,
+					},
+				},
+			}
+		),
+	})
+end
+
 --- Setup LSP
 ---@param NAME_CONFIG_TABLE table<string, config.lsp.Handler.Config>
 local function lspconfig_setup(NAME_CONFIG_TABLE)
@@ -46,111 +72,49 @@ local function lspconfig_setup(NAME_CONFIG_TABLE)
 	end
 end
 
-local function with_mason()
-	local mason_lspconfig = require("mason-lspconfig")
-	-- Preparing begin
-
-  local masonLspConfig = profile.utils.extract_mason_lspconfig(server_config_table)
-
-	-- Preparing end
-
-	mason_lspconfig.setup({
-		-- A list of servers to automatically install if they're not already installed.
-		-- Example: { "rust_analyzer@nightly", "lua_ls" }
-		--
-		-- This setting has no relation with the `automatic_installation` setting.
-		---@type string[]
-		ensure_installed = {},
-
-		-- Whether servers that are set up (via lspconfig) should be automatically installed
-		-- if they're not already installed.
-		--
-		-- This setting has no relation with the `ensure_installed` setting.
-		-- Can either be:
-		--   - false: Servers are not automatically installed.
-		--   - true: All servers set up via lspconfig are automatically installed.
-		--   - { exclude: string[] }:
-		--        All servers set up via lspconfig,
-		--        except the ones provided in the list, are automatically installed.
-		--        Example: automatic_installation = { exclude = { "rust_analyzer", "solargraph" } }
-		---@type boolean
-		automatic_installation = false,
-	})
+---@param HANDLE_BY_MASON table<string, config.lsp.Handler.Config>
+---@param MANUAL_SETUP table<string, config.lsp.Handler.Config>
+local function with_mason(HANDLE_BY_MASON, MANUAL_SETUP)
+  common_setup()
 
 	-- Setup mason installed servers
-	lspconfig_setup(masonLspConfig.handle_by_mason)
+	lspconfig_setup(HANDLE_BY_MASON)
 
 	-- Setup manually
-	lspconfig_setup(masonLspConfig.manual_setup)
-
-	-- LSP server end
-
-	return {
-    ensure_installed = masonLspConfig.ensure_installed,
-		handle_by_mason = masonLspConfig.handle_by_mason,
-		manual_setup = masonLspConfig.manual_setup,
-	}
+	lspconfig_setup(MANUAL_SETUP)
 end
 
-local function lspconfig_only()
-	-- Preparing begin
-
-	local name_config_table = profile.utils.extract_lspconfigs(server_config_table)
-
-  -- Preparing end
-
-	-- LSP server begin
-
-	lspconfig_setup(name_config_table)
-
-	-- LSP server end
-
-  return {
-    manual_setup = name_config_table,
-  }
+---@param NAME_CONFIG_TABLE table<string, config.lsp.Handler.Config>
+local function lspconfig_only(NAME_CONFIG_TABLE)
+  common_setup()
+	lspconfig_setup(NAME_CONFIG_TABLE)
 end
 
 -- Set LSP inlay hint
 if profile.preference.enable_inlay_hint then
-  vim.lsp.inlay_hint.enable()
+	vim.lsp.inlay_hint.enable()
 end
-
--- Append required capabilities
-lspconfig.util.default_config = Table.merge("force", lspconfig.util.default_config, {
-	capabilities = Table.deep_merge(
-		"force",
-		vim.lsp.protocol.make_client_capabilities(),
-		require("lsp-file-operations").default_capabilities(),
-		require("cmp_nvim_lsp").default_capabilities(),
-		-- UFO default capabilities
-		{
-			textDocument = {
-				foldingRange = {
-					dynamicRegistration = false,
-					lineFoldingOnly = true,
-				},
-			},
-		}
-	),
-})
 
 ---@type config.lsp.LspConfig
 local M = {
-  ensure_installed = {},
+	lspconfig_setup = lspconfig_setup,
+	setup = {
+		with_mason = with_mason,
+		lspconfig_only = lspconfig_only,
+	},
+	ensure_installed = {},
 	handle_by_mason = {},
 	manual_setup = {},
 }
 
 -- Setup LSP
 if profile.preference.use_mason then
-	---@return integer
-	local res = with_mason()
-  M.ensure_installed = res.ensure_installed
-  M.handle_by_mason = res.handle_by_mason
-  M.manual_setup = res.manual_setup
+	local res = profile.utils.extract_mason_lspconfig(server_config_table)
+	M.ensure_installed = res.ensure_installed
+	M.handle_by_mason = res.handle_by_mason
+	M.manual_setup = res.manual_setup
 else
-	M.manual_setup = lspconfig_only().manual_setup
+	M.manual_setup = profile.utils.extract_lspconfigs(server_config_table)
 end
 
 return M
-

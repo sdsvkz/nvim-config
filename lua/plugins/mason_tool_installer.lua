@@ -1,22 +1,11 @@
-local vkzlib = Vkz.vkzlib
 local lsp = require("config.lsp")
 local lint = require("config.lint")
-local mason_tool_installer = require("mason-tool-installer")
 
-local deep_merge = vkzlib.Data.table.deep_merge
+local deep_merge = Vkz.vkzlib.Data.table.deep_merge
 
+local profile = require("profiles")
 
-
----Options of Mason package
----@class (exact) MasonInstallConfig
----@field [1] string Package name
----@field version string? Package version
----@field auto_update boolean? Automatically update package if update available
----@field condition (fun(): boolean)? Conditional installing
-
----@alias config.mason.InstallConfig string | MasonInstallConfig
-
-mason_tool_installer.setup({
+local opts = {
 	ensure_installed = deep_merge("force", lsp.ensure_installed, lint.ensure_installed),
 
 	-- if set to true this will check each tool for updates. If updates
@@ -55,6 +44,28 @@ mason_tool_installer.setup({
 	integrations = {
 		["mason-lspconfig"] = true,
 		["mason-null-ls"] = false,
-		["mason-nvim-dap"] = false, -- TODO: Change to true after dap integration is done
+		["mason-nvim-dap"] = true,
 	},
-})
+}
+
+---Options of Mason package
+---@class (exact) MasonInstallConfig
+---@field [1] string Package name
+---@field version string? Package version
+---@field auto_update boolean? Automatically update package if update available
+---@field condition (fun(): boolean)? Conditional installing
+
+---@alias config.mason.InstallConfig string | MasonInstallConfig
+
+---@type LazyPluginSpec
+return {
+	"WhoIsSethDaniel/mason-tool-installer.nvim",
+	enabled = profile.preference.use_mason == true,
+  event = "VeryLazy",
+	dependencies = {
+		"williamboman/mason.nvim",
+		"williamboman/mason-lspconfig.nvim",
+		"jay-babu/mason-nvim-dap.nvim",
+	},
+  opts = profile.utils.merge_plugin_opts(Vkz.vkzlib.io.lua.get_caller_module_path(), opts)
+}
