@@ -13,7 +13,6 @@ local opts = {
 return {
 	"mason-org/mason-lspconfig.nvim",
 	enabled = profile.preference.use_mason == true,
-  event = "VeryLazy",
 	dependencies = {
 		"mason-org/mason.nvim",
 		"neovim/nvim-lspconfig",

@@ -12,12 +12,10 @@ if vim.g.neovide then
 end
 
 require("config.lazy")
-require("config.lsp")
-require("config.lint")
 
-if profile.preference.use_ai == true then
-  require("config.ai")
-end
+-- if profile.preference.use_ai == true then
+--   require("config.ai")
+-- end
 
 require("config.theme")
 require('config.keymap')

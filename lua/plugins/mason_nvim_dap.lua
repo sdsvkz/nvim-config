@@ -10,7 +10,6 @@ local opts = {}
 return {
 	"jay-babu/mason-nvim-dap.nvim",
 	enabled = profile.preference.use_mason == true,
-  event = "VeryLazy",
 	dependencies = {
 		"williamboman/mason.nvim",
 		"mfussenegger/nvim-dap",

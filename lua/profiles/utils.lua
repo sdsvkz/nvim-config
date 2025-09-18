@@ -1,6 +1,7 @@
 ---@module "lazy"
 ---@module "conform"
 ---@module "lint"
+---@module "dap"
 
 local vkzlib = Vkz.vkzlib
 local log = Vkz.log
@@ -10,288 +11,13 @@ local to_string = vkzlib.core.to_string
 local deep_copy = vkzlib.core.deep_copy
 local concat = vkzlib.Data.list.concat
 local deep_merge = vkzlib.Data.table.deep_merge
-local unpack = vkzlib.Data.list.unpack
 local join = vkzlib.Data.str.join
 local fileIO = vkzlib.io.file
 local is_module_exists = vkzlib.io.lua.is_module_exists
+local first_not_nil = vkzlib.core.first_not_nil
+local let = vkzlib.core.let
 
 local utils = {}
-
-utils.toolsConfig = {
-	angularls = {
-		masonConfig = { "angularls", auto_update = true },
-    handler = function ()
-      vim.lsp.config("angularls", {
-        root_dir = function(bufnr, on_dir)
-          local fname = vim.api.nvim_buf_get_name(bufnr)
-          -- Look for angular.json as the project root
-          local root = require("lspconfig.util").root_pattern("angular.json")(fname)
-          if root then
-            on_dir(root)
-          end
-        end,
-      })
-      vim.lsp.enable("angularls")
-    end
-	},
-	bashls = {
-		masonConfig = { "bashls", auto_update = true },
-	},
-	clangd = {
-		masonConfig = { "clangd", auto_update = true },
-	},
-	---@typ
-	eslint = {
-		masonConfig = { "eslint", auto_update = true },
-		-- Format on save
-		handler = function()
-			local base_on_attach = vim.lsp.config.eslint.on_attach
-			vim.lsp.config("eslint", {
-				on_attach = function(client, bufnr)
-					if not base_on_attach then
-						return
-					end
-
-					base_on_attach(client, bufnr)
-					vim.api.nvim_create_autocmd("BufWritePre", {
-						buffer = bufnr,
-						command = "LspEslintFixAll",
-					})
-				end,
-			})
-
-			-- --- Filter out diagnostics from `vtsls`
-			-- local default_handler = vim.lsp.handlers["textDocument/publishDiagnostics"]
-			-- vim.lsp.handlers["textDocument/publishDiagnostics"] = function(err, result, ctx, config)
-			-- 	if result and result.diagnostics then
-			-- 		result.diagnostics = vim.tbl_filter(function(diagnostic)
-			-- 			return diagnostic.source ~= "ts"
-			-- 		end, result.diagnostics)
-			-- 	end
-			-- 	return default_handler(err, result, ctx, config)
-			-- end
-
-			vim.lsp.enable("eslint")
-		end,
-	},
-	---@type config.lint.LinterSpec
-	luacheck = {
-		"luacheck",
-		auto_update = true,
-		-- -- Example on disable auto-installation
-		-- condition = function ()
-		--   return false
-		-- end,
-		opts = function(linter)
-			---@type lint.Linter
-			---@diagnostic disable-next-line: missing-fields
-			local properties = {
-				args = {
-					-- Ignore some warnings, see https://luacheck.readthedocs.io/en/stable/warnings.html
-					-- Some of them are duplicated with `luals`, others are annoying
-					"--ignore",
-					"21*",
-					"611",
-					"612",
-					"631",
-					unpack(linter.args),
-				},
-			}
-			return deep_merge("force", linter, properties)
-		end,
-	},
-	lua_ls = {
-		masonConfig = { "lua_ls", auto_update = true },
-		handler = function()
-			vim.lsp.config("lua_ls", {
-				on_init = function(client)
-					if client.workspace_folders then
-						local path = client.workspace_folders[1].name
-						local config_path = vim.fn.stdpath("config")
-						if path ~= config_path and path ~= config_path:gsub("\\", "/") then
-							return
-						end
-					end
-
-					client.config.settings.Lua = deep_merge("force", client.config.settings.Lua, {
-						runtime = {
-							-- Tell the language server which version of Lua you're using
-							-- (most likely LuaJIT in the case of Neovim)
-							version = "LuaJIT",
-							-- Tell the language server how to find Lua modules same way as Neovim
-							-- (see `:h lua-module-load`)
-							path = {
-								"lua/?.lua",
-								"lua/?/init.lua",
-								"/lua/libs/?.lua",
-								"/lua/libs/?/init.lua",
-							},
-						},
-						-- Make the server aware of Neovim runtime files
-						workspace = {
-							checkThirdParty = false,
-							library = {
-								vim.env.VIMRUNTIME,
-								vim.fn.stdpath("config") .. "/lua",
-								vim.fn.stdpath("config") .. "/lua/libs",
-								-- Depending on the usage, you might want to add additional paths here.
-								-- "${3rd}/luv/library"
-								-- "${3rd}/busted/library",
-							},
-							-- or pull in all of 'runtimepath'.
-							-- library = vim.api.nvim_get_runtime_file("", true)
-						},
-					})
-				end,
-
-				settings = {
-					Lua = {
-						hint = {
-							enable = true,
-							-- setType = true,
-						},
-					},
-				},
-			})
-			vim.lsp.enable("lua_ls")
-		end,
-	},
-	jsonls = {
-		masonConfig = { "jsonls", auto_update = true },
-		handler = function()
-			vim.lsp.config("jsonls", {
-				settings = {
-					json = {
-						format = {
-							enable = true,
-						},
-						schemas = concat(require("schemastore").json.schemas({
-							extra = {
-								{
-									description = "Lua language server configuration file",
-									fileMatch = { ".luarc.json" },
-									name = ".luarc.json",
-									url = "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
-								},
-							},
-						})),
-						validate = { enable = true },
-					},
-				},
-			})
-			vim.lsp.enable("jsonls")
-		end,
-	},
-	neocmake = {
-		masonConfig = { "neocmake", auto_update = true },
-		handler = function()
-			vim.lsp.config("neocmake", {
-				init_options = {
-					-- Annoying
-					lint = {
-						enable = false,
-					},
-				},
-			})
-			vim.lsp.enable("neocmake")
-		end,
-	},
-	powershell_es = {
-		masonConfig = { "powershell_es", auto_update = true },
-		handler = function()
-			vim.lsp.config("powershell_es", {
-				bundle_path = vim.fn.stdpath("data") .. "/mason/packages/powershell-editor-services",
-				init_options = {
-					enableProfileLoading = false,
-				},
-			})
-			vim.lsp.enable("powershell_es")
-		end,
-	},
-	pyright = {
-		masonConfig = { "pyright", auto_update = true },
-	},
-	vtsls = {
-		masonConfig = { "vtsls", auto_update = true },
-		handler = function()
-			vim.lsp.config("vtsls", {
-				filetypes = {
-					"javascript",
-					"javascriptreact",
-					"javascript.jsx",
-					"typescript",
-					"typescriptreact",
-					"typescript.tsx",
-				},
-				settings = {
-					complete_function_calls = false,
-					vtsls = {
-						enableMoveToFileCodeAction = true,
-						autoUseWorkspaceTsdk = true,
-						experimental = {
-							maxInlayHintLength = 50,
-							completion = {
-								enableServerSideFuzzyMatch = true,
-							},
-						},
-					},
-					javascript = {
-						updateImportsOnFileMove = { enabled = "always" },
-						suggest = {
-							completeFunctionCalls = false,
-						},
-						inlayHints = {
-							functionLikeReturnTypes = { enabled = true },
-							parameterNames = { enabled = "literals" },
-							parameterTypes = { enabled = true },
-							propertyDeclarationTypes = { enabled = true },
-							variableTypes = { enabled = false },
-						},
-					},
-					typescript = {
-						updateImportsOnFileMove = { enabled = "always" },
-						suggest = {
-							completeFunctionCalls = false,
-						},
-						inlayHints = {
-							enumMemberValues = { enabled = true },
-							functionLikeReturnTypes = { enabled = true },
-							parameterNames = { enabled = "literals" },
-							parameterTypes = { enabled = true },
-							propertyDeclarationTypes = { enabled = true },
-							variableTypes = { enabled = false },
-						},
-					},
-				},
-			})
-		end,
-		vim.lsp.enable("vtsls"),
-	},
-	yamlls = {
-		masonConfig = { "yamlls", auto_update = true },
-		handler = function()
-			vim.lsp.config("yamlls", {
-				settings = {
-					yaml = {
-						format = {
-							enable = true,
-						},
-						validate = true,
-						schemas = require("schemastore").yaml.schemas(),
-						schemaStore = {
-							-- Must disable built-in schemaStore support to use
-							-- schemas from SchemaStore.nvim plugin
-							enable = false,
-							-- Avoid TypeError: Cannot read properties of undefined (reading 'length')
-							url = "",
-						},
-					},
-				},
-			})
-			vim.lsp.enable("yamlls")
-		end,
-	},
-}
 
 ---@param PROFILE profiles.Profile
 ---@param MODULE_NAME string
@@ -304,18 +30,19 @@ local function merge_profile(PROFILE, MODULE_NAME)
 	return merged
 end
 
----@param LANGS table<string | string[], profiles.Profile.Languages.Language>
----@param FT string
+---Check if language `LANG` is enabled
+---@param LANGS table<string | string[], profiles.Profile.Languages.Language> Language settings from `Profile`
+---@param LANG string
 ---@return boolean
-local function is_ft_support_enabled(LANGS, FT)
-	for FILETYPES, LANG in pairs(LANGS) do
-		if type(FILETYPES) == "string" then
-			if FILETYPES == FT and LANG.enable == true then
+local function is_language_support_enabled(LANGS, LANG)
+	for LANG_NAMES, LANG_CONFIG in pairs(LANGS) do
+		if type(LANG_NAMES) == "string" then
+			if LANG_NAMES == LANG and LANG_CONFIG.enable == true then
 				return true
 			end
 		else
-			for _, FILETYPE in ipairs(FILETYPES) do
-				if FILETYPE == FT and LANG.enable == true then
+			for _, LANG_NAME in ipairs(LANG_NAMES) do
+				if LANG_NAME == LANG and LANG_CONFIG.enable == true then
 					return true
 				end
 			end
@@ -326,76 +53,132 @@ end
 
 ---Retrieve required tools from profile
 ---@param LANGUAGES profiles.Profile.Languages
----@return { formatters: table<string, profiles.Profile.Languages.Tools.Formatters>, linters: table<string, profiles.Profile.Languages.Tools.Linters>, ls: profiles.Profile.Languages.Tools.LanguageServers }
+---@return { formatters: table<string, profiles.Profile.Languages.Tools.Formatters>, linters: table<string, profiles.Profile.Languages.Tools.Linters>, ls: profiles.Profile.Languages.Tools.LanguageServers, dap: config.dap.Config }
 local function get_language_tools(LANGUAGES)
-	-- TODO: Extract dap as soon as nvim-dap is added
-
 	---@type table<string, profiles.Profile.Languages.Tools.Formatters>
 	local formatters = {}
 	---@type table<string, profiles.Profile.Languages.Tools.Linters>
 	local linters = {}
 	---@type profiles.Profile.Languages.Tools.LanguageServers
 	local ls = {}
+	---@type config.dap.Config
+	local dap = {
+		adapters = {},
+		configurations = {},
+	}
 
 	---@type table<string, profiles.Profile.Languages.Language>
 	local supported = {}
-	-- Flatten languages with multiple filetypes
-	for FT, LANG in pairs(LANGUAGES.supported) do
-		---@cast FT string | string[]
-		---@cast LANG profiles.Profile.Languages.Language
-		if type(FT) == "string" then
+	-- Flatten languages with multiple name
+	for LANG_NAME, LANG_CONFIG in pairs(LANGUAGES.supported) do
+		---@cast LANG_NAME string | string[]
+		---@cast LANG_CONFIG profiles.Profile.Languages.Language
+		if type(LANG_NAME) == "string" then
 			-- Leave it untouched
-			supported[FT] = LANG
+			supported[LANG_NAME] = LANG_CONFIG
 		else
 			-- Map every filetype to the same language
-			for _, V in ipairs(FT) do
-				supported[V] = LANG
+			for _, V in ipairs(LANG_NAME) do
+				supported[V] = LANG_CONFIG
 			end
 		end
 	end
 	log.t(to_string(supported))
 
 	-- Merge tools of each languages
-	for FT, LANG in pairs(LANGUAGES.custom) do
+	for LANG_NAME, LANG_CONFIG in pairs(LANGUAGES.custom) do
 		-- This way make any language with enable flag set to `false`
 		-- not be included in the final toolset.
 		-- Just like they are "disabled"
-		if LANG.enable then
-			---Process to extract tools for `FILETYPE`, from `LANG`
-			---@param FILETYPE string
-			local function extract(FILETYPE)
-				assert(type(FILETYPE) == "string", "Extracting tools for invalid filetype")
-				-- Default toolset if corresponding tools not exists
-				local DEFAULT = supported[FILETYPE]
-				if type(DEFAULT) == "table" then
-					local is_tools_exists = type(LANG.tools) == "table"
-					formatters[FILETYPE] = is_tools_exists and LANG.tools.formatters
-						or deep_copy(DEFAULT.tools.formatters, true)
-					linters[FILETYPE] = is_tools_exists and LANG.tools.linters or deep_copy(DEFAULT.tools.linters, true)
-					ls = deep_merge("force", ls, is_tools_exists and LANG.tools.ls or DEFAULT.tools.ls or {})
-				else
-					formatters[FILETYPE] = LANG.tools.formatters
-					linters[FILETYPE] = LANG.tools.linters
-					ls = deep_merge("force", ls, LANG.tools.ls)
+		if not LANG_CONFIG.enable then
+			goto continue
+		end
+
+		---Process to extract tools for `FT`, from `LANG_CONFIG`
+		---@param FT string filetype
+		---@param OVERRIDE profiles.Profile.Languages.Tools? Toolset to extract
+		---@param DEFAULT profiles.Profile.Languages.Tools? Toolset to use if corresponding tools not exists
+		local function extract(FT, OVERRIDE, DEFAULT)
+			assert(type(FT) == "string", "Extracting tools for invalid filetype")
+
+			-- Set formatters for filetype
+			formatters[FT] = first_not_nil(OVERRIDE and OVERRIDE.formatters, DEFAULT and DEFAULT.formatters)
+				or formatters[FT]
+
+			-- Set linters for filetype
+			linters[FT] = first_not_nil(OVERRIDE and OVERRIDE.linters, DEFAULT and DEFAULT.linters) or linters[FT]
+
+			-- Merge language servers
+			if OVERRIDE and OVERRIDE.ls then
+				ls = deep_merge("force", ls, OVERRIDE.ls)
+			elseif DEFAULT and DEFAULT.ls then
+				ls = deep_merge("force", ls, DEFAULT.ls)
+			end
+
+			-- DAP
+
+			-- Merge adapters
+
+			local OVERRIDE_DAP_ADAPTERS = OVERRIDE and OVERRIDE.dap and OVERRIDE.dap.adapters
+			local DEFAULT_DAP_ADAPTERS = DEFAULT and DEFAULT.dap and DEFAULT.dap.adapters
+
+			if OVERRIDE_DAP_ADAPTERS then
+				dap.adapters = deep_merge("force", dap.adapters, OVERRIDE_DAP_ADAPTERS)
+			elseif DEFAULT_DAP_ADAPTERS then
+				dap.adapters = deep_merge("force", dap.adapters, DEFAULT_DAP_ADAPTERS)
+			end
+
+			-- Merge configurations
+
+			local OVERRIDE_DAP_CONFIGS = OVERRIDE and OVERRIDE.dap and OVERRIDE.dap.configurations
+			local DEFAULT_DAP_CONFIGS = DEFAULT and DEFAULT.dap and DEFAULT.dap.configurations
+
+			---@param CONFIGS profiles.Profile.Languages.Tools.Dap.Configurations
+			local function merge_dap_configurations(CONFIGS)
+				for FILETYPE, CONFIG in pairs(CONFIGS) do
+					local function merge(it)
+						return it and CONFIG and concat(it, CONFIG)
+					end
+					-- Extract configurations for filetypes of the language
+					if FILETYPE == 1 then
+						dap.configurations[FT] = let(dap.configurations[FT], merge)
+					elseif type(FILETYPE) == "string" then
+						dap.configurations[FILETYPE] = let(dap.configurations[FILETYPE], merge)
+					else
+						error("Invalid filetype for dap configuration: " .. to_string(FILETYPE))
+					end
 				end
 			end
 
-			if type(FT) == "string" then
-				extract(FT)
-			else
-				-- Merge every filetype in language with multiple filetype
-				-- NOTE: Need optimize
-				for _, V in ipairs(FT) do
-					extract(V)
-				end
+			if OVERRIDE_DAP_CONFIGS then
+				merge_dap_configurations(OVERRIDE_DAP_CONFIGS)
+			elseif DEFAULT_DAP_CONFIGS then
+				merge_dap_configurations(DEFAULT_DAP_CONFIGS)
 			end
 		end
+
+		-- Extracted filetypes
+		local FILETYPES = LANG_CONFIG.filetypes
+		if not FILETYPES then
+			if type(LANG_NAME) == "string" then
+				FILETYPES = { LANG_NAME }
+			else
+				FILETYPES = LANG_NAME
+			end
+		end
+
+		for _, FILETYPE in ipairs(FILETYPES) do
+			extract(FILETYPE, LANG_CONFIG and LANG_CONFIG.tools, supported[FILETYPE] and supported[FILETYPE].tools)
+		end
+
+		::continue::
 	end
 
 	return {
 		formatters = formatters,
 		linters = linters,
 		ls = ls,
+		dap = dap,
 	}
 end
 
@@ -437,6 +220,7 @@ local function preprocess_profile(PROFILE)
 	profile.languages.formatters = TOOLS.formatters
 	profile.languages.linters = TOOLS.linters
 	profile.languages.ls = TOOLS.ls
+	profile.languages.dap = TOOLS.dap
 	profile.utils = utils
 	return profile
 end
@@ -489,11 +273,13 @@ local function extract_mason_lspconfigs(LS)
 		assert(type(server_name) == "string")
 
 		if type(handler) == "table" then
-			-- Put manual ones into manual_setup instead of ensure_installed
+			-- Put manual ones into `manual_setup` instead of `ensure_installed`
 			res.manual_setup[server_name] = handler.config
 		else
-			-- Put all others into ensure_installed
-			table.insert(res.ensure_installed, server_config)
+			if not server_config.no_mason then
+				-- Put it into `ensure_installed`, except the one with `no_mason` set
+				table.insert(res.ensure_installed, server_config)
+			end
 			if handler ~= false then
 				-- Skip `false` for installing only
 				res.handle_by_mason[server_name] = handler
@@ -520,25 +306,29 @@ local function extract_required_linters(LINTERS)
 	for ft, linters_of_ft in pairs(LINTERS) do
 		for index, linter in ipairs(linters_of_ft) do
 			if type(linter) == "table" then
-				---@type MasonInstallConfig
-				local config = {
-					linter[1],
-					auto_update = linter.auto_update,
-					condition = linter.condition,
-					version = linter.version,
-				}
+				local name = linter[1]
 				local opts = linter.opts
 				local errmsg = LazyValue:new(function()
 					return "Invalid LinterSpec: " .. to_string(linter)
 				end)
-				vassert(type(config[1]) == "string", errmsg)
+				vassert(type(name) == "string", errmsg)
 				if type(opts) == "function" then
 					-- Register or override linter
-					res.linters[config[1]] = opts
+					res.linters[name] = opts
 				end
 				-- Extract linter name
-				linters_by_ft[ft][index] = config[1]
-				table.insert(res.ensure_installed, config)
+				linters_by_ft[ft][index] = name
+				if not linter.no_mason then
+					---Put it into `ensure_installed` if `no_mason` is not set
+					---@type MasonInstallConfig
+					local config = {
+						name,
+						auto_update = linter.auto_update,
+						version = linter.version,
+						condition = linter.condition,
+					}
+					table.insert(res.ensure_installed, config)
+				end
 			elseif type(linter) == "string" then
 				linters_by_ft[ft][index] = linter
 				table.insert(res.ensure_installed, linter)
@@ -582,7 +372,7 @@ local function scan_profile()
 end
 
 local function create_file(NAME)
-  local handle = {}
+	local handle = {}
 
 	---Write `CONTENT` to file
 	---On success, `errmsg == nil`
@@ -599,7 +389,7 @@ local function create_file(NAME)
 		return fileIO.read_file(Vkz.storage.path .. NAME)
 	end
 
-  return handle
+	return handle
 end
 
 ---@type profiles.Profile.Default.Name
@@ -744,7 +534,7 @@ local function merge_plugin_opts(path, opts, extras)
 end
 
 utils.merge_profile = merge_profile
-utils.is_ft_support_enabled = is_ft_support_enabled
+utils.is_ft_support_enabled = is_language_support_enabled
 utils.generate_config = generate_config
 utils.get_language_tools = get_language_tools
 utils.preprocess_profile = preprocess_profile

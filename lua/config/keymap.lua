@@ -7,8 +7,6 @@ local dapui = require("dapui")
 
 wk.add(Mappings)
 
--- Set
-
 vim.keymap.set({ "i", "c" }, "<C-v>", "<C-r>+", { desc = "Paste" })
 
 Groups.Editing.set("n", "F", function()
@@ -27,7 +25,7 @@ Groups.Editing.set("n", "h", function()
 	vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = 0 }), { bufnr = 0 })
 end, { desc = "Toggle inlay hints (Buffer)" })
 Groups.Editing.set("n", "r", function()
-  vim.lsp.buf.rename()
+	vim.lsp.buf.rename()
 end, { desc = "Rename symbol" })
 
 Groups.Goto.set("n", "d", "<CMD>Telescope lsp_definitions<CR>", { desc = "Go to definition" })
@@ -105,3 +103,31 @@ Groups.UI.set("n", "D", function()
 end, {
 	desc = "Toggle all debugging windows",
 })
+
+local function set_cmake_keymap()
+	local bufnr = vim.api.nvim_get_current_buf()
+	Groups.CMake.set("n", "g", "<CMD>CMakeGenerate<CR>", {
+		desc = "Generate make system",
+		silent = true,
+		buffer = bufnr,
+	})
+	Groups.CMake.set("n", "b", "<CMD>CMakeBuild<CR>", {
+		desc = "Build targets",
+		silent = true,
+		buffer = bufnr,
+	})
+	Groups.CMake.set("n", "r", "<CMD>CMakeRun<CR>", {
+		desc = "Run targets",
+		silent = true,
+		buffer = bufnr,
+	})
+	Groups.CMake.set("n", "t", "<CMD>CMakeRunTest<CR>", {
+		desc = "Run Tests",
+		silent = true,
+		buffer = bufnr,
+	})
+end
+
+return {
+	set_cmake_keymap = set_cmake_keymap,
+}

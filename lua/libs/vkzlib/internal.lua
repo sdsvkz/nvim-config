@@ -265,7 +265,7 @@ end
 ---@generic T
 ---@generic R
 ---@param it T
----@param block fun(x: T): R
+---@param block fun(it: T): R
 ---@return R
 core.let = function(it, block)
 	return block(it)

@@ -2,34 +2,32 @@ local profile = require("profiles")
 
 ---@type Hover.Config
 local opts = {
-  ---List of modules names to load as providers.
-  ---@type (string | Hover.Config.Provider)[]
-  providers = {
-    'hover.providers.diagnostic',
-    'hover.providers.lsp',
-    'hover.providers.dap',
-    -- 'hover.providers.man',
-    -- 'hover.providers.dictionary',
-    'hover.providers.gh',
-    'hover.providers.gh_user',
-    -- 'hover.providers.jira',
-    'hover.providers.fold_preview',
-    -- 'hover.providers.highlight',
-  },
-  preview_opts = {
-    border = "single",
-  },
+	---List of modules names to load as providers.
+	---@type (string | Hover.Config.Provider)[]
+	providers = {
+		"hover.providers.diagnostic",
+		"hover.providers.lsp",
+		"hover.providers.dap",
+		'hover.providers.man',
+		-- 'hover.providers.dictionary',
+		"hover.providers.gh",
+		"hover.providers.gh_user",
+		-- 'hover.providers.jira',
+		"hover.providers.fold_preview",
+		-- 'hover.providers.highlight',
+	},
+	preview_opts = {
+		border = "single",
+	},
 	-- Whether the contents of a currently open hover window should be moved
 	-- to a :h preview-window when pressing the hover keymap.
 	preview_window = false,
 	title = true,
 	mouse_providers = {
-		'hover.providers.lsp',
+		"hover.providers.lsp",
 	},
 	mouse_delay = 500,
 }
-
-local conf = {}
 
 local function hover()
 	return require("hover")
@@ -43,31 +41,7 @@ local keys = {
 		function()
 			hover().open()
 		end,
-		desc = "Hover doc",
-	},
-	-- Useless with noice or notify
-	-- Use `<C-w>w` instead
-	-- {
-	--   "gk", mode = "n", function ()
-	--     hover().select()
-	--   end,
-	--   desc = "Jump to hover doc"
-	-- },
-	{
-		"<C-p>",
-		mode = "n",
-		function()
-			hover().switch("previous")
-		end,
-		desc = "Previous source (Hover doc)",
-	},
-	{
-		"<C-n>",
-		mode = "n",
-		function()
-			hover().switch("next")
-		end,
-		desc = "Next source (Hover doc)",
+		desc = "Hover doc / Next source",
 	},
 }
 

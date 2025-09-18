@@ -12,7 +12,6 @@ return {
 	{
 		"williamboman/mason.nvim",
 		enabled = profile.preference.use_mason == true,
-		event = "VeryLazy",
 		opts = profile.utils.merge_plugin_opts(Vkz.vkzlib.io.lua.get_caller_module_path(), opts),
 		cmd = {
 			"Mason",

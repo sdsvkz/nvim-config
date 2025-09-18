@@ -17,11 +17,12 @@
 
 ---@module "lint"
 ---@module "conform"
+---@module "dap"
 
 ---@alias profiles.Profile.Default.Name "Default"
 ---@type profiles.Profile.Default.Name
 local NAME = "Default"
-local toolsConfig = require("profiles.utils").toolsConfig
+local ToolConfigs = require("profiles.options").ToolConfigs
 
 ---@class profiles.Profile
 local profile = {
@@ -31,7 +32,6 @@ local profile = {
 		---Operating system used
 		---Used for platform-specific features
 		---@type Profiles.Options.System
-		---@diagnostic disable-next-line: undefined-field
 		os = vim.uv.os_uname().sysname,
 
 		---Path to C compiler
@@ -185,6 +185,11 @@ local profile = {
 				---Whether to use this language
 				---@type boolean?
 				enable = false,
+				---TODO:
+				---Filetypes of this language
+				---If not set, language key will be used as filetypes
+				---@type string[]
+				filetypes = nil,
 				---@class profiles.Profile.Languages.Tools
 				tools = {
 					-- TEST: Add `conform` supported options to `formatters`
@@ -200,15 +205,25 @@ local profile = {
 					---Use names from lspconfig, not mason
 					---@alias profiles.Profile.Languages.Tools.LanguageServers table<config.mason.InstallConfig, config.lsp.Handler>
 
+					---@alias profiles.Profile.Languages.Tools.Dap.Configurations  { [1]: (dap.Configuration[]?), [string]: (dap.Configuration[])? }
+
+					---@class profiles.Profile.Languages.Tools.Dap
+					---Adapters for this language
+					---Map adapter name or `MasonInstallConfig` for the adapter to it's configuration
+					---@field adapters config.dap.Config.Adapters
+					---DAP Configuration for language's filetypes
+					---@field configurations profiles.Profile.Languages.Tools.Dap.Configurations
+
 					---@type profiles.Profile.Languages.Tools.Formatters?
 					formatters = nil,
 					---@type profiles.Profile.Languages.Tools.Linters?
 					linters = nil,
 					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
-						[toolsConfig.angularls.masonConfig] = toolsConfig.angularls.handler,
+						[ToolConfigs.angularls.masonConfig] = ToolConfigs.angularls.handler,
 					},
-					-- TODO: Add dap config here after nvim-dap is added
+					---@type profiles.Profile.Languages.Tools.Dap?
+					dap = nil,
 				},
 			},
 			---@type profiles.Profile.Languages.Language
@@ -219,8 +234,15 @@ local profile = {
 				tools = {
 					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
-						[toolsConfig.clangd.masonConfig] = true,
+						[ToolConfigs.clangd.masonConfig] = true,
 					},
+          ---@type profiles.Profile.Languages.Tools.Dap
+          dap = {
+            adapters = {
+              [ToolConfigs.codelldb.masonConfig] = ToolConfigs.codelldb.adapter,
+            },
+            configurations = ToolConfigs.codelldb.configurations,
+          },
 				},
 			},
 			---@type profiles.Profile.Languages.Language
@@ -230,7 +252,7 @@ local profile = {
 				tools = {
 					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
-						[toolsConfig.neocmake.masonConfig] = toolsConfig.neocmake.handler,
+						[ToolConfigs.neocmake.masonConfig] = ToolConfigs.neocmake.handler,
 					},
 				},
 			},
@@ -264,7 +286,7 @@ local profile = {
 				tools = {
 					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
-						[toolsConfig.jsonls.masonConfig] = toolsConfig.jsonls.handler,
+						[ToolConfigs.jsonls.masonConfig] = ToolConfigs.jsonls.handler,
 					},
 				},
 			},
@@ -278,11 +300,18 @@ local profile = {
 					formatters = { "stylua" },
 					---@type profiles.Profile.Languages.Tools.Linters?
 					linters = {
-						toolsConfig.luacheck,
+						ToolConfigs.luacheck,
 					},
 					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
-						[toolsConfig.lua_ls.masonConfig] = toolsConfig.lua_ls.handler,
+						[ToolConfigs.lua_ls.masonConfig] = ToolConfigs.lua_ls.handler,
+					},
+					---@type profiles.Profile.Languages.Tools.Dap
+					dap = {
+						---@type config.dap.Config.Adapters
+						adapters = {},
+						---@type dap.Configuration[]
+						configurations = {},
 					},
 				},
 			},
@@ -302,7 +331,7 @@ local profile = {
 				tools = {
 					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
-						[toolsConfig.powershell_es.masonConfig] = toolsConfig.powershell_es.handler,
+						[ToolConfigs.powershell_es.masonConfig] = ToolConfigs.powershell_es.handler,
 					},
 				},
 			},
@@ -320,7 +349,7 @@ local profile = {
 					},
 					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
-						[toolsConfig.pyright.masonConfig] = true,
+						[ToolConfigs.pyright.masonConfig] = true,
 					},
 				},
 			},
@@ -337,7 +366,7 @@ local profile = {
 					},
 					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
-						[toolsConfig.bashls.masonConfig] = true,
+						[ToolConfigs.bashls.masonConfig] = true,
 					},
 				},
 			},
@@ -363,14 +392,15 @@ local profile = {
 			[{ "typescript", "javascript" }] = {
 				-- NOTE: You still need to setup ESLint in your project
 				-- See https://eslint.org/docs/latest/use/getting-started#quick-start
-				enable = true,
+				enable = false,
 				---@type profiles.Profile.Languages.Tools
 				tools = {
+					---@type profiles.Profile.Languages.Tools.Formatters
 					formatters = { "prettierd", "prettier", stop_after_first = true },
 					---@type profiles.Profile.Languages.Tools.LanguageServers
 					ls = {
-						[toolsConfig.vtsls.masonConfig] = toolsConfig.vtsls.handler,
-						[toolsConfig.eslint.masonConfig] = toolsConfig.eslint.handler,
+						[ToolConfigs.vtsls.masonConfig] = ToolConfigs.vtsls.handler,
+						[ToolConfigs.eslint.masonConfig] = ToolConfigs.eslint.handler,
 					},
 				},
 			},
@@ -388,7 +418,7 @@ local profile = {
 					-- },
 					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
-						[toolsConfig.yamlls.masonConfig] = toolsConfig.yamlls.handler,
+						[ToolConfigs.yamlls.masonConfig] = ToolConfigs.yamlls.handler,
 					},
 				},
 			},
@@ -444,6 +474,10 @@ local profile = {
 		---This should be extracted automatically from fields above
 		---@type profiles.Profile.Languages.Tools.LanguageServers?
 		ls = nil,
+
+		---This should be extracted automatically from fields above
+		---@type config.dap.Config?
+		dap = nil,
 	},
 
 	---Debugging

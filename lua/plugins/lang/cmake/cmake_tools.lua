@@ -2,8 +2,7 @@ local merge_plugin_opts = require("profiles.utils").merge_plugin_opts
 local deep_merge = Vkz.vkzlib.Data.table.deep_merge
 
 local opts = function(_, o)
-	local osys = require("cmake-tools.osys")
-	return deep_merge("force", o, {
+	deep_merge("force", o, {
 		cmake_command = "cmake", -- this is used to specify cmake command path
 		ctest_command = "ctest", -- this is used to specify ctest command path
 		cmake_use_preset = true,
@@ -15,20 +14,27 @@ local opts = function(_, o)
 		--       ${kitGenerator}
 		--       ${variant:xx}
 		cmake_build_directory = function()
+			local osys = require("cmake-tools.osys")
 			if osys.iswin32 then
 				return "out\\${variant:buildType}"
 			end
 			return "out/${variant:buildType}"
 		end, -- this is used to specify generate directory for cmake, allows macro expansion, can be a string or a function returning the string, relative to cwd.
-		cmake_soft_link_compile_commands = true, -- this will automatically make a soft link from compile commands file to project root dir
-		cmake_compile_commands_from_lsp = false, -- this will automatically set compile commands file location using lsp, to use it, please set `cmake_soft_link_compile_commands` to false
+		cmake_compile_commands_options = {
+			action = "soft_link", -- available options: soft_link, copy, lsp, none
+			-- soft_link: this will automatically make a soft link from compile commands file to target
+			-- copy:      this will automatically copy compile commands file to target
+			-- lsp:       this will automatically set compile commands file location using lsp
+			-- none:      this will make this option ignored
+			target = vim.uv.cwd(), -- path to directory, this is used only if action == "soft_link" or action == "copy"
+		},
 		cmake_kits_path = nil, -- this is used to specify global cmake kits path, see CMakeKits for detailed usage
 		cmake_variants_message = {
 			short = { show = true }, -- whether to show short message
 			long = { show = true, max_length = 40 }, -- whether to show long message
 		},
 		cmake_dap_configuration = { -- debug settings for cmake
-			name = "cpp",
+			name = "CMakeDebug",
 			type = "codelldb",
 			request = "launch",
 			stopOnEntry = false,
@@ -57,7 +63,7 @@ local opts = function(_, o)
 						strategy = {
 							"toggleterm",
 							direction = "horizontal",
-							autos_croll = true,
+							auto_scroll = true,
 							quit_on_exit = "success",
 						},
 					}, -- options to pass into the `overseer.new_task` command
@@ -138,6 +144,7 @@ local opts = function(_, o)
 			refresh_rate_ms = 100, -- how often to iterate icons
 		},
 		cmake_virtual_text_support = true, -- Show the target related to current file using virtual text (at right corner)
+		cmake_use_scratch_buffer = false, -- A buffer that shows what cmake-tools has done
 	})
 end
 

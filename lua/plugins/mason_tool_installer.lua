@@ -5,6 +5,17 @@ local deep_merge = Vkz.vkzlib.Data.table.deep_merge
 
 local profile = require("profiles")
 
+
+---Options of Mason package
+---@class (exact) MasonInstallConfig
+---@field [1] string Package name
+---@field version string? Package version
+---@field auto_update boolean? Automatically update package if update available
+---@field condition (fun(): boolean)? Conditional installing
+---@field no_mason integer? Don't use mason if set
+
+---@alias config.mason.InstallConfig string | MasonInstallConfig
+
 local opts = {
 	ensure_installed = deep_merge("force", lsp.ensure_installed, lint.ensure_installed),
 
@@ -48,20 +59,10 @@ local opts = {
 	},
 }
 
----Options of Mason package
----@class (exact) MasonInstallConfig
----@field [1] string Package name
----@field version string? Package version
----@field auto_update boolean? Automatically update package if update available
----@field condition (fun(): boolean)? Conditional installing
-
----@alias config.mason.InstallConfig string | MasonInstallConfig
-
 ---@type LazyPluginSpec
 return {
 	"WhoIsSethDaniel/mason-tool-installer.nvim",
 	enabled = profile.preference.use_mason == true,
-  event = "VeryLazy",
 	dependencies = {
 		"williamboman/mason.nvim",
 		"williamboman/mason-lspconfig.nvim",
