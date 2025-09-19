@@ -1,23 +1,13 @@
 local lsp = require("config.lsp")
 local lint = require("config.lint")
+local dap = require("config.dap")
 
 local deep_merge = Vkz.vkzlib.Data.table.deep_merge
 
 local profile = require("profiles")
 
-
----Options of Mason package
----@class (exact) MasonInstallConfig
----@field [1] string Package name
----@field version string? Package version
----@field auto_update boolean? Automatically update package if update available
----@field condition (fun(): boolean)? Conditional installing
----@field no_mason integer? Don't use mason if set
-
----@alias config.mason.InstallConfig string | MasonInstallConfig
-
 local opts = {
-	ensure_installed = deep_merge("force", lsp.ensure_installed, lint.ensure_installed),
+	ensure_installed = deep_merge("force", lsp.ensure_installed, lint.ensure_installed, dap.ensure_installed),
 
 	-- if set to true this will check each tool for updates. If updates
 	-- are available the tool will be updated. This setting does not

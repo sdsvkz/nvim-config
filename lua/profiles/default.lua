@@ -20,6 +20,7 @@
 ---@module "dap"
 
 ---@alias profiles.Profile.Default.Name "Default"
+
 ---@type profiles.Profile.Default.Name
 local NAME = "Default"
 local ToolConfigs = require("profiles.options").ToolConfigs
@@ -205,12 +206,13 @@ local profile = {
 					---Use names from lspconfig, not mason
 					---@alias profiles.Profile.Languages.Tools.LanguageServers table<config.mason.InstallConfig, config.lsp.Handler>
 
+          ---@alias profiles.Profile.Languages.Tools.Dap.Adapters config.dap.Opts.Adapters
 					---@alias profiles.Profile.Languages.Tools.Dap.Configurations  { [1]: (dap.Configuration[]?), [string]: (dap.Configuration[])? }
 
 					---@class profiles.Profile.Languages.Tools.Dap
 					---Adapters for this language
 					---Map adapter name or `MasonInstallConfig` for the adapter to it's configuration
-					---@field adapters config.dap.Config.Adapters
+					---@field adapters profiles.Profile.Languages.Tools.Dap.Adapters
 					---DAP Configuration for language's filetypes
 					---@field configurations profiles.Profile.Languages.Tools.Dap.Configurations
 
@@ -308,9 +310,9 @@ local profile = {
 					},
 					---@type profiles.Profile.Languages.Tools.Dap
 					dap = {
-						---@type config.dap.Config.Adapters
+						---@type profiles.Profile.Languages.Tools.Dap.Adapters
 						adapters = {},
-						---@type dap.Configuration[]
+						---@type profiles.Profile.Languages.Tools.Dap.Configurations
 						configurations = {},
 					},
 				},
@@ -476,7 +478,7 @@ local profile = {
 		ls = nil,
 
 		---This should be extracted automatically from fields above
-		---@type config.dap.Config?
+		---@type config.dap.Opts?
 		dap = nil,
 	},
 

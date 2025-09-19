@@ -143,6 +143,10 @@ Themes.tokyonight = {
 	end,
 }
 
+---@module "lint"
+---@module "conform"
+---@module "dap"
+
 local ToolConfigs = {
 	angularls = {
 		masonConfig = { "angularls", auto_update = true },
@@ -174,17 +178,19 @@ local ToolConfigs = {
 			command = "codelldb",
 			detached = vim.uv.os_uname().sysname ~= System.Windows,
 		},
-		---@type dap.Configuration[]
+		---@type profiles.Profile.Languages.Tools.Dap.Configurations
 		configurations = {
 			{
-				name = "Launch file",
-				type = "codelldb",
-				request = "launch",
-				program = function()
-					return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
-				end,
-				cwd = "${workspaceFolder}",
-				stopOnEntry = false,
+				{
+					name = "Launch file",
+					type = "codelldb",
+					request = "launch",
+					program = function()
+						return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+					end,
+					cwd = "${workspaceFolder}",
+					stopOnEntry = false,
+				},
 			},
 		},
 	},

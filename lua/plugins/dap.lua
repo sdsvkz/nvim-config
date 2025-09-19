@@ -1,9 +1,9 @@
-local profile = require("profiles")
+local dap = require("config.dap")
 
 ---@type LazyPluginSpec
 return {
-  "mfussenegger/nvim-dap",
-  config = function ()
-    local dap = require("dap")
-  end,
+	"mfussenegger/nvim-dap",
+	config = function()
+    dap.setup(dap.adapters, dap.configurations)
+	end,
 }

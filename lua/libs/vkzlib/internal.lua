@@ -159,9 +159,9 @@ end
 
 ---Assert with lazy message evaluation
 ---
----Raises an error if the value of its argument v is false (i.e., `nil` or `false`)
----otherwise, returns all its arguments. In case of error, call `get_msg` to get error object;
----when absent, it defaults to `"assertion failed!"`
+---Raises an error if the value of its argument `v` is false (i.e., `nil` or `false`)
+---otherwise, returns all its arguments. In case of error, use `msg` as error object;
+---`msg` can also be a `LazyValue`, when absent, it defaults to `"assertion failed!"`
 ---
 ---[View documents](http://www.lua.org/manual/5.1/manual.html#pdf-assert)
 ---
@@ -182,7 +182,6 @@ local function assert_(v, msg, ...)
 	return v, msg, ...
 end
 
-local get_qualified_name = get_qualified_name_(MODULE)
 local errmsg = errmsg_(MODULE)
 local assert = assert_
 

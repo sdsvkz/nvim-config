@@ -1,6 +1,10 @@
 local MODULE = "Data.list"
 
-local list = require("vkzlib.internal").Data.list
+local internal = require("vkzlib.internal")
+local list = internal.Data.list
+local to_string = internal.core.to_string
+local errmsg = internal.errmsg(MODULE)
+local vassert = internal.assert
 
 local pack = list.pack
 local unpack = list.unpack
@@ -9,9 +13,13 @@ local unpack = list.unpack
 ---@param ... table
 ---@return table
 local function concat(...)
+	local deferred_errmsg = errmsg("concat")
+
 	local res = {}
-	local args = list.pack(...)
-	for _, arg in ipairs(args) do
+	for i = 1, select("#", ...) do
+		---@type table
+		local arg = select(i, ...)
+		vassert(type(arg) == "table", deferred_errmsg(string.format("%dth argument is invalid: %s", i, to_string(arg))))
 		for _, v in ipairs(arg) do
 			table.insert(res, v)
 		end
@@ -112,11 +120,11 @@ end
 ---@return T[]
 local function filter(pred, xs)
 	return foldl(function(acc, x)
-    if pred(x) == true then
-      table.insert(acc, x)
-    end
-    return acc
-  end, {}, xs)
+		if pred(x) == true then
+			table.insert(acc, x)
+		end
+		return acc
+	end, {}, xs)
 end
 
 local map = list.map
@@ -132,6 +140,6 @@ return {
 	findIndex = findIndex,
 	findIndices = findIndices,
 	foldl = foldl,
-  filter = filter,
+	filter = filter,
 	map = map,
 }

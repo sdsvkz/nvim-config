@@ -15,7 +15,6 @@ local join = vkzlib.Data.str.join
 local fileIO = vkzlib.io.file
 local is_module_exists = vkzlib.io.lua.is_module_exists
 local first_not_nil = vkzlib.core.first_not_nil
-local let = vkzlib.core.let
 
 local utils = {}
 
@@ -53,7 +52,7 @@ end
 
 ---Retrieve required tools from profile
 ---@param LANGUAGES profiles.Profile.Languages
----@return { formatters: table<string, profiles.Profile.Languages.Tools.Formatters>, linters: table<string, profiles.Profile.Languages.Tools.Linters>, ls: profiles.Profile.Languages.Tools.LanguageServers, dap: config.dap.Config }
+---@return { formatters: table<string, profiles.Profile.Languages.Tools.Formatters>, linters: table<string, profiles.Profile.Languages.Tools.Linters>, ls: profiles.Profile.Languages.Tools.LanguageServers, dap: config.dap.Opts }
 local function get_language_tools(LANGUAGES)
 	---@type table<string, profiles.Profile.Languages.Tools.Formatters>
 	local formatters = {}
@@ -61,7 +60,7 @@ local function get_language_tools(LANGUAGES)
 	local linters = {}
 	---@type profiles.Profile.Languages.Tools.LanguageServers
 	local ls = {}
-	---@type config.dap.Config
+	---@type config.dap.Opts
 	local dap = {
 		adapters = {},
 		configurations = {},
@@ -136,14 +135,16 @@ local function get_language_tools(LANGUAGES)
 			---@param CONFIGS profiles.Profile.Languages.Tools.Dap.Configurations
 			local function merge_dap_configurations(CONFIGS)
 				for FILETYPE, CONFIG in pairs(CONFIGS) do
-					local function merge(it)
-						return it and CONFIG and concat(it, CONFIG)
+					---@param FILETYPE_CONFIG dap.Configuration[]?
+					---@return dap.Configuration[]
+					local function merge(FILETYPE_CONFIG)
+						return FILETYPE_CONFIG and concat(FILETYPE_CONFIG, CONFIG) or CONFIG
 					end
 					-- Extract configurations for filetypes of the language
 					if FILETYPE == 1 then
-						dap.configurations[FT] = let(dap.configurations[FT], merge)
+						dap.configurations[FT] = merge(dap.configurations[FT])
 					elseif type(FILETYPE) == "string" then
-						dap.configurations[FILETYPE] = let(dap.configurations[FILETYPE], merge)
+						dap.configurations[FILETYPE] = merge(dap.configurations[FILETYPE])
 					else
 						error("Invalid filetype for dap configuration: " .. to_string(FILETYPE))
 					end
@@ -346,6 +347,31 @@ local function extract_required_linters(LINTERS)
 	return res
 end
 
+---Extract `config.dap.Config` from profile field
+---@param DAP config.dap.Opts
+---@return config.dap.DapConfig
+local function extract_dap(DAP)
+  ---@type config.dap.DapConfig
+  local res = {
+    ensure_installed = {},
+    adapters = {},
+    configurations = DAP.configurations,
+  }
+
+  for MASON_INSTALL_CONFIG, ADAPTER in pairs(DAP.adapters) do
+    local ADAPTER_NAME = type(MASON_INSTALL_CONFIG) == "string" and MASON_INSTALL_CONFIG or MASON_INSTALL_CONFIG[1]
+    res.adapters[ADAPTER_NAME] = ADAPTER
+    if type(MASON_INSTALL_CONFIG) == "table" and MASON_INSTALL_CONFIG.no_mason then
+      -- Skip `no_mason` ones
+      goto continue
+    end
+    table.insert(res.ensure_installed, MASON_INSTALL_CONFIG)
+      ::continue::
+  end
+
+  return res
+end
+
 ---Scan for profile
 ---@return string[]
 local function scan_profile()
@@ -541,6 +567,7 @@ utils.preprocess_profile = preprocess_profile
 utils.extract_lspconfigs = extract_lspconfigs
 utils.extract_mason_lspconfig = extract_mason_lspconfigs
 utils.extract_required_linters = extract_required_linters
+utils.extract_dap = extract_dap
 utils.scan_profile = scan_profile
 utils.create_file = create_file
 utils.DEFAULT_PROFILE_NAME = DEFAULT_PROFILE_NAME
