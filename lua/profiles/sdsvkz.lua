@@ -147,7 +147,7 @@ local profile = {
 				local profile = require("profiles")
 				if profile.appearence.theme.colorscheme:find("catppuccin") then
 					---@cast opts bufferline.UserConfig
-					opts.highlights = require("catppuccin.groups.integrations.bufferline").get_theme()
+					opts.highlights = require("catppuccin.special.bufferline").get_theme()
 				end
 			end,
 		},
@@ -168,9 +168,12 @@ local profile = {
 			angular = {
 				enable = true,
 			},
-			[{ "c", "cpp" }] = {
+			c = {
 				enable = true,
 			},
+      cpp = {
+        enable = true,
+      },
 			cmake = {
 				enable = true,
 			},
@@ -192,14 +195,20 @@ local profile = {
 			ps1 = {
 				enable = false,
 			},
-			[{ "bash", "sh" }] = {
+			bash = {
 				enable = false,
 			},
+      sh = {
+        enable = false,
+      },
 			rust = {
 				enable = true,
 			},
-      [{ "javascript", "typescript"}] = {
-        enable = true
+      javascript = {
+        enable = true,
+      },
+      typescript = {
+        enable = true,
       },
 			yaml = {
 				enable = true,

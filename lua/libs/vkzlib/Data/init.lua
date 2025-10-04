@@ -1,5 +1,3 @@
-local MODULE = "Data"
-
 return {
 	Either = require("vkzlib.Data.Either"),
   LazyValue = require("vkzlib.Data.LazyValue"),

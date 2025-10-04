@@ -10,6 +10,10 @@ local options = {
   ---@type boolean
   enable_test = user_options.enable_test or false,
 
+  ---Name of test modules to run on requiring the library
+  ---@type string[]
+  run_test = user_options.run_test or {},
+
   ---Log level for `vkzlib.logging`
   ---@type vkzlib.logging.Logger.Level
   log_level = user_options.log_level or "info",

@@ -1,5 +1,3 @@
-local MODULE = "io.file"
-
 ---Try open the file and do something
 ---@generic R1, R2
 ---@param on_open fun(file: file*): R1 Called if success

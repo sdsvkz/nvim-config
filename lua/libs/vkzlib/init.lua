@@ -12,8 +12,8 @@ local vkzlib = {
   vim = require("vkzlib.vim"),
 }
 
-if options.enable_test then
-  vkzlib.test = require("vkzlib.test")
+if options.enable_test == true then
+  vkzlib._test = require("test")
 end
 
 return vkzlib

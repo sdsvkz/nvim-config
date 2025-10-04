@@ -6,11 +6,13 @@ local vkzlib = setmetatable({
 }, {
   __index = function(t, k)
     -- Exclude
-    if k == "init" or k == "lazy" or k == "user" or (k == "test" and options.enable_test == false) then
+    if k == "init" or k == "lazy" or k == "user" then
       return nil
     end
 
-    local ok, val = pcall(require, string.format("vkzlib.%s", k))
+    local path = k == "_test" and options.enable_test == true and "test" or string.format("vkzlib.%s", k)
+
+    local ok, val = pcall(require, path)
 
     if not ok or type(val) == "table" then
       return nil

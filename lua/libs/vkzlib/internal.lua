@@ -1,8 +1,6 @@
 local LIB = "vkzlib"
 local VERSION = "0.0.1"
 
-local MODULE = "core"
-
 local options = require("vkzlib.options")
 
 -- vkzlib.Data.LazyValue
@@ -182,8 +180,9 @@ local function assert_(v, msg, ...)
 	return v, msg, ...
 end
 
-local errmsg = errmsg_(MODULE)
 local assert = assert_
+
+local errmsg = errmsg_("core")
 
 local core = {}
 
@@ -281,39 +280,44 @@ core.also = function(it, block)
 	return it
 end
 
--- `true` if all argument is `true`
----@param bs boolean[]
----@return boolean
-core.all = function(bs)
-	local deferred_errmsg = errmsg("all")
-	for _, b in ipairs(bs) do
-		assert(type(b) == "boolean", LazyValue:new(function ()
-		  return deferred_errmsg("contains non-boolean argument"):toStrict()
-		end))
-		if not b then
-			return false
-		end
+---Fold the list using the given left-associative binary operator
+---@generic T, R
+---@param f fun(acc: R, X: T): R
+---@param INITIAL R Initial value of accumulator
+---@param XS T[] list to fold
+---@return R
+function core.foldl(f, INITIAL, XS)
+	local acc = core.deep_copy(INITIAL, true)
+	for _, x in ipairs(XS) do
+		acc = f(acc, x)
 	end
-	return true
+	return acc
+end
+-- `true` if all elements satisfy `pred`
+---@generic T
+---@param pred fun(X: T): boolean
+---@param XS T[]
+---@return boolean
+function core.all(pred, XS)
+	return core.foldl(function(acc, X)
+		return acc and pred(X)
+	end, true, XS)
 end
 
--- `true` if any argument is `true`
----@param bs boolean[]
+-- `true` if any element satisfy `pred`
+---@generic T
+---@param pred fun(X: T): boolean
+---@param XS T[]
 ---@return boolean
-core.any = function(bs)
-	local deferred_errmsg = errmsg("any")
-	for _, b in ipairs(bs) do
-		assert(type(b) == "boolean", LazyValue:new(function ()
-		  return deferred_errmsg("contains non-boolean argument"):toStrict()
-		end))
-		if b then
-			return true
-		end
-	end
-	return false
+function core.any(pred, XS)
+	return core.foldl(function(acc, X)
+		return acc or pred(X)
+	end, false, XS)
 end
 
 -- vkzlib.logging
+
+errmsg = errmsg_("logging")
 
 ---@alias vkzlib.logging.Logger.Level "trace" | "debug" | "info" | "warn" | "error" | "fatal"
 
@@ -387,9 +391,12 @@ local function get_logger(format, opts)
 		end
 	end
 
-	assert(level_num ~= nil and color ~= nil, LazyValue:new(function ()
-	  return deferred_errmsg("failed to get level and color"):toStrict()
-	end))
+	assert(
+		level_num ~= nil and color ~= nil,
+		LazyValue:new(function()
+			return deferred_errmsg("failed to get level and color"):toStrict()
+		end)
+	)
 
 	return function(...)
 		local deferred_errmsg_return = errmsg("get_logger.return")
@@ -424,9 +431,12 @@ local function get_logger(format, opts)
 		-- Log to file
 		if type(outfile) == "string" then
 			local fp = io.open(outfile, "a")
-			assert(fp ~= nil, LazyValue:new(function ()
-			  return deferred_errmsg_return("failed to open file: " .. outfile):toStrict()
-			end))
+			assert(
+				fp ~= nil,
+				LazyValue:new(function()
+					return deferred_errmsg_return("failed to open file: " .. outfile):toStrict()
+				end)
+			)
 			fp:write(format({
 				color = "",
 				info = info,
@@ -475,7 +485,9 @@ local function logger(module_name, level, depth)
 	return _logger()
 end
 
--- vkzlib.list
+-- vkzlib.Data.list
+
+errmsg = errmsg_("Data.list")
 
 -- Returns a new table with all arguments stored into keys `1`, `2`, etc
 -- and with a field `"n"` with the total number of arguments
@@ -508,15 +520,21 @@ end
 ---@return any ...
 local function backup_list_unpack(list, first, last)
 	local deferred_errmsg = errmsg("list_unpack")
-	assert(type(list) == "table", LazyValue:new(function ()
-	  return deferred_errmsg("bad argument #1 (table expected, got " .. type(list) .. ")"):toStrict()
-	end))
+	assert(
+		type(list) == "table",
+		LazyValue:new(function()
+			return deferred_errmsg("bad argument #1 (table expected, got " .. type(list) .. ")"):toStrict()
+		end)
+	)
 
 	local function get_integer(x, name, default)
 		if x then
-			assert(type(x) == "number", LazyValue:new(function ()
-			  return deferred_errmsg("bad argument " .. name .. " (number expected, got " .. type(x) .. ")"):toStrict()
-			end))
+			assert(
+				type(x) == "number",
+				LazyValue:new(function()
+					return deferred_errmsg("bad argument " .. name .. " (number expected, got " .. type(x) .. ")"):toStrict()
+				end)
+			)
 			return x < 0 and math.ceil(x) or math.floor(x)
 		else
 			return default
@@ -542,11 +560,15 @@ local list_map = function(f, xs)
 	return res
 end
 
--- vkzlib.str
+-- vkzlib.Data.str
+
+errmsg = errmsg_("Data.str")
 
 local join = table.concat
 
 -- vkzlib.typing
+
+errmsg = errmsg_("typing")
 
 -- Whether type of `x` is any of vararg
 ---@param x any
@@ -554,23 +576,26 @@ local join = table.concat
 ---@return boolean
 local function is_type(x, ...)
 	local type_x = type(x)
-	return core.any(core.map(function(t)
-		return type_x == t
-	end, { ... }))
+	return core.any(function(X)
+		---@cast X type
+		return type_x == X
+	end, { ... })
 end
 
 -- Throw if type of `x` is not `t`
 ---@param x any
----@param get_msg fun(default: LazyValue<string>): any
 ---@param ... type
-local function ensure_type(x, get_msg, ...)
+local function ensure_type(x, ...)
 	local deferred_errmsg = errmsg("ensure_type")
 	-- Shitty lua can't naming `...` so it is not inherited into inner function
 	-- I have to store those things
 	local args = { ... }
-	assert(is_type(x, ...), LazyValue:new(function()
-    return get_msg(deferred_errmsg("type " .. type(x) .. " but requires any of " .. core.to_string(args)))
-  end))
+	assert(
+		is_type(x, ...),
+		LazyValue:new(function()
+			return deferred_errmsg(string.format("Expected any of %s, got %s", core.to_string(args), type(x))):toStrict()
+		end)
+	)
 end
 
 -- If `x` is an object and is callable
@@ -599,17 +624,33 @@ local function is_callable(x)
 	return core.is_callable_object(x)
 end
 
--- vkzlib.table
+---If `t` is a list (a table indexed _only_ by contiguous integers starting from 1)
+---Empty table is considered to be a list
+---@param t any
+---@return boolean
+local function is_list(t)
+  if type(t) ~= "table" then
+    return false
+  end
+  for _, _ in ipairs(t) do
+    return true
+  end
+  return false
+end
+
+-- vkzlib.Data.table
+
+errmsg = errmsg_("Data.table")
 
 ---Check if `t` is empty
 ---@param t table
 ---@return boolean
 local function table_is_empty(t)
-  local deferred_errmsg = errmsg("table_is_empty")
-  if type(t) ~= "table" then
-    error(deferred_errmsg("t is not a table"):toStrict())
-  end
-  return next(t) == nil
+	local deferred_errmsg = errmsg("table_is_empty")
+	if type(t) ~= "table" then
+		error(deferred_errmsg("t is not a table"):toStrict())
+	end
+	return next(t) == nil
 end
 
 ---Apply `f` to all value of `t`
@@ -618,11 +659,11 @@ end
 ---@param t table<K, V>
 ---@return table<K, R>
 local function table_map(f, t)
-  local res = {}
-  for k, v in pairs(t) do
-    res[k] = f(v)
-  end
-  return res
+	local res = {}
+	for k, v in pairs(t) do
+		res[k] = f(v)
+	end
+	return res
 end
 
 return {
@@ -637,13 +678,13 @@ return {
 	Data = {
 		LazyValue = LazyValue,
 		list = {
-      is_empty = table_is_empty,
+			is_empty = table_is_empty,
 			pack = list_pack,
 			unpack = list_unpack,
 			map = list_map,
 		},
 		table = {
-      is_empty = table_is_empty,
+			is_empty = table_is_empty,
 			map = table_map,
 		},
 		str = {
@@ -662,10 +703,11 @@ return {
 		ensure_type = ensure_type,
 		is_callable = is_callable,
 		is_callable_object = is_callable_object,
+    is_list = is_list,
 	},
 
-  _backup = {
-    pack = backup_list_pack,
-    unpack = backup_list_unpack,
-  },
+	_backup = {
+		pack = backup_list_pack,
+		unpack = backup_list_unpack,
+	},
 }

@@ -1,5 +1,3 @@
-local MODULE = "typing"
-
 local internal = require("vkzlib.internal")
 
 local is_type = internal.typing.is_type

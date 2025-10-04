@@ -65,4 +65,3 @@ end
 -- Run config
 
 require("config")
-

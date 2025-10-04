@@ -1,5 +1,3 @@
-local MODULE = "logging"
-
 -- TODO: Looks like callback doesn't have funcinfo. Figure it out.
 
 local internal = require("vkzlib.internal")

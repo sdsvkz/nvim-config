@@ -1,5 +1,3 @@
-local MODULE = "Data.Maybe"
-
 ---@enum Maybe.Types
 local _TYPES = {
   ---@alias Maybe.Types.Nothing "Maybe.Nothing"

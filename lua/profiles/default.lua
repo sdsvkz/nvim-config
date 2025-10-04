@@ -15,15 +15,87 @@
 --
 --]]
 
+---@module "lazy"
 ---@module "lint"
 ---@module "conform"
 ---@module "dap"
+---@module "neotest"
 
 ---@alias profiles.Profile.Default.Name "Default"
 
 ---@type profiles.Profile.Default.Name
 local NAME = "Default"
-local ToolConfigs = require("profiles.options").ToolConfigs
+local Options = require("profiles.options")
+local ToolConfigs = Options.ToolConfigs
+local NeotestAdapters = Options.NeotestAdapters
+local deep_merge = Vkz.vkzlib.Data.table.deep_merge
+
+---@type profiles.Profile.Languages.Language
+local LANG_C = {
+	enable = false,
+	---@type profiles.Profile.Languages.Tools?
+	tools = {
+		---@type profiles.Profile.Languages.Tools.LanguageServers?
+		ls = {
+			[ToolConfigs.clangd.masonConfig] = true,
+		},
+		---@type profiles.Profile.Languages.Tools.Dap?
+		dap = {
+			adapters = {
+				[ToolConfigs.codelldb.masonConfig] = ToolConfigs.codelldb.adapter,
+			},
+			configurations = ToolConfigs.codelldb.configurations,
+		},
+	},
+}
+
+---@type profiles.Profile.Languages.Language
+local CPP_SPECIFIC = {
+  ---@type profiles.Profile.Languages.Neotest?
+  neotest = {
+    ---@type profiles.Profile.Languages.Neotest.Adapters?
+    adapters = {
+      [NeotestAdapters.gtest.spec] = NeotestAdapters.gtest.adapter,
+    },
+  },
+}
+
+local LANG_CPP = deep_merge("force", LANG_C, CPP_SPECIFIC)
+
+---@type profiles.Profile.Languages.Language
+local LANG_SHELL = {
+	enable = false,
+	---@type profiles.Profile.Languages.Tools?
+	tools = {
+		---@type profiles.Profile.Languages.Tools.Formatters?
+		formatters = { "shfmt" },
+		---@type profiles.Profile.Languages.Tools.Linters?
+		linters = {
+			{ "shellcheck", auto_update = true },
+		},
+		---@type profiles.Profile.Languages.Tools.LanguageServers?
+		ls = {
+			[ToolConfigs.bashls.masonConfig] = true,
+		},
+	},
+}
+
+---@type profiles.Profile.Languages.Language
+local LANG_JAVASCRIPT = {
+	enable = false,
+	---@type profiles.Profile.Languages.Tools?
+	tools = {
+		---@type profiles.Profile.Languages.Tools.Formatters?
+		formatters = { "prettierd", "prettier", stop_after_first = true },
+		---@type profiles.Profile.Languages.Tools.LanguageServers?
+		ls = {
+			[ToolConfigs.vtsls.masonConfig] = ToolConfigs.vtsls.handler,
+			-- NOTE: You still need to setup ESLint in your project
+			-- See https://eslint.org/docs/latest/use/getting-started#quick-start
+			[ToolConfigs.eslint.masonConfig] = ToolConfigs.eslint.handler,
+		},
+	},
+}
 
 ---@class profiles.Profile
 local profile = {
@@ -188,8 +260,8 @@ local profile = {
 				enable = false,
 				---TODO:
 				---Filetypes of this language
-				---If not set, language key will be used as filetypes
-				---@type string[]
+				---If not set, language key will be used as filetype
+				---@type string[]?
 				filetypes = nil,
 				---@class profiles.Profile.Languages.Tools
 				tools = {
@@ -206,7 +278,7 @@ local profile = {
 					---Use names from lspconfig, not mason
 					---@alias profiles.Profile.Languages.Tools.LanguageServers table<config.mason.InstallConfig, config.lsp.Handler>
 
-          ---@alias profiles.Profile.Languages.Tools.Dap.Adapters config.dap.Opts.Adapters
+					---@alias profiles.Profile.Languages.Tools.Dap.Adapters config.dap.Opts.Adapters
 					---@alias profiles.Profile.Languages.Tools.Dap.Configurations  { [1]: (dap.Configuration[]?), [string]: (dap.Configuration[])? }
 
 					---@class profiles.Profile.Languages.Tools.Dap
@@ -227,30 +299,25 @@ local profile = {
 					---@type profiles.Profile.Languages.Tools.Dap?
 					dap = nil,
 				},
-			},
-			---@type profiles.Profile.Languages.Language
-			[{ "c", "cpp" }] = {
-				---@type boolean?
-				enable = false,
-				---@type profiles.Profile.Languages.Tools
-				tools = {
-					---@type profiles.Profile.Languages.Tools.LanguageServers?
-					ls = {
-						[ToolConfigs.clangd.masonConfig] = true,
-					},
-          ---@type profiles.Profile.Languages.Tools.Dap
-          dap = {
-            adapters = {
-              [ToolConfigs.codelldb.masonConfig] = ToolConfigs.codelldb.adapter,
-            },
-            configurations = ToolConfigs.codelldb.configurations,
-          },
+				---Neotest configuration
+				---@class profiles.Profile.Languages.Neotest
+				neotest = {
+					---@alias profiles.Profile.Languages.Neotest.Adapters table<integer | string | LazyPluginSpec, fun(): neotest.Adapter[]>?
+
+					---Map neotest adapter plugin specs to a function that
+					---return a list of `neotest.Adapter`
+					---@type profiles.Profile.Languages.Neotest.Adapters
+					adapters = nil,
 				},
 			},
 			---@type profiles.Profile.Languages.Language
+			c = LANG_C,
+			---@type profiles.Profile.Languages.Language
+			cpp = LANG_CPP,
+			---@type profiles.Profile.Languages.Language
 			cmake = {
 				enable = false,
-				---@type profiles.Profile.Languages.Tools
+				---@type profiles.Profile.Languages.Tools?
 				tools = {
 					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
@@ -261,7 +328,7 @@ local profile = {
 			---@type profiles.Profile.Languages.Language
 			haskell = {
 				enable = false,
-				---@type profiles.Profile.Languages.Tools
+				---@type profiles.Profile.Languages.Tools?
 				tools = {
 					-- formatters = { "ormolu" }, -- HLS use Ormolu as built-in formatter
 
@@ -284,7 +351,7 @@ local profile = {
 			---@type profiles.Profile.Languages.Language
 			json = {
 				enable = true,
-				---@type profiles.Profile.Languages.Tools
+				---@type profiles.Profile.Languages.Tools?
 				tools = {
 					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
@@ -296,7 +363,7 @@ local profile = {
 			---@type profiles.Profile.Languages.Language
 			lua = {
 				enable = true,
-				---@type profiles.Profile.Languages.Tools
+				---@type profiles.Profile.Languages.Tools?
 				tools = {
 					---@type profiles.Profile.Languages.Tools.Formatters?
 					formatters = { "stylua" },
@@ -308,11 +375,11 @@ local profile = {
 					ls = {
 						[ToolConfigs.lua_ls.masonConfig] = ToolConfigs.lua_ls.handler,
 					},
-					---@type profiles.Profile.Languages.Tools.Dap
+					---@type profiles.Profile.Languages.Tools.Dap?
 					dap = {
-						---@type profiles.Profile.Languages.Tools.Dap.Adapters
+						---@type profiles.Profile.Languages.Tools.Dap.Adapters?
 						adapters = {},
-						---@type profiles.Profile.Languages.Tools.Dap.Configurations
+						---@type profiles.Profile.Languages.Tools.Dap.Configurations?
 						configurations = {},
 					},
 				},
@@ -320,7 +387,7 @@ local profile = {
 			---@type profiles.Profile.Languages.Language
 			markdown = {
 				enable = false,
-				---@type profiles.Profile.Languages.Tools
+				---@type profiles.Profile.Languages.Tools?
 				tools = {
 					---@type profiles.Profile.Languages.Tools.Formatters?
 					formatters = { "prettierd", "prettier", stop_after_first = true },
@@ -329,7 +396,7 @@ local profile = {
 			---@type profiles.Profile.Languages.Language
 			ps1 = {
 				enable = false,
-				---@type profiles.Profile.Languages.Tools
+				---@type profiles.Profile.Languages.Tools?
 				tools = {
 					---@type profiles.Profile.Languages.Tools.LanguageServers?
 					ls = {
@@ -340,7 +407,7 @@ local profile = {
 			---@type profiles.Profile.Languages.Language
 			python = {
 				enable = false,
-				---@type profiles.Profile.Languages.Tools
+				---@type profiles.Profile.Languages.Tools?
 				tools = {
 					---@type profiles.Profile.Languages.Tools.Formatters?
 					formatters = { "isort", "black" },
@@ -355,27 +422,12 @@ local profile = {
 					},
 				},
 			},
-			---@type profiles.Profile.Languages.Language
-			[{ "bash", "sh" }] = {
-				enable = false,
-				---@type profiles.Profile.Languages.Tools
-				tools = {
-					---@type profiles.Profile.Languages.Tools.Formatters?
-					formatters = { "shfmt" },
-					---@type profiles.Profile.Languages.Tools.Linters?
-					linters = {
-						{ "shellcheck", auto_update = true },
-					},
-					---@type profiles.Profile.Languages.Tools.LanguageServers?
-					ls = {
-						[ToolConfigs.bashls.masonConfig] = true,
-					},
-				},
-			},
+			bash = LANG_SHELL,
+			sh = LANG_SHELL,
 			---@type profiles.Profile.Languages.Language
 			rust = {
 				enable = false,
-				---@type profiles.Profile.Languages.Tools
+				---@type profiles.Profile.Languages.Tools?
 				tools = {
 					-- NOTE: This require `rust-analyzer` in PATH
 					-- `rustaceanvim` will handle setup.
@@ -391,24 +443,12 @@ local profile = {
 				},
 			},
 			---@type profiles.Profile.Languages.Language
-			[{ "typescript", "javascript" }] = {
-				-- NOTE: You still need to setup ESLint in your project
-				-- See https://eslint.org/docs/latest/use/getting-started#quick-start
-				enable = false,
-				---@type profiles.Profile.Languages.Tools
-				tools = {
-					---@type profiles.Profile.Languages.Tools.Formatters
-					formatters = { "prettierd", "prettier", stop_after_first = true },
-					---@type profiles.Profile.Languages.Tools.LanguageServers
-					ls = {
-						[ToolConfigs.vtsls.masonConfig] = ToolConfigs.vtsls.handler,
-						[ToolConfigs.eslint.masonConfig] = ToolConfigs.eslint.handler,
-					},
-				},
-			},
-			-- NOTE: Enabled by default
+			typescript = LANG_JAVASCRIPT,
+			---@type profiles.Profile.Languages.Language
+			javascript = LANG_JAVASCRIPT,
 			---@type profiles.Profile.Languages.Language
 			yaml = {
+				-- NOTE: Enabled by default
 				enable = true,
 				---@type profiles.Profile.Languages.Tools
 				tools = {
@@ -426,9 +466,11 @@ local profile = {
 			},
 		},
 
+		---@alias profiles.Profile.Languages.Custom table<string, profiles.Profile.Languages.Language>
+
 		---Map filetype into language options
 		---Override this in your own profile. It will be merged with `supported`
-		---@type table<string | string[], profiles.Profile.Languages.Language>
+		---@type profiles.Profile.Languages.Custom
 		custom = {
 			-- Example
 
@@ -480,6 +522,14 @@ local profile = {
 		---This should be extracted automatically from fields above
 		---@type config.dap.Opts?
 		dap = nil,
+
+		---This should be extracted automatically from fields above
+		---@type profiles.Profile.Languages.Neotest?
+		neotest = nil,
+
+		---This should be extracted automatically from fields above
+		---@type table<string, profiles.Profile.Languages.Language>
+		supported_flattened = nil,
 	},
 
 	---Debugging

@@ -1,5 +1,3 @@
-local MODULE = "io"
-
 return {
   file = require("vkzlib.io.file"),
   lua = require("vkzlib.io.lua"),

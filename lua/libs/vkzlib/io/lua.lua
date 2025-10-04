@@ -1,10 +1,8 @@
-local MODULE = "io.lua"
-
 local internal = require("vkzlib.internal")
 local core = internal.core
 local LazyValue = internal.Data.LazyValue
 
-local errmsg = internal.errmsg(MODULE)
+local errmsg = internal.errmsg("io.lua")
 
 ---Get the path of caller module
 ---This function is implemented with `debug.getinfo(2, "S")`

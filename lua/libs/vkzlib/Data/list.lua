@@ -1,17 +1,34 @@
-local MODULE = "Data.list"
-
 local internal = require("vkzlib.internal")
+local core = internal.core
 local list = internal.Data.list
-local to_string = internal.core.to_string
-local errmsg = internal.errmsg(MODULE)
+local deep_copy = core.deep_copy
+local to_string = core.to_string
+
+local errmsg = internal.errmsg("Data.list")
 local vassert = internal.assert
 
+local all = core.all
+local any = core.any
+local foldl = core.foldl
 local pack = list.pack
 local unpack = list.unpack
 
--- Merge multiple lists
----@param ... table
----@return table
+---Reverse the list
+---@generic T
+---@param XS T[]
+---@return T[]
+local function reverse(XS)
+  local res = {}
+  for i = #XS, 1, -1 do
+    table.insert(res, deep_copy(XS[i], true))
+  end
+  return res
+end
+
+---Merge multiple lists
+---@generic T : table
+---@param ... T
+---@return T
 local function concat(...)
 	local deferred_errmsg = errmsg("concat")
 
@@ -29,25 +46,25 @@ end
 
 ---Find the first element that satisfy predicate
 ---@generic T
----@param pred fun(x: T): boolean
----@param xs T[]
+---@param pred fun(X: T): boolean
+---@param XS T[]
 ---@return T?
-local function find(pred, xs)
-	for _, x in ipairs(xs) do
-		if pred(x) == true then
-			return x
+local function find(pred, XS)
+	for _, X in ipairs(XS) do
+		if pred(X) == true then
+			return X
 		end
 	end
 end
 
 ---Find index of the first element that satisfy predicate
 ---@generic T
----@param pred fun(x: T): boolean
----@param xs T[]
+---@param pred fun(X: T): boolean
+---@param XS T[]
 ---@return integer?
-local function findIndex(pred, xs)
-	for index, x in ipairs(xs) do
-		if pred(x) == true then
+local function findIndex(pred, XS)
+	for index, X in ipairs(XS) do
+		if pred(X) == true then
 			return index
 		end
 	end
@@ -55,14 +72,14 @@ end
 
 ---Find indices of every element that satisfy predicate
 ---@generic T
----@param pred fun(x: T): boolean
----@param xs T[]
+---@param pred fun(X: T): boolean
+---@param XS T[]
 ---@return integer[]
-local function findIndices(pred, xs)
+local function findIndices(pred, XS)
 	---@type integer[]
 	local indices = {}
-	for index, x in ipairs(xs) do
-		if pred(x) == true then
+	for index, X in ipairs(XS) do
+		if pred(X) == true then
 			table.insert(indices, index)
 		end
 	end
@@ -70,68 +87,84 @@ local function findIndices(pred, xs)
 end
 
 ---Check if element `e` is in list `xs`
----@param e any
----@param xs any[]
+---@param E any
+---@param XS any[]
 ---@return boolean
-local function elem(e, xs)
-	return find(function(x)
-		return x == e
-	end, xs) ~= nil
+local function elem(E, XS)
+	return find(function(X)
+		return X == E
+	end, XS) ~= nil
 end
 
 ---Return index of the first element that equals `e` in `xs`
----@param e any
----@param xs any[]
+---@param E any
+---@param XS any[]
 ---@return integer?
-local function elemIndex(e, xs)
-	return findIndex(function(x)
-		return x == e
-	end, xs)
+local function elemIndex(E, XS)
+	return findIndex(function(X)
+		return X == E
+	end, XS)
 end
 
 ---Return indices of every element that equals `e` in `xs`
----@param e any
----@param xs any[]
+---@param E any
+---@param XS any[]
 ---@return integer[]
-local function elemIndices(e, xs)
-	return findIndices(function(x)
-		return x == e
-	end, xs)
-end
-
----Left fold `xs` with `f`, with `initial` accumulator value
----@generic T, R
----@param f fun(acc: R, x: T): R
----@param initial R
----@param xs T[]
----@return R
-local function foldl(f, initial, xs)
-	local acc = initial
-	for _, x in ipairs(xs) do
-		acc = f(acc, x)
-	end
-	return acc
+local function elemIndices(E, XS)
+	return findIndices(function(X)
+		return X == E
+	end, XS)
 end
 
 ---Filter out elements of `xs` that doesn't satisfy `pred`
 ---@generic T
----@param pred fun(x: T): boolean
----@param xs T[]
+---@param pred fun(X: T): boolean
+---@param XS T[]
 ---@return T[]
-local function filter(pred, xs)
-	return foldl(function(acc, x)
-		if pred(x) == true then
-			table.insert(acc, x)
+local function filter(pred, XS)
+	return foldl(function(acc, X)
+		if pred(X) == true then
+			table.insert(acc, X)
 		end
 		return acc
-	end, {}, xs)
+	end, {}, XS)
 end
 
 local map = list.map
 
+---Remove duplicates with equality predicate
+---@generic T
+---@param eq fun(A: T, B: T): boolean Equality predicate
+---@param XS T[]
+---@return T[]
+local function nubBy(eq,  XS)
+	return foldl(function(acc, X)
+		if all(function(Y)
+			return not eq(X, Y)
+		end, acc) then
+			table.insert(acc, X)
+		end
+		return acc
+	end, {}, XS)
+end
+
+---Remove duplicates (Check equality using `==`)
+---@generic T
+---@param XS T[]
+---@return T[]
+local function nub(XS)
+  return nubBy(function (A, B)
+    return A == B
+  end, XS)
+end
+
 return {
+	all = all,
+	any = any,
+	foldl = foldl,
 	pack = pack,
 	unpack = unpack,
+  reverse = reverse,
 	concat = concat,
 	elem = elem,
 	elemIndex = elemIndex,
@@ -139,7 +172,8 @@ return {
 	find = find,
 	findIndex = findIndex,
 	findIndices = findIndices,
-	foldl = foldl,
 	filter = filter,
 	map = map,
+	nubBy = nubBy,
+  nub = nub,
 }

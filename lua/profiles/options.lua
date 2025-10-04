@@ -340,6 +340,7 @@ local ToolConfigs = {
 		masonConfig = { "neocmake", auto_update = true },
 		handler = function()
 			vim.lsp.config("neocmake", {
+				single_file_support = true,
 				init_options = {
 					-- Annoying
 					lint = {
@@ -447,8 +448,21 @@ local ToolConfigs = {
 	},
 }
 
+local NeotestAdapters = {
+	gtest = {
+		spec = "alfaix/neotest-gtest",
+		adapter = function()
+			local gtest = require("neotest-gtest").setup({})
+			return {
+				gtest,
+			}
+		end,
+	},
+}
+
 return {
 	System = System,
 	Themes = Themes,
 	ToolConfigs = ToolConfigs,
+  NeotestAdapters = NeotestAdapters,
 }

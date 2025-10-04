@@ -11,13 +11,16 @@ local to_string = vkzlib.core.to_string
 local deep_copy = vkzlib.core.deep_copy
 local concat = vkzlib.Data.list.concat
 local deep_merge = vkzlib.Data.table.deep_merge
+local any_with_key = vkzlib.Data.table.any_with_key
 local join = vkzlib.Data.str.join
 local fileIO = vkzlib.io.file
 local is_module_exists = vkzlib.io.lua.is_module_exists
 local first_not_nil = vkzlib.core.first_not_nil
+local nubBy = vkzlib.Data.list.nubBy
 
 local utils = {}
 
+---@nodiscard
 ---@param PROFILE profiles.Profile
 ---@param MODULE_NAME string
 ---@return profiles.Profile
@@ -30,30 +33,49 @@ local function merge_profile(PROFILE, MODULE_NAME)
 end
 
 ---Check if language `LANG` is enabled
----@param LANGS table<string | string[], profiles.Profile.Languages.Language> Language settings from `Profile`
+---@nodiscard
+---@param LANGS profiles.Profile.Languages.Supported | profiles.Profile.Languages.Custom Language settings from `Profile`
 ---@param LANG string
 ---@return boolean
 local function is_language_support_enabled(LANGS, LANG)
-	for LANG_NAMES, LANG_CONFIG in pairs(LANGS) do
-		if type(LANG_NAMES) == "string" then
-			if LANG_NAMES == LANG and LANG_CONFIG.enable == true then
-				return true
-			end
-		else
-			for _, LANG_NAME in ipairs(LANG_NAMES) do
-				if LANG_NAME == LANG and LANG_CONFIG.enable == true then
-					return true
-				end
-			end
-		end
-	end
-	return false
+	return any_with_key(function(LANG_NAME, LANG_CONFIG)
+		---@cast LANG_NAME string
+		---@cast LANG_CONFIG profiles.Profile.Languages.Language
+		return LANG_NAME == LANG and LANG_CONFIG.enable == true
+	end, LANGS)
 end
 
----Retrieve required tools from profile
----@param LANGUAGES profiles.Profile.Languages
+---Set `filetypes` to names of the language if it is `nil`
+---@param LANGS profiles.Profile.Languages.Supported | profiles.Profile.Languages.Custom
+local function fill_default_filetypes(LANGS)
+	for LANG_NAME, LANG_CONFIG in pairs(LANGS) do
+		-- Do nothing if `filetypes` is already set
+		if LANG_CONFIG.filetypes then
+			goto continue
+		end
+
+		LANG_CONFIG.filetypes = { LANG_NAME }
+		::continue::
+	end
+end
+
+---@param A config.mason.InstallConfig
+---@param B config.mason.InstallConfig
+---@return boolean
+local function is_same_mason_package(A, B)
+  local A_NAME = type(A) == "table" and A[1] or A
+  local B_NAME = type(B) == "table" and B[1] or B
+  return A_NAME == B_NAME
+end
+
+---Merge required tools from profile
+---NOTE: The result may contains multiple `MasonInstallConfig` for the same package
+---
+---@nodiscard
+---@param SUPPORTED profiles.Profile.Languages.Supported
+---@param CUSTOM profiles.Profile.Languages.Custom
 ---@return { formatters: table<string, profiles.Profile.Languages.Tools.Formatters>, linters: table<string, profiles.Profile.Languages.Tools.Linters>, ls: profiles.Profile.Languages.Tools.LanguageServers, dap: config.dap.Opts }
-local function get_language_tools(LANGUAGES)
+local function merge_language_tools(SUPPORTED, CUSTOM)
 	---@type table<string, profiles.Profile.Languages.Tools.Formatters>
 	local formatters = {}
 	---@type table<string, profiles.Profile.Languages.Tools.Linters>
@@ -66,26 +88,58 @@ local function get_language_tools(LANGUAGES)
 		configurations = {},
 	}
 
-	---@type table<string, profiles.Profile.Languages.Language>
-	local supported = {}
-	-- Flatten languages with multiple name
-	for LANG_NAME, LANG_CONFIG in pairs(LANGUAGES.supported) do
-		---@cast LANG_NAME string | string[]
-		---@cast LANG_CONFIG profiles.Profile.Languages.Language
-		if type(LANG_NAME) == "string" then
-			-- Leave it untouched
-			supported[LANG_NAME] = LANG_CONFIG
-		else
-			-- Map every filetype to the same language
-			for _, V in ipairs(LANG_NAME) do
-				supported[V] = LANG_CONFIG
+	---@nodiscard
+	---@generic K, V
+	---@param TABLE table<K, V>
+	---@param OVERRIDE table<K, V>? table to be merged
+	---@param DEFAULT table<K, V>? table to be merged if `OVERRIDE` not exists
+	---@return table<K, V>
+	local function merge(TABLE, OVERRIDE, DEFAULT)
+		local res = TABLE
+		if OVERRIDE then
+			res = deep_merge("force", res, OVERRIDE)
+		elseif DEFAULT then
+			res = deep_merge("force", res, DEFAULT)
+		end
+		return res
+	end
+
+	---Process to extract tools for `FT`, from `LANG_CONFIG`
+	---@param FT string filetype
+	---@param OVERRIDE profiles.Profile.Languages.Tools.Dap.Configurations?
+	---@param DEFAULT profiles.Profile.Languages.Tools.Dap.Configurations?
+	local function merge_dap_configurations(FT, OVERRIDE, DEFAULT)
+		---@nodiscard
+		---@param NEW dap.Configuration[]
+		---@param ORIG dap.Configuration[]?
+		---@return dap.Configuration[]
+		local function _merge(NEW, ORIG)
+			return ORIG and concat(ORIG, NEW) or NEW
+		end
+
+		---@param CONFIGS profiles.Profile.Languages.Tools.Dap.Configurations
+		local function _merge_dap_configurations(CONFIGS)
+			for FILETYPE, CONFIG in pairs(CONFIGS) do
+				-- Extract configurations for filetypes of the language
+				if FILETYPE == 1 then
+					dap.configurations[FT] = _merge(CONFIG, dap.configurations[FT])
+				elseif type(FILETYPE) == "string" then
+					dap.configurations[FILETYPE] = _merge(CONFIG, dap.configurations[FILETYPE])
+				else
+					error("Invalid filetype for dap configuration: " .. to_string(FILETYPE))
+				end
 			end
 		end
+
+		if OVERRIDE then
+			_merge_dap_configurations(OVERRIDE)
+		elseif DEFAULT then
+			_merge_dap_configurations(DEFAULT)
+		end
 	end
-	log.t(to_string(supported))
 
 	-- Merge tools of each languages
-	for LANG_NAME, LANG_CONFIG in pairs(LANGUAGES.custom) do
+	for LANG_NAME, LANG_CONFIG in pairs(CUSTOM) do
 		-- This way make any language with enable flag set to `false`
 		-- not be included in the final toolset.
 		-- Just like they are "disabled"
@@ -93,83 +147,38 @@ local function get_language_tools(LANGUAGES)
 			goto continue
 		end
 
-		---Process to extract tools for `FT`, from `LANG_CONFIG`
-		---@param FT string filetype
-		---@param OVERRIDE profiles.Profile.Languages.Tools? Toolset to extract
-		---@param DEFAULT profiles.Profile.Languages.Tools? Toolset to use if corresponding tools not exists
-		local function extract(FT, OVERRIDE, DEFAULT)
-			assert(type(FT) == "string", "Extracting tools for invalid filetype")
+		local OVERRIDE = LANG_CONFIG and LANG_CONFIG.tools
+		---@type profiles.Profile.Languages.Tools?
+		local DEFAULT = SUPPORTED[LANG_NAME] and SUPPORTED[LANG_NAME].tools
 
-			-- Set formatters for filetype
-			formatters[FT] = first_not_nil(OVERRIDE and OVERRIDE.formatters, DEFAULT and DEFAULT.formatters)
-				or formatters[FT]
-
-			-- Set linters for filetype
-			linters[FT] = first_not_nil(OVERRIDE and OVERRIDE.linters, DEFAULT and DEFAULT.linters) or linters[FT]
-
-			-- Merge language servers
-			if OVERRIDE and OVERRIDE.ls then
-				ls = deep_merge("force", ls, OVERRIDE.ls)
-			elseif DEFAULT and DEFAULT.ls then
-				ls = deep_merge("force", ls, DEFAULT.ls)
-			end
-
-			-- DAP
-
-			-- Merge adapters
-
-			local OVERRIDE_DAP_ADAPTERS = OVERRIDE and OVERRIDE.dap and OVERRIDE.dap.adapters
-			local DEFAULT_DAP_ADAPTERS = DEFAULT and DEFAULT.dap and DEFAULT.dap.adapters
-
-			if OVERRIDE_DAP_ADAPTERS then
-				dap.adapters = deep_merge("force", dap.adapters, OVERRIDE_DAP_ADAPTERS)
-			elseif DEFAULT_DAP_ADAPTERS then
-				dap.adapters = deep_merge("force", dap.adapters, DEFAULT_DAP_ADAPTERS)
-			end
-
-			-- Merge configurations
-
-			local OVERRIDE_DAP_CONFIGS = OVERRIDE and OVERRIDE.dap and OVERRIDE.dap.configurations
-			local DEFAULT_DAP_CONFIGS = DEFAULT and DEFAULT.dap and DEFAULT.dap.configurations
-
-			---@param CONFIGS profiles.Profile.Languages.Tools.Dap.Configurations
-			local function merge_dap_configurations(CONFIGS)
-				for FILETYPE, CONFIG in pairs(CONFIGS) do
-					---@param FILETYPE_CONFIG dap.Configuration[]?
-					---@return dap.Configuration[]
-					local function merge(FILETYPE_CONFIG)
-						return FILETYPE_CONFIG and concat(FILETYPE_CONFIG, CONFIG) or CONFIG
-					end
-					-- Extract configurations for filetypes of the language
-					if FILETYPE == 1 then
-						dap.configurations[FT] = merge(dap.configurations[FT])
-					elseif type(FILETYPE) == "string" then
-						dap.configurations[FILETYPE] = merge(dap.configurations[FILETYPE])
-					else
-						error("Invalid filetype for dap configuration: " .. to_string(FILETYPE))
-					end
-				end
-			end
-
-			if OVERRIDE_DAP_CONFIGS then
-				merge_dap_configurations(OVERRIDE_DAP_CONFIGS)
-			elseif DEFAULT_DAP_CONFIGS then
-				merge_dap_configurations(DEFAULT_DAP_CONFIGS)
-			end
-		end
+		-- Merge language servers
+		ls = merge(ls, OVERRIDE and OVERRIDE.ls, DEFAULT and DEFAULT.ls)
+		-- Merge DAP adapters
+		dap.adapters = merge(
+			dap.adapters,
+			OVERRIDE and OVERRIDE.dap and OVERRIDE.dap.adapters,
+			DEFAULT and DEFAULT.dap and DEFAULT.dap.adapters
+		)
 
 		-- Extracted filetypes
 		local FILETYPES = LANG_CONFIG.filetypes
-		if not FILETYPES then
-			if type(LANG_NAME) == "string" then
-				FILETYPES = { LANG_NAME }
-			else
-				FILETYPES = LANG_NAME
-			end
-		end
+		assert(type(FILETYPES) == "table", "Extracting a language with invalid filetypes")
 
+    -- Filetype specific
 		for _, FILETYPE in ipairs(FILETYPES) do
-			extract(FILETYPE, LANG_CONFIG and LANG_CONFIG.tools, supported[FILETYPE] and supported[FILETYPE].tools)
+			-- Set formatters for filetype
+			formatters[FILETYPE] = first_not_nil(OVERRIDE and OVERRIDE.formatters, DEFAULT and DEFAULT.formatters)
+				or formatters[FILETYPE]
+
+			-- Set linters for filetype
+      linters[FILETYPE] = first_not_nil(OVERRIDE and OVERRIDE.linters, DEFAULT and DEFAULT.linters)
+        or linters[FILETYPE]
+
+			merge_dap_configurations(
+				FILETYPE,
+				OVERRIDE and OVERRIDE.dap and OVERRIDE.dap.configurations,
+				DEFAULT and DEFAULT.dap and DEFAULT.dap.configurations
+			)
 		end
 
 		::continue::
@@ -183,11 +192,31 @@ local function get_language_tools(LANGUAGES)
 	}
 end
 
+---@param ensure_installed config.mason.InstallConfig[]
+---@return config.mason.InstallConfig[]
+local function remove_duplicated_mason_packages(ensure_installed)
+  return nubBy(is_same_mason_package, ensure_installed)
+end
+
+---Merge neotest configuration from each languages
+---@nodiscard
+---@param LANGUAGES profiles.Profile.Languages
+---@return profiles.Profile.Languages.Neotest
+local function merge_neotest_config(LANGUAGES)
+	local res = {
+		adapters = {},
+	}
+	-- TODO:
+
+	return res
+end
+
+---@nodiscard
 ---@param spec (string | LazyPluginSpec)?
 ---@param colorscheme string
 ---@param theme_config (fun(plugin: table, opts: table, spec: LazyPlugin) | true)?
 ---@return ((fun(main: string): fun(self: LazyPlugin, opts: table)) | true)?
-local function generate_config(spec, colorscheme, theme_config)
+local function generate_theme_config(spec, colorscheme, theme_config)
 	if theme_config == true or theme_config == nil then
 		return theme_config
 	elseif type(spec) ~= "string" then
@@ -204,29 +233,37 @@ local function generate_config(spec, colorscheme, theme_config)
 end
 
 ---Generate complete profile table
+---@nodiscard
 ---@param PROFILE profiles.Profile
 ---@return profiles.Profile
 local function preprocess_profile(PROFILE)
 	local profile = deep_copy(PROFILE, true)
 	if profile.appearence.theme.config == nil then
-		profile.appearence.theme.config = generate_config(
+		profile.appearence.theme.config = generate_theme_config(
 			profile.appearence.theme.plugin,
 			profile.appearence.theme.colorscheme,
 			profile.appearence.theme.theme_config
 		)
 	end
 
-	local TOOLS = get_language_tools(profile.languages)
+	fill_default_filetypes(profile.languages.supported)
+	fill_default_filetypes(profile.languages.custom)
 
+	local TOOLS = merge_language_tools(profile.languages.supported, profile.languages.custom)
 	profile.languages.formatters = TOOLS.formatters
 	profile.languages.linters = TOOLS.linters
 	profile.languages.ls = TOOLS.ls
 	profile.languages.dap = TOOLS.dap
+
+	profile.languages.neotest = merge_neotest_config(profile.languages)
+
 	profile.utils = utils
+
 	return profile
 end
 
 ---Extract server name and corresponding config
+---@nodiscard
 ---@param LS profiles.Profile.Languages.Tools.LanguageServers
 ---@return table<string, config.lsp.Handler.Config>
 local function extract_lspconfigs(LS)
@@ -256,6 +293,7 @@ local function extract_lspconfigs(LS)
 end
 
 ---Extract Lsp configurations for `config.lsp`
+---@nodiscard
 ---@param LS profiles.Profile.Languages.Tools.LanguageServers
 ---@return config.lsp.LspConfig
 local function extract_mason_lspconfigs(LS)
@@ -288,10 +326,13 @@ local function extract_mason_lspconfigs(LS)
 		end
 	end
 
+  res.ensure_installed = remove_duplicated_mason_packages(res.ensure_installed)
+
 	return res
 end
 
 ---Extract required linters for `config.lint`
+---@nodiscard
 ---@param LINTERS table<string, profiles.Profile.Languages.Tools.Linters>
 ---@return config.lint.LinterConfig
 local function extract_required_linters(LINTERS)
@@ -348,31 +389,35 @@ local function extract_required_linters(LINTERS)
 end
 
 ---Extract `config.dap.Config` from profile field
+---@nodiscard
 ---@param DAP config.dap.Opts
 ---@return config.dap.DapConfig
 local function extract_dap(DAP)
-  ---@type config.dap.DapConfig
-  local res = {
-    ensure_installed = {},
-    adapters = {},
-    configurations = DAP.configurations,
-  }
+	---@type config.dap.DapConfig
+	local res = {
+		ensure_installed = {},
+		adapters = {},
+		configurations = DAP.configurations,
+	}
 
-  for MASON_INSTALL_CONFIG, ADAPTER in pairs(DAP.adapters) do
-    local ADAPTER_NAME = type(MASON_INSTALL_CONFIG) == "string" and MASON_INSTALL_CONFIG or MASON_INSTALL_CONFIG[1]
-    res.adapters[ADAPTER_NAME] = ADAPTER
-    if type(MASON_INSTALL_CONFIG) == "table" and MASON_INSTALL_CONFIG.no_mason then
-      -- Skip `no_mason` ones
-      goto continue
-    end
-    table.insert(res.ensure_installed, MASON_INSTALL_CONFIG)
-      ::continue::
-  end
+	for MASON_INSTALL_CONFIG, ADAPTER in pairs(DAP.adapters) do
+		local ADAPTER_NAME = type(MASON_INSTALL_CONFIG) == "string" and MASON_INSTALL_CONFIG or MASON_INSTALL_CONFIG[1]
+		res.adapters[ADAPTER_NAME] = ADAPTER
+		if type(MASON_INSTALL_CONFIG) == "table" and MASON_INSTALL_CONFIG.no_mason then
+			-- Skip `no_mason` ones
+			goto continue
+		end
+		table.insert(res.ensure_installed, MASON_INSTALL_CONFIG)
+		::continue::
+	end
 
-  return res
+  res.ensure_installed = remove_duplicated_mason_packages(res.ensure_installed)
+
+	return res
 end
 
 ---Scan for profile
+---@nodiscard
 ---@return string[]
 local function scan_profile()
 	---@type string[]
@@ -491,6 +536,7 @@ end
 
 ---Merge opts for current plugin module (Caller of this function)
 ---Throw error on exception or failure
+---@nodiscard
 ---@param path string
 ---@param opts table | fun(self: LazyPluginSpec, o: table): table? Default opts
 ---@param extras table?
@@ -561,8 +607,11 @@ end
 
 utils.merge_profile = merge_profile
 utils.is_ft_support_enabled = is_language_support_enabled
-utils.generate_config = generate_config
-utils.get_language_tools = get_language_tools
+utils.generate_theme_config = generate_theme_config
+utils.is_same_mason_package = is_same_mason_package
+utils.merge_language_tools = merge_language_tools
+utils.remove_duplicated_mason_packages = remove_duplicated_mason_packages
+utils.merge_neotest_config = merge_neotest_config
 utils.preprocess_profile = preprocess_profile
 utils.extract_lspconfigs = extract_lspconfigs
 utils.extract_mason_lspconfig = extract_mason_lspconfigs
