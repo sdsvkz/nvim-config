@@ -6,6 +6,7 @@ local merge_plugin_opts = require("profiles.utils").merge_plugin_opts
 ---@param o neotest.Config
 ---@return neotest.Config
 local function opts(self, o)
+  -- TODO: Set options with values from `config.neotest`
   return o
 end
 

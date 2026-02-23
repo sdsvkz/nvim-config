@@ -59,6 +59,7 @@ local function fill_default_filetypes(LANGS)
 	end
 end
 
+---@nodiscard
 ---@param A config.mason.InstallConfig
 ---@param B config.mason.InstallConfig
 ---@return boolean
@@ -192,6 +193,7 @@ local function merge_language_tools(SUPPORTED, CUSTOM)
 	}
 end
 
+---@nodiscard
 ---@param ensure_installed config.mason.InstallConfig[]
 ---@return config.mason.InstallConfig[]
 local function remove_duplicated_mason_packages(ensure_installed)
@@ -200,10 +202,13 @@ end
 
 ---Merge neotest configuration from each languages
 ---@nodiscard
----@param LANGUAGES profiles.Profile.Languages
+---@param SUPPORTED profiles.Profile.Languages.Supported
+---@param CUSTOM profiles.Profile.Languages.Custom
 ---@return profiles.Profile.Languages.Neotest
-local function merge_neotest_config(LANGUAGES)
+local function merge_neotest_config(SUPPORTED, CUSTOM)
+  ---@type profiles.Profile.Languages.Neotest
 	local res = {
+    ---@type profiles.Profile.Languages.Neotest.Adapters
 		adapters = {},
 	}
 	-- TODO:
@@ -255,7 +260,7 @@ local function preprocess_profile(PROFILE)
 	profile.languages.ls = TOOLS.ls
 	profile.languages.dap = TOOLS.dap
 
-	profile.languages.neotest = merge_neotest_config(profile.languages)
+	profile.languages.neotest = merge_neotest_config(profile.languages.supported, profile.languages.custom)
 
 	profile.utils = utils
 
@@ -414,6 +419,17 @@ local function extract_dap(DAP)
   res.ensure_installed = remove_duplicated_mason_packages(res.ensure_installed)
 
 	return res
+end
+
+---@nodiscard
+---@param NEOTEST profiles.Profile.Languages.Neotest
+---@return config.neotest.NeotestConfig
+local function extract_neotest(NEOTEST)
+  local res = {}
+
+  -- TODO:
+
+  return res
 end
 
 ---Scan for profile

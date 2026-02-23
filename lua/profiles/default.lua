@@ -526,10 +526,6 @@ local profile = {
 		---This should be extracted automatically from fields above
 		---@type profiles.Profile.Languages.Neotest?
 		neotest = nil,
-
-		---This should be extracted automatically from fields above
-		---@type table<string, profiles.Profile.Languages.Language>
-		supported_flattened = nil,
 	},
 
 	---Debugging
