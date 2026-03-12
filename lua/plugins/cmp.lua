@@ -136,6 +136,7 @@ local opts = function(_, o)
 		},
 
 		mapping = cmp.mapping.preset.insert({
+      ['<C-Space>'] = cmp.mapping.complete(),
 			["<CR>"] = cmp.mapping(confirm, { "i", "s" }),
 			["<Down>"] = cmp.mapping(select_next_item, { "i", "s" }),
 			["<C-n>"] = cmp.mapping(select_next_item, { "i", "s" }),
