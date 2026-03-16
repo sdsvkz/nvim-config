@@ -390,7 +390,7 @@ local profile = {
 				---@type profiles.Profile.Languages.Tools?
 				tools = {
 					---@type profiles.Profile.Languages.Tools.Formatters?
-					formatters = { "prettier", stop_after_first = true },
+					formatters = { "prettierd", "prettier", stop_after_first = true },
 				},
 			},
 			---@type profiles.Profile.Languages.Language
