@@ -213,6 +213,9 @@ local profile = {
 			yaml = {
 				enable = true,
 			},
+      prisma = {
+        enable = true,
+      },
 		},
 	},
 	---@type profiles.Profile.Debugging

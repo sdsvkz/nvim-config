@@ -390,7 +390,7 @@ local profile = {
 				---@type profiles.Profile.Languages.Tools?
 				tools = {
 					---@type profiles.Profile.Languages.Tools.Formatters?
-					formatters = { "prettierd", "prettier", stop_after_first = true },
+					formatters = { "prettier", stop_after_first = true },
 				},
 			},
 			---@type profiles.Profile.Languages.Language
@@ -464,6 +464,15 @@ local profile = {
 					},
 				},
 			},
+      ---@type profiles.Profile.Languages.Language
+      prisma = {
+        enable = false,
+        tools = {
+          ls = {
+            [ToolConfigs.prismals.masonConfig] = true,
+          },
+        },
+      }
 		},
 
 		---@alias profiles.Profile.Languages.Custom table<string, profiles.Profile.Languages.Language>

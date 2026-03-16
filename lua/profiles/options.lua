@@ -446,6 +446,9 @@ local ToolConfigs = {
 			vim.lsp.enable("yamlls")
 		end,
 	},
+  prismals = {
+    masonConfig = { "prismals", auto_update = true },
+  },
 }
 
 local NeotestAdapters = {
