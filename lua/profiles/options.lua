@@ -1,3 +1,4 @@
+local to_string = Vkz.vkzlib.core.to_string
 local concat = Vkz.vkzlib.Data.list.concat
 local deep_merge = Vkz.vkzlib.Data.table.deep_merge
 
@@ -194,14 +195,24 @@ local ToolConfigs = {
 			},
 		},
 	},
-	---@typ
 	eslint = {
 		masonConfig = { "eslint", auto_update = true },
 		-- Format on save
 		handler = function()
 			local base_on_attach = vim.lsp.config.eslint.on_attach
 			vim.lsp.config("eslint", {
-				on_attach = function(client, bufnr)
+        settings = deep_merge('force', vim.lsp.config.eslint.settings, {
+          workingDirectory = { mode = 'location' },
+        }),
+
+        on_init = function (client)
+          client.config.settings.workingDirectory = {
+            directory = client.config.root_dir
+          }
+        end,
+
+				on_attach = function (client, bufnr)
+
 					if not base_on_attach then
 						return
 					end
