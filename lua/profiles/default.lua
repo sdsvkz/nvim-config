@@ -450,8 +450,12 @@ local profile = {
 			},
 			---@type profiles.Profile.Languages.Language
 			typescript = LANG_JAVASCRIPT,
+      ---@type profiles.Profile.Languages.Language
+      typescriptreact = LANG_JAVASCRIPT,
 			---@type profiles.Profile.Languages.Language
 			javascript = LANG_JAVASCRIPT,
+      ---@type profiles.Profile.Languages.Language
+      javascriptreact = LANG_JAVASCRIPT,
 			---@type profiles.Profile.Languages.Language
 			yaml = {
 				-- NOTE: Enabled by default

@@ -207,7 +207,13 @@ local profile = {
       javascript = {
         enable = true,
       },
+      javascriptreact = {
+        enable = true,
+      },
       typescript = {
+        enable = true,
+      },
+      typescriptreact = {
         enable = true,
       },
 			yaml = {
