@@ -51,13 +51,13 @@ local LANG_C = {
 
 ---@type profiles.Profile.Languages.Language
 local CPP_SPECIFIC = {
-  ---@type profiles.Profile.Languages.Neotest?
-  neotest = {
-    ---@type profiles.Profile.Languages.Neotest.Adapters?
-    adapters = {
-      [NeotestAdapters.gtest.spec] = NeotestAdapters.gtest.adapter,
-    },
-  },
+	---@type profiles.Profile.Languages.Neotest?
+	neotest = {
+		---@type profiles.Profile.Languages.Neotest.Adapters?
+		adapters = {
+			[NeotestAdapters.gtest.spec] = NeotestAdapters.gtest.adapter,
+		},
+	},
 }
 
 local LANG_CPP = deep_merge("force", LANG_C, CPP_SPECIFIC)
@@ -86,7 +86,7 @@ local LANG_JAVASCRIPT = {
 	---@type profiles.Profile.Languages.Tools?
 	tools = {
 		---@type profiles.Profile.Languages.Tools.Formatters?
-		formatters = { "prettierd", "prettier", stop_after_first = true },
+		formatters = { "prettierd", "prettier", stop_after_first = true, timeout_ms = 5000, lsp_format = "fallback" },
 		---@type profiles.Profile.Languages.Tools.LanguageServers?
 		ls = {
 			[ToolConfigs.vtsls.masonConfig] = ToolConfigs.vtsls.handler,
@@ -390,7 +390,13 @@ local profile = {
 				---@type profiles.Profile.Languages.Tools?
 				tools = {
 					---@type profiles.Profile.Languages.Tools.Formatters?
-					formatters = { "prettierd", "prettier", stop_after_first = true },
+					formatters = {
+						"prettierd",
+						"prettier",
+						stop_after_first = true,
+						timeout_ms = 5000,
+						lsp_format = "fallback",
+					},
 				},
 			},
 			---@type profiles.Profile.Languages.Language
@@ -453,7 +459,13 @@ local profile = {
 				---@type profiles.Profile.Languages.Tools
 				tools = {
 					---@type profiles.Profile.Languages.Tools.Formatters?
-					formatters = { "prettierd", "prettier", stop_after_first = true },
+					formatters = {
+						"prettierd",
+						"prettier",
+						stop_after_first = true,
+						timeout_ms = 5000,
+						lsp_format = "fallback",
+					},
 					---@type profiles.Profile.Languages.Tools.Linters?
 					-- linters = {
 					-- 	{ "yamllint", auto_update = true },
@@ -464,15 +476,15 @@ local profile = {
 					},
 				},
 			},
-      ---@type profiles.Profile.Languages.Language
-      prisma = {
-        enable = false,
-        tools = {
-          ls = {
-            [ToolConfigs.prismals.masonConfig] = true,
-          },
-        },
-      }
+			---@type profiles.Profile.Languages.Language
+			prisma = {
+				enable = false,
+				tools = {
+					ls = {
+						[ToolConfigs.prismals.masonConfig] = true,
+					},
+				},
+			},
 		},
 
 		---@alias profiles.Profile.Languages.Custom table<string, profiles.Profile.Languages.Language>
