@@ -120,7 +120,7 @@ Themes.fluoromachine = {
 }
 
 Themes.moonfly = {
-	plugin = "fluoromachine",
+	plugin = "moonfly",
 	colorscheme = "moonfly",
 }
 
