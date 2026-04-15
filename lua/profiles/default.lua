@@ -156,6 +156,9 @@ local profile = {
 				install = { colorscheme = { "habamax" } },
 				-- automatically check for plugin updates
 				checker = { enabled = true },
+        rocks = {
+          hererocks = false,
+        }
 			}
 		end,
 
@@ -164,7 +167,7 @@ local profile = {
 		plugin_opts = {
 			-- e.g.
 			-- codecompanion = {
-			-- 	strategies = {
+			-- 	interactions = {
 			-- 		chat = {
 			-- 			adapter = {
 			-- 				name = "ollama",

@@ -8,7 +8,7 @@ local neovide_fullscreen_handle = utils.create_file("neovide_fullscreen.state")
 
 local function neovide()
 	vim.g.neovide_theme = "auto"
-	vim.o.guifont = "CaskaydiaCove Nerd Font"
+	vim.o.guifont = "FiraCode Nerd Font Mono"
 	vim.g.neovide_opacity = 0.6
 	vim.g.neovide_normal_opacity = 0.6
 	vim.g.neovide_hide_mouse_when_typing = true
@@ -41,22 +41,22 @@ local function neovide()
 		pattern = "*",
 		callback = function(_)
 			vim.keymap.set({ "n", "v" }, "<F11>", function()
-        local is_fullscreen = vim.g.neovide_fullscreen == nil and true or not vim.g.neovide_fullscreen
+				local is_fullscreen = vim.g.neovide_fullscreen == nil and true or not vim.g.neovide_fullscreen
 				vim.g.neovide_fullscreen = is_fullscreen
 				neovide_fullscreen_handle:write(is_fullscreen == true and "1" or "0")
 			end)
 		end,
 	})
 
-  -- This doesn't work
-  --
+	-- This doesn't work
+	--
 	-- Remember fullscreen state
 	-- vim.api.nvim_create_autocmd({ "VimLeavePre" }, {
 	-- 	group = vkzlib.vim.augroup("neovide", "save_fullscreen_state"),
 	-- 	pattern = "n",
 	-- 	callback = function(_)
 	-- 		Vkz.log.d("Saving fullscreen state")
- --      neovide_fullscreen_handle:write(vim.g.neovide_fullscreen == true and "1" or "0")
+	--      neovide_fullscreen_handle:write(vim.g.neovide_fullscreen == true and "1" or "0")
 	-- 	end,
 	-- })
 end
@@ -88,59 +88,42 @@ local profile = {
 					adapter = adapter[adapter_name]
 					---@cast adapter nil | fun(): CodeCompanion.ACPAdapter | CodeCompanion.HTTPAdapter
 					if type(adapter) == "function" then
-						local gemini_cli = adapter()
-						return gemini_cli:extend(adapter_opts)
+						adapter = adapter()
+						return adapter:extend(adapter_opts)
 					else
-						return require("codecompanion.adapters").extend("gemini_cli", adapter_opts)
+						return require("codecompanion.adapters").extend(adapter_name, adapter_opts)
 					end
 				end
 				return deep_merge("force", opts, {
 					adapters = {
 						acp = {
 							gemini_cli = function()
-								local identity_path = vim.env.AGE_IDENTITY_PATH
-								local gemini_api_key_path = vim.env.AGE_GEMINI_API_KEY_PATH
-								Vkz.log.d(
-									string.format(
-										"AGE_IDENTITY_PATH = %s\nAGE_GEMINI_API_KEY_PATH = %s",
-										identity_path,
-										gemini_api_key_path
-									)
-								)
-								local new_opts = {}
-								if type(identity_path) == "string" and type(gemini_api_key_path) == "string" then
-									new_opts = {
-										env = {
-											api_key = string.format(
-												"cmd: age -d -i %s %s",
-												identity_path,
-												gemini_api_key_path
-											),
-										},
-									}
-								end
-								return extend(true, "gemini_cli", new_opts)
+								return extend(true, "gemini_cli", {
+                  defaults = {
+                    auth_method = "oauth-personal",
+                  },
+                })
 							end,
 						},
 					},
 				})
 			end,
-      ---@module "mcphub"
+			---@module "mcphub"
 
-      ---@type MCPHub.Config
-      mcphub = {
-        ---@param _ MCPHub.JobContext
-        ---@return table
-        global_env = function (_)
-          local env = {}
-          local function copy_vim_env(NAME)
-            env[NAME] = vim.env[NAME]
-          end
-          copy_vim_env("HTTP_PROXY")
-          copy_vim_env("HTTPS_PROXY")
-          return env
-        end
-      },
+			---@type MCPHub.Config
+			mcphub = {
+				---@param _ MCPHub.JobContext
+				---@return table
+				global_env = function(_)
+					local env = {}
+					local function copy_vim_env(NAME)
+						env[NAME] = vim.env[NAME]
+					end
+					copy_vim_env("HTTP_PROXY")
+					copy_vim_env("HTTPS_PROXY")
+					return env
+				end,
+			},
 			---@module "bufferline"
 
 			bufferline = function(_, opts)
@@ -171,9 +154,9 @@ local profile = {
 			c = {
 				enable = true,
 			},
-      cpp = {
-        enable = true,
-      },
+			cpp = {
+				enable = true,
+			},
 			cmake = {
 				enable = true,
 			},
@@ -198,30 +181,30 @@ local profile = {
 			bash = {
 				enable = false,
 			},
-      sh = {
-        enable = false,
-      },
+			sh = {
+				enable = false,
+			},
 			rust = {
 				enable = true,
 			},
-      javascript = {
-        enable = true,
-      },
-      javascriptreact = {
-        enable = true,
-      },
-      typescript = {
-        enable = true,
-      },
-      typescriptreact = {
-        enable = true,
-      },
+			javascript = {
+				enable = true,
+			},
+			javascriptreact = {
+				enable = true,
+			},
+			typescript = {
+				enable = true,
+			},
+			typescriptreact = {
+				enable = true,
+			},
 			yaml = {
 				enable = true,
 			},
-      prisma = {
-        enable = true,
-      },
+			prisma = {
+				enable = true,
+			},
 		},
 	},
 	---@type profiles.Profile.Debugging

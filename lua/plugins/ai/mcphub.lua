@@ -15,6 +15,7 @@ return {
 	},
 	build = "npm install -g mcp-hub@latest", -- Installs `mcp-hub` node binary globally
 	cmd = "MCPHub",
+	branch = "fix",
 	keys = {
 		{
 			Groups.Setting.lhs .. "h",

@@ -32,7 +32,7 @@ local opts = {
 			},
 		},
 	},
-	strategies = {
+	interactions = {
 		chat = {
 			adapter = {
 				name = "ollama",
