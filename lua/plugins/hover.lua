@@ -47,7 +47,7 @@ local keys = {
 
 -- Mouse support
 if profile.preference.mouse ~= "" then
-	table.insert({
+	table.insert(keys, {
 		"<MouseMove>",
 		mode = "n",
 		function()
