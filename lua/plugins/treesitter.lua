@@ -3,7 +3,6 @@ local elem = Vkz.vkzlib.Data.list.elem
 local merge_plugin_opts = require("profiles.utils").merge_plugin_opts
 
 local opts = {
-
 	auto_install = true,
 	highlight = {
 		enable = true,
@@ -42,6 +41,7 @@ return {
 
 		-- Enable highlight and indentation
 		vim.api.nvim_create_autocmd("FileType", {
+      pattern = { "<filetype>" },
 			callback = function()
 				pcall(vim.treesitter.start)
 				vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
